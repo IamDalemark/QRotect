@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { dashboard } from '@/lib/admin/data';
 import { PublicProvider } from '@/components/public/context';
 import { PublicShell } from '@/components/public/shell';

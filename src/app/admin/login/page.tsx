@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import Link from 'next/link';
 import { AuthForm } from '@/components/admin/auth-form';
 import { databaseConfigured } from '@/lib/directory/server';
