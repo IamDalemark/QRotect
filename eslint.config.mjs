@@ -8,6 +8,9 @@ const eslintConfig = defineConfig([
   ...nextTs,
   prettier,
   globalIgnores([
+    '.agents/**',
+    '.impeccable/**',
+    '.codex/**',
     '.next/**',
     'out/**',
     'build/**',

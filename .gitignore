@@ -24,3 +24,9 @@ supabase/.temp/
 supabase/.branches/
 
 next-env.d.ts
+
+.impeccable/hook.cache.json
+.impeccable/config.local.json
+.agents/skills/impeccable/scripts/bin/
+.impeccable/review/
+.impeccable/live/
