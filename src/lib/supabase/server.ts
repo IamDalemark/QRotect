@@ -1,3 +1,4 @@
+import type { Database } from './database.types';
 import 'server-only';
 
 import { createServerClient } from '@supabase/ssr';
@@ -9,7 +10,7 @@ export async function createClient() {
   const { url, publishableKey } = getSupabaseConfig();
   const cookieStore = await cookies();
 
-  return createServerClient(url, publishableKey, {
+  return createServerClient<Database>(url, publishableKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
