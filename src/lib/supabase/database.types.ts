@@ -115,6 +115,10 @@ export type Database = {
     Functions: {
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       publish_directory: { Args: { expected_revision: number }; Returns: string };
+      restore_directory: {
+        Args: { expected_revision: number; source_id: string };
+        Returns: string;
+      };
       save_directory: { Args: { document: Json; expected_revision: number }; Returns: number };
       valid_directory: { Args: { document: Json }; Returns: boolean };
     };
