@@ -1,5 +1,6 @@
 'use server';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, updateTag } from 'next/cache';
+import { currentSnapshot, PUBLIC_SNAPSHOT_TAG } from '@/lib/directory/server';
 import { requireAdmin } from '@/lib/admin/auth';
 import { snapshotSchema, publicationIssues } from '@/lib/directory/schema';
 import { z } from 'zod';
@@ -58,8 +59,7 @@ export async function publishDraft(revision: number) {
       message:
         'Publication failed. The current public version remains unchanged. Reload and try again.',
     };
-  revalidatePath('/', 'layout');
-  return { ok: true, message: 'Published. Connected visitors will receive the new directory.' };
+  return refreshPublication('Published');
 }
 export async function restorePublication(id: string, revision: number) {
   const { client } = await requireAdmin();
@@ -74,8 +74,7 @@ export async function restorePublication(id: string, revision: number) {
       ok: false,
       message: 'Restore failed. Reload the draft; the current publication is unchanged.',
     };
-  revalidatePath('/', 'layout');
-  return { ok: true, message: 'Restored as a new publication. Reload to see the updated draft.' };
+  return refreshPublication('Restored as a new publication');
 }
 export async function uploadMap(form: FormData) {
   const { client } = await requireAdmin();
@@ -105,4 +104,25 @@ export async function uploadMap(form: FormData) {
         id,
         assetPath,
       };
+}
+
+async function refreshPublication(action: string) {
+  try {
+    // Expire immediately for corrections; do not deliberately serve the previous
+    // publication on the first read after a successful administrator mutation.
+    updateTag(PUBLIC_SNAPSHOT_TAG);
+    revalidatePath('/', 'layout');
+    await currentSnapshot();
+    return {
+      ok: true,
+      message: `${action}. Public data refreshed. Open pages check for updates every minute while visible.`,
+    };
+  } catch {
+    // The transaction already committed. Reporting a failed publication here
+    // would invite an unnecessary second publication and hide the real problem.
+    return {
+      ok: true,
+      message: `${action} in the database. Public refresh could not be confirmed. Check the public directory before retrying.`,
+    };
+  }
 }

@@ -1,8 +1,8 @@
-import { currentSnapshot, databaseConfigured } from '@/lib/directory/server';
+import { loadCurrentSnapshot, databaseConfigured } from '@/lib/directory/server';
 export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
-    await currentSnapshot();
+    await loadCurrentSnapshot();
     return Response.json(
       { status: 'ok', database: databaseConfigured() ? 'connected' : 'not-configured' },
       { headers: { 'Cache-Control': 'no-store' } },

@@ -1,8 +1,14 @@
 import { currentSnapshot } from '@/lib/directory/server';
+import { snapshotETag } from '@/lib/directory/public-etag';
 export const dynamic = 'force-dynamic';
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    return Response.json(await currentSnapshot(), { headers: { 'Cache-Control': 'no-store' } });
+    const snapshot = await currentSnapshot();
+    const etag = await snapshotETag(snapshot);
+    const headers = { 'Cache-Control': 'no-store', ETag: etag };
+    if (request.headers.get('If-None-Match') === etag)
+      return new Response(null, { status: 304, headers });
+    return Response.json(snapshot, { headers });
   } catch {
     return Response.json(
       { error: 'Directory unavailable. Try reconnecting.' },
