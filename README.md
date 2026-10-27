@@ -4,9 +4,9 @@ A QR-accessible emergency contact directory covering campus, Iloilo City, and na
 
 ## Current delivery
 
-Implemented locally: English/Hiligaynon browsing, category/area/search filters, copy controls, confirmation and swipe-to-call, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and offline public access after a successful first visit.
+Implemented locally: English/Hiligaynon browsing, category/area/search filters, six Home quick calls with explicit administrator-selected destinations, copy controls, confirmation and swipe-to-call, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and offline public access after a successful first visit.
 
-Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, physical phone checks, and the participant pilot remain content/release gates. The configured existing hosted Supabase project is now initialized with all three database migrations. No Vercel deployment was performed by this implementation.
+Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, physical phone checks, and the participant pilot remain content/release gates. The configured existing hosted Supabase project is now initialized with the three initial database migrations. The additional quick-call migration is verified locally and still needs hosted application before assignment editing. No Vercel deployment was performed by this implementation.
 
 Initial setup and the earlier feature branches are integrated into `develop`. `main` receives the same locally verified implementation at the user’s request; approved content and hosted release gates remain separate. Work is in **/Users/daniel/Documents/QRotect**, with the Next.js source in `src/app`.
 
@@ -64,6 +64,7 @@ Browser checks create and remove an isolated temporary local account, publicatio
 
 ## Project guide
 
+- [Quick-call UX research](docs/QUICK_CALL_UX_RESEARCH.md): direct Home actions, destination selection and accessibility tradeoffs.
 - [Filter UX research](docs/FILTER_UX_RESEARCH.md): primary-source evidence and the compact inline filter interaction.
 - [Architecture](docs/ARCHITECTURE.md): routes, publication model, security and offline boundaries.
 - [Operations](docs/OPERATIONS.md): administrator workflow, recovery, backup and future release setup.

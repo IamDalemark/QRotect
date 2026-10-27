@@ -10,7 +10,7 @@ A campus emergency contact website with English and Hiligaynon public interfaces
 
 ## Primary experience
 
-The homepage prioritizes the national emergency call action, six categories, priority school/local contacts, and search. Categories are Police, Fire, Medical/Ambulance, Hospitals, Disaster Response, and School Emergency. Users should reach a category's confirmation card in two taps from the homepage, followed by a deliberate swipe or accessible alternative to open Phone.
+The homepage prioritizes the national emergency call action and six quick-call actions: Police, Fire, Medical/Ambulance, Hospital, Disaster Response, and Campus Emergency. Each shows its assigned agency and opens the exact contact confirmation in one activation, followed by a deliberate swipe or accessible alternative to open Phone. Quick calls replace the former category-navigation tiles on Home only; search, All contacts and priority contact rows support browsing other destinations. Missing assignments offer category browsing with no call action.
 
 Directory search stays visible beside one Filters button. Category and service-area controls expand inline below it, update loaded contacts immediately, and retain URL/back-navigation state. The button counts active filter groups, excluding search text; clearing filters preserves search, while the empty-results reset clears all restrictions.
 
@@ -18,7 +18,7 @@ Contacts show agency, branch, area, individual numbers, channel, and verificatio
 
 ## Content and administration
 
-Invited administrators maintain working records, preview changes, and explicitly publish a complete version. Unpublished content is private. The research group supplies or approves contact sources, verification dates, translations, emergency guidance, and evacuation map.
+Invited administrators maintain working records, select an exact contact and voice line for each Home quick call, preview changes, and explicitly publish a complete version. Assignments publish atomically with contacts; inactive, missing, text-only, duplicate or mismatched targets must be reassigned or cleared. Existing publications without assignments remain readable and offer category browsing. Private previews show the saved draft without reading or writing visitor caches or refreshing public data. Unpublished content is private. The research group supplies or approves contact sources, verification dates, translations, emergency guidance, and evacuation map.
 
 Guidance and map navigation remain hidden until approved content exists. A static supplied map includes accompanying textual information. Do not invent routes, medical instructions, translations, or agency availability.
 

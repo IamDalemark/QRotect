@@ -4,20 +4,20 @@
 
 Public pages are pre-rendered from a validated publication with 60-second incremental regeneration, then enhanced for filtering, language selection, call confirmation and offline recovery. A shared Next.js Data Cache stores only validated public publications, keyed by Supabase URL and tagged for invalidation. It uses `unstable_cache` to retain the existing non-Cache-Components/Webpack setup; a Cache Components migration is separate work. No public authentication is required. Configured database errors never substitute demonstration fixtures. A failed page regeneration throws so Next.js retains the last successful page; a configured production build needs a readable publication source.
 
-| Route                                                      | Responsibility                                                        |
-| ---------------------------------------------------------- | --------------------------------------------------------------------- |
-| `/`                                                        | National call confirmation, six categories, search, priority contacts |
-| `/directory?category=&area=&q=`                            | Filterable contact rows with browser Back support                     |
-| `/guidance`, `/campus-map`                                 | Approved supplied content; unavailable explanations until published   |
-| `/about`                                                   | Research/privacy explanation                                          |
-| `/admin/login`, `/admin/password`                          | Sign-in/recovery and protected password change                        |
-| `/admin`, `/admin/{contacts,guidance,map,publish,history}` | Verified administrator maintenance                                    |
-| `/admin/preview`                                           | Private saved-draft preview using either language                     |
-| `/api/public/snapshot`                                     | Validated current publication only                                    |
-| `/api/public/maps/[id]`                                    | Image only when referenced by current publication                     |
-| `/api/admin/map`                                           | Verified administrator's private map preview                          |
-| `/api/health`                                              | Minimal health response, no records or credentials                    |
-| `/offline`                                                 | Public fallback shell; chooses requested public screen on the client  |
+| Route                                                                  | Responsibility                                                       |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `/`                                                                    | National confirmation, six quick calls, search, priority contacts    |
+| `/directory?category=&area=&q=`                                        | Filterable contact rows with browser Back support                    |
+| `/guidance`, `/campus-map`                                             | Approved supplied content; unavailable explanations until published  |
+| `/about`                                                               | Research/privacy explanation                                         |
+| `/admin/login`, `/admin/password`                                      | Sign-in/recovery and protected password change                       |
+| `/admin`, `/admin/{contacts,quick-calls,guidance,map,publish,history}` | Verified administrator maintenance                                   |
+| `/admin/preview`                                                       | Private saved-draft preview using either language                    |
+| `/api/public/snapshot`                                                 | Validated current publication only                                   |
+| `/api/public/maps/[id]`                                                | Image only when referenced by current publication                    |
+| `/api/admin/map`                                                       | Verified administrator's private map preview                         |
+| `/api/health`                                                          | Minimal health response, no records or credentials                   |
+| `/offline`                                                             | Public fallback shell; chooses requested public screen on the client |
 
 ## Database and publication model
 
@@ -30,6 +30,14 @@ Categories and service areas are fixed bilingual application definitions. Contac
 Every relevant table has RLS. Anonymous visitors see only the current publication. Non-admin authenticated accounts cannot edit drafts or promote themselves. Protected pages/actions verify Auth identity and database membership; the session-refresh proxy alone is not treated as authorization. No privileged key is required by the website.
 
 Database types are generated from the applied schema. `scripts/write-schema.ts <new_timestamp_name.sql>` creates a new validation migration from Zod; it refuses to overwrite existing migrations. HTTP source restrictions are represented explicitly because JSON-schema conversion does not encode Zod's protocol option.
+
+## Home quick calls
+
+The optional v1 `quickCalls` array has at most six `{category, contactId, numberId}` assignments. Both application publication checks and SQL reject duplicates, missing or inactive contacts, category mismatches, ambiguous number IDs, text-only lines and all-zero dial values. Drafts can hold references needing repair. A shared client resolver checks the exact IDs, never array order, and renders category browsing when no usable assignment exists. Phone handoff reuses the existing frozen-target confirmation with a custom native button trigger. No query runs on activation.
+
+Older v1 snapshots without this field remain readable. Known legacy fixture IDs receive the explicit authored demo assignments at normalization boundaries; non-fixture publications never infer assignments. Explicit `quickCalls: []` remains cleared. The six demo lines retain `09123456789`. New strict-schema fields require deploying the updated reader/worker before publishing assignments; older installed clients may retain their last readable snapshot until the explicit website update is accepted.
+
+`/admin/quick-calls` edits the assignments in the normal saved draft. `/admin/preview` includes Home and uses a preview provider that never reads/writes public saved data, registers a worker, or refreshes the public publication. Publish/restore use the existing cache invalidation and warming hooks.
 
 ## Images and calling boundaries
 

@@ -73,3 +73,11 @@ At the owner's request, six sample contacts were installed in the hosted public 
 For a separate empty demonstration project, `pnpm seed:demo -- --public-demo` is the explicit first-time installer. It requires the matching local demo-administrator credentials and authenticated CLI project management access. It refuses existing drafts with contacts or an existing current publication, backs up the previous draft locally, saves with a revision check, and installs only a fixture snapshot with the inert legacy test-contact field set to null. It does not mark samples approved or weaken the normal publishing function. Privileged keys stay in process memory and are not printed or saved.
 
 Edit the draft in administration and replace the samples with verified records before ordinary publication. The fixture snapshot is demonstration data; it does not establish hotline accuracy or school approval.
+
+## Home quick-call assignments
+
+The `202610280001_quick_calls.sql` migration extends document validation and publication reference checks without changing existing content. It has been applied and tested locally; hosted application is still pending. Back up and apply the versioned migration to the intended project before saving assignments there. Deploy the updated app/worker before publishing the new field, and accept the existing Update website action on older installed clients. Do not rerun the first-time demo installer against existing data.
+
+In Administration → Home quick calls, select each category's exact active contact and voice line. Save draft, open Preview saved draft and inspect Home in both languages, then publish. Empty assignments offer Browse contacts on Home. If a contact is withdrawn, changes category or loses its selected voice line, clear or reassign the shortcut before publication. Never assume record order or priority determines the destination. Existing published records without assignments require deliberate administrator configuration; real destinations are never auto-selected.
+
+`pnpm test:db` now includes transaction-rolled-back quick-call publication checks against local PostgreSQL. `pnpm test:browser` uses temporary local accounts/data and includes assignment persistence, private-preview isolation, publication, and withdrawal after clearing. No test sends a real call or changes hosted data.
