@@ -46,3 +46,11 @@ Verified afterwards:
 - `pnpm check` and the 12 unit tests pass with the added setup diagnostics.
 
 No administrator invitation, account promotion, frontend deployment or emergency call was performed. Keep credentials out of source and chat. `pnpm supabase:check` provides a repeatable read-only configuration check.
+
+## Public demo population
+
+The owner explicitly requested a public demonstration using `09123456789` and omission of the separate placeholder banner. The first-time installer found an empty draft and no current publication, saved six editable draft contacts, and installed a six-contact fixture snapshot. Public readback confirmed the supplied number, `fixture=true`, no approvals and no consenting test contact. Existing records were not overwritten.
+
+After the change, `pnpm check` and 12 unit tests passed. The public Playwright suite passed 28 checks, with two duplicate viewport-matrix skips, against a local production server reading the actual hosted demonstration data. Desktop, mobile, directory, simulation and Hiligaynon captures were inspected. The manual detector returned no findings on the changed shell; a fresh independent finish reviewer returned **ship**, and the documenter confirmed no design-system changes were needed.
+
+Hosted data is already populated. Removing the banner on a hosted frontend requires deployment of the corresponding source revision; no deployment was performed as part of these local checks.

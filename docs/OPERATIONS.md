@@ -65,3 +65,11 @@ After choosing the stable approved HTTPS destination, run `pnpm qr -- https://ap
 | Node.js          | 22.x                                               |
 
 Set `ENABLE_EXPERIMENTAL_COREPACK=1` so Vercel uses the package manager pinned in `package.json` (`pnpm@11.18.0`). Keep development dependencies available during the build because Serwist is part of the production build step. These are configuration instructions only; no deployment was performed. See [Vercel build configuration](https://vercel.com/docs/builds/configure-a-build).
+
+## Public demo contacts
+
+At the owner's request, six sample contacts were installed in the hosted public demo and working draft, all using `0912 345 6789` (`09123456789` as the stored number). Names remain sample names, verification is unset, and all agency actions remain simulations. The supplemental placeholder banner is omitted from the updated interface.
+
+For a separate empty demonstration project, `pnpm seed:demo -- --public-demo` is the explicit first-time installer. It requires the matching local demo-administrator credentials and authenticated CLI project management access. It refuses existing drafts with contacts or an existing current publication, backs up the previous draft locally, saves with a revision check, and installs only a fixture snapshot with no consenting dialer contact. It does not mark samples approved or weaken the normal publishing function. Privileged keys stay in process memory and are not printed or saved.
+
+Edit the draft in administration and replace the samples with verified records before ordinary publication. The fixture snapshot is demonstration data; it does not establish hotline accuracy or school approval.

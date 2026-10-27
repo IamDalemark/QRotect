@@ -10,6 +10,8 @@ Sample mode contains clearly marked demonstration records. Real contacts, transl
 
 Initial setup and the completed feature branches are integrated into `develop`. `main` receives the same locally verified implementation at the user’s request; approved content and hosted release gates remain separate. Work is in **/Users/daniel/Documents/QRotect**, with the Next.js source in `src/app`.
 
+The hosted project now includes six owner-requested demo contacts, one per category, using `0912 345 6789`. They are also available in the working draft for editing. No guidance, map or consenting dialer contact was invented. The code omits the supplemental placeholder banner; hosted frontend changes take effect when the corresponding code is deployed.
+
 ## Local review
 
 Use Node 22.23.2, pnpm 11.18.0, and Docker Desktop for the administrator database.
