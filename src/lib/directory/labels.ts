@@ -8,7 +8,7 @@ export const categories: Record<Category, { en: string; hil: string }> = {
   school: { en: 'School emergency', hil: 'Emerhensya sa eskwelahan' },
 };
 export const areas = {
-  cpu: { en: 'CPU campus', hil: 'Kampus sang CPU' },
+  cpu: { en: 'Campus', hil: 'Kampus' },
   iloilo: { en: 'Iloilo City', hil: 'Iloilo City' },
   national: { en: 'Nationwide', hil: 'Bug-os nga pungsod' },
 };
@@ -27,8 +27,6 @@ export const copy = {
     guidance: 'Emergency guidance',
     map: 'Campus map',
     about: 'About QROTECT',
-    research: 'A CPU Senior High School research project',
-    samples: 'Sample directory — these are demonstration records, not verified emergency contacts.',
     title: 'Find the right emergency contact.',
     intro: 'Choose the help you need. No sign-in required.',
     category: 'Choose a category',
@@ -81,7 +79,6 @@ export const copy = {
     actualSize: 'Reset zoom',
     updated: 'Map reviewed',
     fallback: 'English fallback',
-    translation: 'Hiligaynon wording is awaiting research-team review.',
   },
   hil: {
     skip: 'Laktawi pakadto sa sulod',
@@ -97,8 +94,6 @@ export const copy = {
     guidance: 'Giya sa emerhensya',
     map: 'Mapa sang kampus',
     about: 'Parte sa QROTECT',
-    research: 'Proyekto sa panaliksik sang CPU Senior High School',
-    samples: 'Halimbawa nga listahan — indi ini kumpirmado nga mga kontak sa emerhensya.',
     title: 'Pangitaa ang nagakaigo nga kontak.',
     intro: 'Pilia ang bulig nga kinahanglan. Wala sang pag-sign in.',
     category: 'Pagpili sang kategorya',
@@ -151,6 +146,5 @@ export const copy = {
     actualSize: 'Ibalik ang kadakuon',
     updated: 'Ginsusi ang mapa',
     fallback: 'English nga teksto',
-    translation: 'Kinahanglan pa susihon sang grupo ang Hiligaynon nga mga pulong.',
   },
 };

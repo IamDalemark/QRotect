@@ -3,7 +3,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'QROTECT Emergency Contacts',
     short_name: 'QROTECT',
-    description: 'A school emergency contact research prototype.',
+    description: 'Campus and public emergency contacts.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

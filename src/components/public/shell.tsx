@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- full document navigation keeps offline routes independent of RSC requests */
 'use client';
-import { QrCode, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { QrCode, ArrowUpRight } from 'lucide-react';
 import { usePublic } from './context';
 import { OfflineStatus } from './offline-status';
 export function PublicShell({ children }: { children: React.ReactNode }) {
@@ -15,7 +15,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           <a className="brand" href="/">
             <QrCode size={27} aria-hidden="true" />
             <span>
-              QROTECT<small>CPU · ILOILO CITY</small>
+              QROTECT<small>Campus</small>
             </span>
           </a>
           <label className="language-label">
@@ -32,12 +32,6 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           </label>
         </div>
       </header>
-      <div className="research-strip">
-        <div className="container">
-          <ShieldCheck size={16} aria-hidden="true" />
-          {t.research}
-        </div>
-      </div>
       <nav className="public-nav container" aria-label={t.navigation}>
         <a href="/">{t.home}</a>
         <a href="/directory">{t.directory}</a>
@@ -62,8 +56,6 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         <div className="container footer-inner">
           <p>
             <strong>QROTECT</strong>
-            <br />
-            {t.research}
           </p>
           <div>
             <a href="/admin">

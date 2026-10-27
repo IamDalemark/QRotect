@@ -10,7 +10,7 @@ export default function Page() {
         ← QROTECT directory
       </Link>
       <h1>Administrator sign in</h1>
-      <p>Invited school and research administrators maintain the directory here.</p>
+      <p>Invited campus administrators maintain the directory here.</p>
       {!configured && (
         <p className="sample-notice">
           The database connection is not configured. Add the Supabase settings in the local

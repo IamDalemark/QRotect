@@ -311,11 +311,13 @@ export function AboutScreen() {
       <div className="page-heading">
         <h1>{t.about}</h1>
       </div>
-      <h2>{language === 'en' ? 'A school research prototype' : 'Prototipo para sa panaliksik'}</h2>
+      <h2>
+        {language === 'en' ? 'Campus emergency contacts' : 'Mga kontak sa emerhensya sa kampus'}
+      </h2>
       <p>
         {language === 'en'
-          ? 'QROTECT helps CPU Senior High School learners find school and public emergency contacts. It is a school research project, not an official dispatch service. Confirm a contact and swipe to open the selected number in your phone app. Your device handles the call.'
-          : 'Ang QROTECT nagabulig sa mga estudyante sang CPU sa pagpangita sang mga kontak. Proyekto ini sa panaliksik. Kumpirmaha ang kontak kag i-swipe para buksan ang napilian nga numero sa telepono.'}
+          ? 'QROTECT helps learners, teachers, and staff find campus and public emergency contacts. Confirm a contact and swipe to open the selected number in your phone app. Your device handles the call.'
+          : 'Ang QROTECT nagabulig sa mga estudyante, manunudlo, kag kawani sa pagpangita sang mga kontak sa emerhensya sa kampus kag publiko. Kumpirmaha ang kontak kag i-swipe para buksan ang napilian nga numero sa telepono.'}
       </p>
       <h2>
         {language === 'en'
@@ -327,7 +329,6 @@ export function AboutScreen() {
           ? 'After a successful online visit, the public directory can be saved on this device. A first visit needs internet. Saved records can become out of date; check their dates and reconnect to refresh. No student accounts, location tracking, or call histories are collected.'
           : 'Kinahanglan internet sa una nga pagbisita. Mahimo ma-save ang listahan para magamit bisan wala internet. Tan-awa ang petsa kag magkonekta para ma-update. Wala ginakolekta nga student account, lokasyon, ukon listahan sang mga tawag.'}
       </p>
-      <p className="sample-notice">{t.translation}</p>
       <a className="button secondary" href="/directory">
         {t.back}
       </a>

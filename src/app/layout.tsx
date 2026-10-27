@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     default: 'QROTECT | Emergency Contact Directory',
     template: '%s | QROTECT',
   },
-  description: 'An emergency contact research prototype for CPU Senior High School.',
+  description: 'Find campus and public emergency contacts with QROTECT.',
   robots: { index: false, follow: false },
   formatDetection: { telephone: false },
 };

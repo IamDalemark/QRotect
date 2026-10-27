@@ -129,18 +129,6 @@ h3 {
   color: var(--color-ink);
   width: 130px;
 }
-.research-strip {
-  background: var(--color-primary-soft);
-  color: var(--color-primary-deep);
-  border-bottom: 1px solid var(--color-divider);
-  font-size: 0.82rem;
-}
-.research-strip .container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-block: 10px;
-}
 .public-nav {
   display: flex;
   gap: 28px;
@@ -176,6 +164,7 @@ h3 {
   min-height: 48px;
   margin-bottom: 12px;
 }
+
 .sample-notice {
   margin-top: 18px;
   padding: 12px 16px;
