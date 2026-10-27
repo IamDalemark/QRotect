@@ -31,21 +31,24 @@ const userId = data.user.id;
 await db.query('insert into public.administrators(user_id) values($1)', [userId]);
 mkdirSync('test-results', { recursive: true });
 const servers: ChildProcess[] = [];
+function environment(connected: boolean) {
+  return {
+    ...process.env,
+    NEXT_PUBLIC_SUPABASE_URL: connected ? api : '',
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: connected
+      ? status.PUBLISHABLE_KEY || status.ANON_KEY
+      : '',
+    QROTECT_REVIEW_MODE: connected ? 'local' : 'sample',
+    SUPABASE_URL: connected ? api : '',
+    SUPABASE_PUBLISHABLE_KEY: connected ? status.PUBLISHABLE_KEY || status.ANON_KEY : '',
+    NEXT_TELEMETRY_DISABLED: '1',
+  };
+}
 function start(port: number, connected: boolean) {
   const stream = openSync(`test-results/server-${port}.log`, 'w');
   const child = spawn('pnpm', ['start', '--hostname', '127.0.0.1', '--port', String(port)], {
     detached: true,
-    env: {
-      ...process.env,
-      NEXT_PUBLIC_SUPABASE_URL: connected ? api : '',
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: connected
-        ? status.PUBLISHABLE_KEY || status.ANON_KEY
-        : '',
-      QROTECT_REVIEW_MODE: connected ? 'local' : 'sample',
-      SUPABASE_URL: connected ? api : '',
-      SUPABASE_PUBLISHABLE_KEY: connected ? status.PUBLISHABLE_KEY || status.ANON_KEY : '',
-      NEXT_TELEMETRY_DISABLED: '1',
-    },
+    env: environment(connected),
     stdio: ['ignore', stream, stream],
   });
   servers.push(child);
@@ -61,19 +64,38 @@ async function ready(port: number) {
 }
 let result = 1;
 try {
-  start(3100, false);
-  start(3102, true);
-  await Promise.all([ready(3100), ready(3102)]);
-  const sample = await (await fetch('http://127.0.0.1:3100/api/public/snapshot')).json();
-  if (!sample.fixture)
-    throw new Error('Sample server isolation failed; stop before running browser tests.');
-  result = await new Promise<number>((resolve) => {
-    const child = spawn('pnpm', ['exec', 'playwright', 'test', '--workers=2'], {
-      stdio: 'inherit',
-      env: { ...process.env, QROTECT_E2E_ADMIN_EMAIL: email, QROTECT_E2E_ADMIN_PASSWORD: password },
+  // Static HTML belongs to the environment used at build time. Run phases
+  // sequentially so a hosted/sample build can never seed the local admin site.
+  for (const connected of [false, true]) {
+    execFileSync('pnpm', ['build'], { env: environment(connected), stdio: 'inherit' });
+    const port = connected ? 3102 : 3100;
+    start(port, connected);
+    await ready(port);
+    const sample = await (await fetch(`http://127.0.0.1:${port}/api/public/snapshot`)).json();
+    if (sample.fixture === connected) throw new Error('Browser server source isolation failed.');
+    result = await new Promise<number>((resolve) => {
+      const files = connected
+        ? ['tests/e2e/admin.spec.ts']
+        : [
+            'tests/e2e/public.spec.ts',
+            'tests/e2e/calling.spec.ts',
+            'tests/e2e/performance.spec.ts',
+          ];
+      const child = spawn('pnpm', ['exec', 'playwright', 'test', ...files, '--workers=2'], {
+        stdio: 'inherit',
+        env: {
+          ...process.env,
+          QROTECT_E2E_ADMIN_EMAIL: email,
+          QROTECT_E2E_ADMIN_PASSWORD: password,
+        },
+      });
+      child.on('exit', (code) => resolve(code ?? 1));
     });
-    child.on('exit', (code) => resolve(code ?? 1));
-  });
+    const server = servers.pop()!;
+    if (server.pid) process.kill(-server.pid, 'SIGTERM');
+    await new Promise<void>((resolve) => server.once('exit', () => resolve()));
+    if (result) break;
+  }
 } finally {
   for (const child of servers)
     if (child.pid) {

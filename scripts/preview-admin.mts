@@ -7,17 +7,19 @@ const status = JSON.parse(
 );
 if (new URL(status.API_URL).hostname !== '127.0.0.1')
   throw new Error('Administrator review requires local Supabase.');
+const environment = {
+  ...process.env,
+  QROTECT_REVIEW_MODE: 'local',
+  SUPABASE_URL: status.API_URL,
+  SUPABASE_PUBLISHABLE_KEY: status.PUBLISHABLE_KEY || status.ANON_KEY,
+  NEXT_PUBLIC_SUPABASE_URL: status.API_URL,
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: status.PUBLISHABLE_KEY || status.ANON_KEY,
+  NEXT_PUBLIC_SITE_URL: 'http://localhost:3102',
+};
+execFileSync('pnpm', ['build'], { env: environment, stdio: 'inherit' });
 const child = spawn('pnpm', ['start', '--hostname', '127.0.0.1', '--port', '3102'], {
   stdio: 'inherit',
-  env: {
-    ...process.env,
-    QROTECT_REVIEW_MODE: 'local',
-    SUPABASE_URL: status.API_URL,
-    SUPABASE_PUBLISHABLE_KEY: status.PUBLISHABLE_KEY || status.ANON_KEY,
-    NEXT_PUBLIC_SUPABASE_URL: status.API_URL,
-    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: status.PUBLISHABLE_KEY || status.ANON_KEY,
-    NEXT_PUBLIC_SITE_URL: 'http://localhost:3102',
-  },
+  env: environment,
 });
 child.on('exit', (code) => {
   process.exitCode = code ?? 1;
