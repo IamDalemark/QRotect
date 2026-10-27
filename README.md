@@ -64,6 +64,7 @@ Browser checks create and remove an isolated temporary local account, publicatio
 
 ## Project guide
 
+- [Filter UX research](docs/FILTER_UX_RESEARCH.md): primary-source evidence and the compact inline filter interaction.
 - [Architecture](docs/ARCHITECTURE.md): routes, publication model, security and offline boundaries.
 - [Operations](docs/OPERATIONS.md): administrator workflow, recovery, backup and future release setup.
 - [Validation](docs/VALIDATION.md): verified scope and pending release gates.

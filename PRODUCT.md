@@ -12,6 +12,8 @@ A campus emergency contact website with English and Hiligaynon public interfaces
 
 The homepage prioritizes the national emergency call action, six categories, priority school/local contacts, and search. Categories are Police, Fire, Medical/Ambulance, Hospitals, Disaster Response, and School Emergency. Users should reach a category's confirmation card in two taps from the homepage, followed by a deliberate swipe or accessible alternative to open Phone.
 
+Directory search stays visible beside one Filters button. Category and service-area controls expand inline below it, update loaded contacts immediately, and retain URL/back-navigation state. The button counts active filter groups, excluding search text; clearing filters preserves search, while the empty-results reset clears all restrictions.
+
 Contacts show agency, branch, area, individual numbers, channel, and verification information. Number ranges are expanded into individually verified entries; extensions stay separate. Text-only services never receive voice-call actions.
 
 ## Content and administration

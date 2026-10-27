@@ -1,3 +1,15 @@
+# Compact directory filters — 28 October 2026
+
+Implemented on `feature/compact-directory-filters`, for local review. The directory sidebar is replaced by a search input and one labeled Filters button. Its inline disclosure contains category/service-area selectors and Clear filters; changes apply locally and immediately. The trigger counts active groups without counting search. Panel clearing retains search; empty-result reset clears all restrictions atomically. Direct links, Back, language switching, cached publications and phone confirmation remain intact.
+
+- `pnpm check` passed (format, lint, TypeScript, production Next/Webpack build and Serwist generation); 26 unit tests passed.
+- Public/calling/performance/filter browser suites: **71 passed, ten intentional duplicate-profile skips** across desktop Chromium, Android Chromium and iPhone WebKit. Includes opening/closing, group counts, combined restrictions, clear semantics and Back restoration, bilingual panel state, keyboard focus/tab order, hidden-control exclusion, concise result status, offline filtering with zero requests, empty reset and existing calling/cache/privacy coverage. No calls placed.
+- Open/closed captures at 320, 390 and 1280px in English and Hiligaynon were inspected. A 320px/200%-text check found existing masthead overflow, fixed by allowing the narrow header to wrap; the final reflow check passed. Automated accessibility checks passed for the open panel and existing public screens.
+- Independent Impeccable finish review: **ship**, no material fixes, at the scope of this precise existing-world extension. All 13 bilingual/open/closed/enlarged-text captures were inspected. Manual detector returned no findings.
+- Primary-source findings and the selected immediate/disclosure tradeoffs are in FILTER_UX_RESEARCH.md. No API/schema/dependency or hosted publication changes were made. The full local database/admin integration suite was not repeated for this interface-only update; physical devices, manual screen readers and reviewed Hiligaynon remain separate release checks.
+
+---
+
 # Public directory performance update — 28 October 2026
 
 Implemented on `feature/public-directory-cache`, for local review. No hosted publication changes or deployment were made for this update.
