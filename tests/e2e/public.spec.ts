@@ -16,6 +16,7 @@ test('category to call confirmation takes two actions', async ({ page }) => {
 });
 test('area filters and browser back preserve navigation', async ({ page }) => {
   await page.goto('/directory?category=fire');
+  await page.getByRole('button', { name: 'Filters (1)', exact: true }).click();
   await page.getByRole('combobox', { name: 'Service area', exact: true }).selectOption('cpu');
   await expect(page.getByText('No approved contacts match your search.')).toBeVisible();
   await page.goBack();
@@ -39,7 +40,9 @@ test('copy failure gives selectable-number recovery', async ({ page }) => {
   });
   await page.goto('/directory?category=fire');
   await page.getByRole('button', { name: 'Copy number: Sample fire station' }).click();
-  await expect(page.getByRole('status')).toContainText('Select the visible number');
+  await expect(page.getByRole('article').getByRole('status')).toContainText(
+    'Select the visible number',
+  );
 });
 test('unapproved guidance and map are hidden and unavailable directly', async ({ page }) => {
   await page.goto('/');
