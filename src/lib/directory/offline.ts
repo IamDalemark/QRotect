@@ -1,3 +1,4 @@
+import { snapshotETag } from './public-etag';
 import { publicSnapshot } from './public-snapshot';
 import { snapshotSchema, type Snapshot } from './schema';
 export const DATA_CACHE = 'qrotect-public-data-v1';
@@ -23,7 +24,9 @@ export async function saveSnapshot(snapshot: Snapshot): Promise<SavedDirectory> 
   if (valid.map) {
     const url = `/api/public/maps/${valid.map.id}`;
     try {
-      const response = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(3000) });
+      const response =
+        (await maps.match(url)) ||
+        (await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(3000) }));
       if (
         response.ok &&
         /^image\/(png|jpeg|webp)/.test(response.headers.get('Content-Type') || '')
@@ -47,11 +50,14 @@ export async function saveSnapshot(snapshot: Snapshot): Promise<SavedDirectory> 
   );
   return value;
 }
-export async function fetchSnapshot(): Promise<Snapshot> {
+export async function fetchSnapshot(current?: Snapshot | null): Promise<Snapshot> {
+  const headers: HeadersInit = current ? { 'If-None-Match': await snapshotETag(current) } : {};
   const response = await fetch('/api/public/snapshot', {
+    headers,
     cache: 'no-store',
     signal: AbortSignal.timeout(3000),
   });
+  if (response.status === 304 && current) return current;
   if (!response.ok) throw new Error('Refresh unavailable');
   return publicSnapshot(snapshotSchema.parse(await response.json()));
 }

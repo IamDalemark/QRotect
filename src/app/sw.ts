@@ -1,10 +1,12 @@
 /// <reference lib="webworker" />
 import { Serwist, NetworkOnly, type PrecacheEntry } from 'serwist';
+import { snapshotSchema } from '@/lib/directory/schema';
 declare const self: ServiceWorkerGlobalScope & {
   __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
 };
 const publicPaths = new Set(['/', '/directory', '/guidance', '/campus-map', '/about', '/offline']);
-const worker = new Serwist({
+const navigation = new NetworkOnly({ networkTimeoutSeconds: 3 });
+const worker: Serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: false,
   clientsClaim: true,
@@ -13,7 +15,22 @@ const worker = new Serwist({
     {
       matcher: ({ sameOrigin, url, request }) =>
         sameOrigin && request.mode === 'navigate' && publicPaths.has(url.pathname),
-      handler: new NetworkOnly({ networkTimeoutSeconds: 3 }),
+      handler: async (options) => {
+        // Returning visitors can use the saved shell immediately, even while
+        // online. PublicProvider validates saved data and refreshes separately.
+        try {
+          const saved = await (
+            await caches.open('qrotect-public-data-v1')
+          ).match('/__qrotect/saved-directory');
+          if (saved && snapshotSchema.safeParse((await saved.json()).snapshot).success) {
+            const shell = await worker.matchPrecache('/offline');
+            if (shell) return shell;
+          }
+        } catch {
+          /* Unavailable or corrupt storage falls back to the network. */
+        }
+        return navigation.handle(options);
+      },
     },
   ],
   fallbacks: {

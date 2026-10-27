@@ -68,3 +68,29 @@ it('marks a snapshot older than seven days without changing verification dates',
   expect(snapshotIsOld(savedAt, savedAt + week)).toBe(false);
   expect(snapshotIsOld(savedAt, savedAt + week + 1)).toBe(true);
 });
+
+it('downloads each versioned map once and removes it on withdrawal', async () => {
+  const fetcher = vi
+    .fn()
+    .mockResolvedValue(new Response('image', { headers: { 'Content-Type': 'image/png' } }));
+  vi.stubGlobal('fetch', fetcher);
+  const id = '00000000-0000-4000-8000-000000000009';
+  const snapshot = {
+    ...emptySnapshot,
+    map: {
+      id,
+      assetPath: `${id}.png`,
+      description: { en: 'Test', hil: 'Test' },
+      instructions: [{ en: 'Test', hil: 'Test' }],
+      source: 'https://example.test/map',
+      reviewedAt: '2026-01-01',
+      reviewer: 'Test',
+      approved: true,
+    },
+  };
+  expect((await saveSnapshot(snapshot)).mapSaved).toBe(true);
+  expect((await saveSnapshot(snapshot)).mapSaved).toBe(true);
+  expect(fetcher).toHaveBeenCalledOnce();
+  await saveSnapshot(emptySnapshot);
+  expect(stores.get(MAP_CACHE)?.size).toBe(0);
+});
