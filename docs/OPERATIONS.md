@@ -38,9 +38,11 @@ pnpm exec supabase db dump --local --data-only --schema public -f .local/content
 
 Store draft backups privately. Restore backups in a separate test database first; validate the document and publish through the normal workflow. A content dump does not back up Auth accounts or Storage image bytes—retain those separately. Publication history is convenient rollback, not an independent backup.
 
-## Future hosted release — not executed
+## Hosted release and remaining setup
 
-Only after approval to deploy:
+The existing configured hosted Supabase project received all three QROTECT migrations on 27 October 2026 after local CLI sign-in. Website health/snapshot/homepage checks returned HTTP 200, and anonymous reads of private tables were denied. This installed the database schema; it did not create administrator accounts, publish contacts or deploy the frontend.
+
+For future independent deployments and remaining release setup:
 
 - Provision a separate research Supabase project, apply all migrations and generate matching database types.
 - Disable public Auth registration, configure the canonical site origin/recovery redirects, and invite the authorized administrator. A trusted project operator adds that user's UUID to `public.administrators`; browser metadata cannot grant access.

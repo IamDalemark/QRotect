@@ -30,6 +30,6 @@ No student records, medical profiles, personal emergency contacts, GPS, automati
 
 ## Technical foundation
 
-Next.js, Vercel, Supabase, TypeScript, Tailwind CSS, Zod, and Serwist. Use Supabase clients, SQL migrations, and database-generated types rather than an ORM. Public browsing, administrator editing and publication, private map storage, and offline recovery are implemented and verified locally. No hosted Supabase project or Vercel deployment is connected. Approved school content, reviewed Hiligaynon wording, physical-device checks, and participant pilot remain release gates.
+Next.js, Vercel, Supabase, TypeScript, Tailwind CSS, Zod, and Serwist. Use Supabase clients, SQL migrations, and database-generated types rather than an ORM. Public browsing, administrator editing and publication, private map storage, and offline recovery are implemented and verified locally. The configured hosted Supabase schema is initialized. Vercel deployments remain user-managed. Approved school content, reviewed Hiligaynon wording, physical-device checks, and participant pilot remain release gates.
 
 See `DESIGN.md` before interface changes.

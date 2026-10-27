@@ -6,7 +6,7 @@ A QR-accessible emergency contact **research prototype** for CPU Senior High Sch
 
 Implemented locally: English/Hiligaynon browsing, category/area/search filters, copy controls, call simulations, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and offline public access after a successful first visit.
 
-Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, test-contact consent, physical phone checks, and the participant pilot remain content/release gates. Nothing has been deployed to Vercel or a hosted Supabase project by this implementation.
+Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, test-contact consent, physical phone checks, and the participant pilot remain content/release gates. The configured existing hosted Supabase project is now initialized with all three database migrations. No Vercel deployment was performed by this implementation.
 
 Initial setup and the completed feature branches are integrated into `develop`. `main` receives the same locally verified implementation at the user’s request; approved content and hosted release gates remain separate. Work is in **/Users/daniel/Documents/QRotect**, with the Next.js source in `src/app`.
 
