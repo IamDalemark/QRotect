@@ -419,7 +419,7 @@ export function Workbench({ initial, initialRevision, section, history, events }
                   })
                 }
               />
-              {(['active', 'priority', 'approved'] as const).map((key) => (
+              {(['active', 'approved'] as const).map((key) => (
                 <label className="checkbox-label" key={key}>
                   <input
                     type="checkbox"
@@ -432,9 +432,7 @@ export function Workbench({ initial, initialRevision, section, history, events }
                   />
                   {key === 'approved'
                     ? 'Reviewed contact and both languages are approved'
-                    : key === 'priority'
-                      ? 'Show in priority contacts'
-                      : 'Active contact'}
+                    : 'Active contact'}
                 </label>
               ))}
             </div>

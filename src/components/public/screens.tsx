@@ -62,45 +62,54 @@ export function HomeScreen() {
         />
       </section>
       <section className="quick-call-section" aria-labelledby="quick-call-heading">
-        <div className="section-heading">
-          <h2 id="quick-call-heading">{t.quickCall}</h2>
-          <a href="/directory">
-            {t.directory}
-            <ArrowRight size={16} aria-hidden="true" />
-          </a>
-        </div>
+        <h2 id="quick-call-heading">{t.emergencyContacts}</h2>
         <div className="quick-call-grid">
           {categoryIds.map((id) => {
             const Icon = icons[id];
             const target = quickCallTarget(data, id);
-            const label = localized(quickCallLabels[id], language);
-            return target ? (
-              <CallConfirmation
-                key={id}
-                {...target}
-                trigger={
-                  <button className="quick-call-button" type="button">
-                    <Icon size={23} aria-hidden="true" />
-                    <span>
-                      <strong>{label}</strong>
-                      <span>{target.agency}</span>
-                    </span>
-                    <Phone size={18} aria-hidden="true" />
-                  </button>
-                }
-              />
-            ) : (
-              <div className="quick-call-missing" key={id}>
-                <Icon size={23} aria-hidden="true" />
-                <div>
-                  <strong>{localized(categories[id], language)}</strong>
-                  <span>{t.quickCallUnavailable}</span>
-                  <a href={`/directory?category=${id}`}>
-                    {t.browseContacts}
-                    <ArrowRight size={14} aria-hidden="true" />
+            const category =
+              id === 'school' ? t.campusEmergency : localized(categories[id], language);
+            return (
+              <article className="home-category" key={id} aria-labelledby={`home-category-${id}`}>
+                <div className="home-category-title">
+                  <Icon size={23} aria-hidden="true" />
+                  <h3 id={`home-category-${id}`}>{category}</h3>
+                </div>
+                <div className="home-category-recipient">
+                  {target ? (
+                    <>
+                      <p>{target.agency}</p>
+                      {target.branch && <p>{target.branch}</p>}
+                    </>
+                  ) : (
+                    <p>{t.quickCallUnavailable}</p>
+                  )}
+                </div>
+                <div className="home-category-actions">
+                  {target && (
+                    <CallConfirmation
+                      {...target}
+                      trigger={
+                        <button
+                          className="button primary quick-call-button"
+                          type="button"
+                          aria-label={`${localized(quickCallLabels[id], language)}: ${target.agency}`}
+                        >
+                          <Phone size={17} aria-hidden="true" />
+                          {t.call}
+                        </button>
+                      }
+                    />
+                  )}
+                  <a
+                    href={`/directory?category=${id}`}
+                    aria-label={`${t.viewContacts}: ${category}`}
+                  >
+                    {t.viewContacts}
+                    <ArrowRight size={15} aria-hidden="true" />
                   </a>
                 </div>
-              </div>
+              </article>
             );
           })}
         </div>
@@ -117,24 +126,6 @@ export function HomeScreen() {
             {t.search}
           </button>
         </form>
-      </section>
-      <section>
-        <div className="section-heading">
-          <h2>{t.priority}</h2>
-          <a href="/directory">
-            {t.directory}
-            <ArrowRight size={16} aria-hidden="true" />
-          </a>
-        </div>
-        {data.contacts
-          .filter((c) => c.active && c.priority)
-          .slice(0, 3)
-          .map((c) => (
-            <ContactRow key={c.id} contact={c} />
-          ))}
-        {!data.contacts.some((c) => c.active && c.priority) && (
-          <p className="empty-state">{t.empty}</p>
-        )}
       </section>
     </>
   );
@@ -272,32 +263,65 @@ export function DirectoryScreen({ initialSearch }: { initialSearch: string }) {
 }
 export function GuidanceScreen() {
   const { data, t, language } = usePublic();
+  const guides = data?.guidance.filter((guide) => guide.approved) ?? [];
   return (
-    <>
+    <article className="reading-page guide-page">
       <div className="page-heading">
-        <h1>{t.guidance}</h1>
+        <h1>{t.guide}</h1>
+        <p>{t.guideIntro}</p>
       </div>
-      {!data?.guidance.length && <Empty text={t.noGuidance} />}
-      {data?.guidance.map((g) => (
-        <article className="guide" key={g.id}>
-          <h2>{localized(g.title, language)}</h2>
-          <ol>
-            {g.steps.map((s, i) => (
-              <li key={i}>{localized(s, language)}</li>
-            ))}
-          </ol>
-          <p>
-            {g.reviewedAt} · {g.reviewer}
-          </p>
-          <a href={g.source} target="_blank" rel="noreferrer">
-            {t.source}
+      <section aria-labelledby="guide-calling">
+        <h2 id="guide-calling">{t.guideCalling}</h2>
+        <ol className="guide-steps">
+          <li>{t.guideChoose}</li>
+          <li>{t.guideConfirm}</li>
+          <li>{t.guidePhone}</li>
+        </ol>
+        <a className="button secondary" href="/directory">
+          {t.directory}
+          <ArrowRight size={16} aria-hidden="true" />
+        </a>
+      </section>
+      <section aria-labelledby="guide-offline">
+        <h2 id="guide-offline">{t.guideOffline}</h2>
+        <p>{t.guideSave}</p>
+        <p>{t.guideFreshness}</p>
+      </section>
+      {Boolean(guides.length) && (
+        <section aria-labelledby="guide-safety">
+          <h2 id="guide-safety">{t.guidance}</h2>
+          {guides.map((g) => (
+            <section className="guide" key={g.id}>
+              <h3>{localized(g.title, language)}</h3>
+              <ol>
+                {g.steps.map((step, i) => (
+                  <li key={i}>{localized(step, language)}</li>
+                ))}
+              </ol>
+              <p>
+                {g.reviewedAt} · {g.reviewer}
+              </p>
+              <a href={g.source} target="_blank" rel="noreferrer">
+                {t.source}
+              </a>
+              <a className="button secondary" href={`/directory?category=${g.category}`}>
+                {t.viewContacts}
+              </a>
+            </section>
+          ))}
+        </section>
+      )}
+      {data?.map?.approved && (
+        <section aria-labelledby="guide-map">
+          <h2 id="guide-map">{t.map}</h2>
+          <p>{localized(data.map.description, language)}</p>
+          <a className="button secondary" href="/campus-map">
+            {t.viewMap}
+            <ArrowRight size={16} aria-hidden="true" />
           </a>
-          <a className="button secondary" href={`/directory?category=${g.category}`}>
-            {t.directory}
-          </a>
-        </article>
-      ))}
-    </>
+        </section>
+      )}
+    </article>
   );
 }
 export function MapScreen() {

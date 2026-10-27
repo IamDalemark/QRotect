@@ -35,6 +35,24 @@ export const copy = {
     nationalEmergency: 'National emergency line',
     adminSignIn: 'Admin sign in',
     home: 'Home',
+    emergencyContacts: 'Emergency contacts',
+    campusEmergency: 'Campus emergency',
+    viewContacts: 'View contacts',
+    guide: 'Guide',
+    guideIntro: 'Help with calling, finding contacts, and using the saved directory.',
+    guideCalling: 'How to call a contact',
+    guideChoose:
+      'On Home, choose Call for the help you need. Choose View contacts to browse other agencies, or use All contacts to search and filter.',
+    guideConfirm:
+      'Check the agency, branch, and number in the confirmation card. Swipe to call, or choose Open Phone instead. Cancel to return without opening Phone.',
+    guidePhone:
+      'Continue in your phone app and follow any device confirmation. QROTECT opens the selected number; it cannot tell whether the call connects.',
+    guideOffline: 'Using the directory offline',
+    guideSave:
+      'Visit while connected and wait for Available offline before relying on saved access. A first visit needs internet, and your browser may remove saved data.',
+    guideFreshness:
+      'Offline, you can browse saved contacts and open a saved number in Phone. Your device handles the call. Check the saved and verification dates, and reconnect to receive corrections.',
+    viewMap: 'View campus map',
     directory: 'All contacts',
     guidance: 'Emergency guidance',
     map: 'Campus map',
@@ -106,6 +124,25 @@ export const copy = {
     nationalEmergency: 'Nasyonal nga linya sa emerhensya',
     adminSignIn: 'Mag-sign in ang administrador',
     home: 'Panguna',
+    emergencyContacts: 'Mga kontak sa emerhensya',
+    campusEmergency: 'Emerhensya sa kampus',
+    viewContacts: 'Tan-awa ang mga kontak',
+    guide: 'Giya',
+    guideIntro:
+      'Bulig sa pagtawag, pagpangita sang kontak, kag paggamit sang na-save nga listahan.',
+    guideCalling: 'Paano magtawag sa kontak',
+    guideChoose:
+      'Sa Panguna, pilia ang Tawag para sa kinahanglan nga bulig. Pilia ang Tan-awa ang mga kontak para sa iban nga ahensya, ukon gamita ang Tanan nga kontak sa pagpangita kag pag-filter.',
+    guideConfirm:
+      'Tan-awa ang ahensya, sangay, kag numero sa kumpirmasyon. I-swipe para magtawag ukon pilia ang Buksan ang Telepono. Pilia ang Kanselahon para magbalik nga wala ginabuksan ang Telepono.',
+    guidePhone:
+      'Magpadayon sa app sang telepono kag sundon ang kumpirmasyon sang device. Ginabuksan sang QROTECT ang napilian nga numero; indi sini mahibaluan kon nakakonekta ang tawag.',
+    guideOffline: 'Paggamit sang listahan nga wala internet',
+    guideSave:
+      'Magbisita nga may internet kag hulata ang Magamit bisan wala internet antes magsalig sa na-save nga listahan. Kinahanglan internet sa una nga pagbisita, kag mahimo makuha sang browser ang na-save nga datos.',
+    guideFreshness:
+      'Bisan wala internet, mahimo makita ang na-save nga mga kontak kag mabuksan ang numero sa Telepono. Ang device ang nagahimo sang tawag. Tan-awa ang mga petsa sang pag-save kag pagkumpirma, kag magkonekta para mabaton ang mga pagtadlong.',
+    viewMap: 'Tan-awa ang mapa sang kampus',
     directory: 'Tanan nga kontak',
     guidance: 'Giya sa emerhensya',
     map: 'Mapa sang kampus',
