@@ -32,7 +32,7 @@ test('invited admin saves private drafts and unreviewed content cannot publish',
   await page.getByLabel('Display number', { exact: true }).fill('09XX XXX XXXX');
   await page
     .getByLabel('Dial value (one number, digits and optional +)', { exact: true })
-    .fill('000');
+    .fill('09123456789');
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Draft saved.');
   await page
@@ -66,16 +66,60 @@ test('invited admin saves private drafts and unreviewed content cannot publish',
     .check();
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Draft saved.');
+  await page.goto('http://127.0.0.1:3102/admin/quick-calls');
+  await page
+    .getByRole('combobox', { name: 'School emergency destination', exact: true })
+    .selectOption({ index: 1 });
+  await page.getByRole('button', { name: 'Save draft', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('Draft saved.');
+  await page.reload();
+  await expect(
+    page.getByRole('combobox', { name: 'School emergency destination', exact: true }),
+  ).not.toHaveValue('');
+  await page.screenshot({
+    path: '.impeccable/review/quick-call-admin-desktop.png',
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.screenshot({ path: '.impeccable/review/quick-call-admin-mobile.png', fullPage: true });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const preview = await page.context().newPage();
+  const requests: string[] = [];
+  preview.on('request', (request) => requests.push(request.url()));
+  await preview.goto('http://127.0.0.1:3102/admin/preview');
+  await preview.getByRole('button', { name: /Call Campus Emergency QROTECT browser test/ }).click();
+  await expect(preview.getByRole('dialog')).toContainText('QROTECT browser test');
+  await preview.keyboard.press('Escape');
+  expect(requests.filter((url) => url.includes('/api/public/snapshot'))).toEqual([]);
+  expect(
+    await preview.evaluate(async () => Boolean(await caches.match('/__qrotect/saved-directory'))),
+  ).toBe(false);
+  await preview.close();
   await page.goto('http://127.0.0.1:3102/admin/publish');
   await page.getByRole('button', { name: 'Publish updates', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Published.');
   const published = await (
     await page.request.get('http://127.0.0.1:3102/api/public/snapshot')
   ).json();
+  expect(published.quickCalls).toHaveLength(1);
+  expect(published.quickCalls[0].contactId).toBe(published.contacts[0].id);
+  expect(published.quickCalls[0].numberId).toBe(published.contacts[0].numbers[0].id);
   expect(published.contacts).toHaveLength(1);
   expect(published.contacts[0].agency).toBe('QROTECT browser test');
   await page.goto('http://127.0.0.1:3102/admin/contacts');
   await page.getByLabel('Active contact', { exact: true }).uncheck();
+  await page.getByRole('button', { name: 'Save draft', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('Draft saved.');
+  await page.goto('http://127.0.0.1:3102/admin/publish');
+  await expect(page.getByRole('button', { name: 'Publish updates', exact: true })).toBeDisabled();
+  await expect(page.getByText(/quick call requires an active contact/)).toBeVisible();
+  await page.goto('http://127.0.0.1:3102/admin/quick-calls');
+  await expect(
+    page.getByText('This destination is unavailable. Reassign or clear it before publishing.'),
+  ).toBeVisible();
+  await page
+    .getByRole('combobox', { name: 'School emergency destination', exact: true })
+    .selectOption('');
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Draft saved.');
   await page.goto('http://127.0.0.1:3102/admin/publish');

@@ -81,6 +81,7 @@ try {
             'tests/e2e/calling.spec.ts',
             'tests/e2e/performance.spec.ts',
             'tests/e2e/filters.spec.ts',
+            'tests/e2e/quick-calls.spec.ts',
           ];
       const child = spawn('pnpm', ['exec', 'playwright', 'test', ...files, '--workers=2'], {
         stdio: 'inherit',

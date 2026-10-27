@@ -15,7 +15,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "pnpm test:browser",
-    "test:db": "tsx scripts/check-database.mts",
+    "test:db": "tsx scripts/check-database.mts && tsx scripts/check-quick-calls.mts",
     "test:browser": "tsx scripts/run-browser-checks.mts",
     "setup:local": "tsx scripts/setup-local.mts",
     "review:sample": "tsx scripts/preview-sample.mts",

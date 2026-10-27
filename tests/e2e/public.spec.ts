@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test('category to call confirmation takes two actions', async ({ page }) => {
+test('Home quick call opens confirmation in one action', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('banner')).toContainText('Emergency Hotline System');
-  await page.getByRole('link', { name: 'Fire', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Sample fire station' })).toBeVisible();
-  await page.getByRole('button', { name: 'Call', exact: true }).click();
+  await page.getByRole('button', { name: /Call Fire Sample fire station/ }).click();
+  await expect(page).toHaveURL('/');
+  await expect(page.getByRole('dialog')).toContainText('Sample fire station');
   await expect(page.getByRole('dialog')).toContainText('Check the number, then swipe');
   await expect(
     page.getByRole('dialog').getByRole('link', { name: 'Open Phone instead' }),
