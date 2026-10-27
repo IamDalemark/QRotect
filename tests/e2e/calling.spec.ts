@@ -146,9 +146,23 @@ test('selected number, label and extension remain stable while a new directory q
   await page.evaluate((next) => {
     next.contacts.find((c) => c.category === 'fire')!.numbers[1].dial = '09123456789';
     next.contacts.find((c) => c.category === 'fire')!.numbers[1].display = 'Replacement line';
-    window.fetch = () => Promise.resolve(Response.json(next));
-    window.dispatchEvent(new Event('online'));
+    const state = window as unknown as { replacementFetched: boolean };
+    state.replacementFetched = false;
+    window.fetch = () => {
+      state.replacementFetched = true;
+      return Promise.resolve(Response.json(next));
+    };
   }, snapshot);
+  // The initial refresh can still be saving offline data. Wait until the next
+  // online event actually starts the replacement fetch before closing the card.
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        window.dispatchEvent(new Event('online'));
+        return (window as unknown as { replacementFetched: boolean }).replacementFetched;
+      }),
+    )
+    .toBe(true);
   await expect(dialog).toContainText('(033) 320 0000');
   await dialog.getByRole('link', { name: 'Open Phone instead' }).click();
   expect(await attempts(page)).toEqual(['tel:+63333200000']);

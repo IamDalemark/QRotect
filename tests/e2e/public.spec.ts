@@ -3,7 +3,7 @@ import AxeBuilder from '@axe-core/playwright';
 
 test('category to call confirmation takes two actions', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('A CPU Senior High School research project').first()).toBeVisible();
+  await expect(page.getByRole('banner')).toContainText('Campus');
   await page.getByRole('link', { name: 'Fire', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Sample fire station' })).toBeVisible();
   await page.getByRole('button', { name: 'Call', exact: true }).click();
