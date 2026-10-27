@@ -73,7 +73,21 @@ try {
     (await db.query('select id from public.publications where current')).rows[0].id,
     publication,
   );
+  const restored = (
+    await db.query('select public.restore_directory($1,$2) as id', [publication, next])
+  ).rows[0].id;
+  assert.notEqual(restored, publication);
+  assert.equal(
+    (await db.query('select count(*)::int as count from public.publications')).rows[0].count,
+    2,
+  );
+  assert.equal(
+    (await db.query('select snapshot from public.publications where current')).rows[0].snapshot
+      .contacts.length,
+    0,
+  );
   await db.query('reset role');
+  await db.query("select set_config('request.jwt.claim.sub','',true)");
   await db.query('set local role anon');
   assert.equal((await db.query('select * from public.publications')).rows.length, 1);
   assert.equal(
@@ -81,7 +95,7 @@ try {
     0,
   );
   console.log(
-    'Database checks passed: anonymous/non-admin denial, self-promotion denial, draft privacy, optimistic conflict, schema validation, and publication rollback.',
+    'Database checks passed: anonymous/non-admin denial, self-promotion denial, draft privacy, optimistic conflict, schema validation, publication rollback, and version-preserving restore.',
   );
 } finally {
   await db.query('rollback');

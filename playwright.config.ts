@@ -15,10 +15,12 @@ export default defineConfig({
     { name: 'android-chromium', use: { ...devices['Pixel 7'] } },
     { name: 'iphone-webkit', use: { ...devices['iPhone 13'] } },
   ],
-  webServer: {
-    command: 'pnpm dev --hostname 127.0.0.1 --port 3100',
-    url: 'http://127.0.0.1:3100',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: process.env.QROTECT_E2E_ADMIN_EMAIL
+    ? undefined
+    : {
+        command: 'pnpm start --hostname 127.0.0.1 --port 3100',
+        url: 'http://127.0.0.1:3100',
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
 });
