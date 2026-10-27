@@ -10,7 +10,11 @@ A campus emergency contact website with English and Hiligaynon public interfaces
 
 ## Primary experience
 
-The homepage prioritizes the national emergency call action and six quick-call actions: Police, Fire, Medical/Ambulance, Hospital, Disaster Response, and Campus Emergency. Each shows its assigned agency and opens the exact contact confirmation in one activation, followed by a deliberate swipe or accessible alternative to open Phone. Quick calls replace the former category-navigation tiles on Home only; search, All contacts and priority contact rows support browsing other destinations. Missing assignments offer category browsing with no call action.
+The homepage prioritizes the national emergency call action and six category groups: Police, Fire, Medical/Ambulance, Hospital, Disaster Response, and Campus Emergency. Each group shows its assigned agency and branch, with separate Call and View contacts actions. Call opens the exact confirmation in one activation, followed by deliberate swipe or the accessible alternative to open Phone. View contacts opens the directory filtered to that category. Missing assignments retain browsing without a call action. Home ends with search and has no School & local contacts / priority list.
+
+Public navigation has exactly three page links: Home (`/`), All contacts (`/directory`), and Guide (`/guidance`). On phones up to 760px they form a fixed bottom bar with icons, visible labels, safe-area padding and a measured content reservation; it hides during call confirmation. Desktop uses top navigation. Active state follows the real URL even when a saved fallback shell serves it. About and administrator access are in the footer.
+
+Guide is always useful: it explains contact selection, confirmation/Phone handoff and saved-directory access. Approved safety guidance and a link to the approved campus map appear when available; no emergency advice or map is invented. Existing guidance and map URLs remain valid offline.
 
 Directory search stays visible beside one Filters button. Category and service-area controls expand inline below it, update loaded contacts immediately, and retain URL/back-navigation state. The button counts active filter groups, excluding search text; clearing filters preserves search, while the empty-results reset clears all restrictions.
 
@@ -18,9 +22,9 @@ Contacts show agency, branch, area, individual numbers, channel, and verificatio
 
 ## Content and administration
 
-Invited administrators maintain working records, select an exact contact and voice line for each Home quick call, preview changes, and explicitly publish a complete version. Assignments publish atomically with contacts; inactive, missing, text-only, duplicate or mismatched targets must be reassigned or cleared. Existing publications without assignments remain readable and offer category browsing. Private previews show the saved draft without reading or writing visitor caches or refreshing public data. Unpublished content is private. The research group supplies or approves contact sources, verification dates, translations, emergency guidance, and evacuation map.
+Invited administrators maintain working records, select an exact contact and voice line for each Home quick call, preview changes, and explicitly publish a complete version. Assignments publish atomically with contacts; inactive, missing, text-only, duplicate or mismatched targets must be reassigned or cleared. Existing publications without assignments remain readable and offer category browsing. The legacy priority flag remains in stored documents for compatibility but has no public display or administrator checkbox. Private previews show the saved draft without reading or writing visitor caches or refreshing public data. Unpublished content is private. The research group supplies or approves contact sources, verification dates, translations, emergency guidance, and evacuation map.
 
-Guidance and map navigation remain hidden until approved content exists. A static supplied map includes accompanying textual information. Do not invent routes, medical instructions, translations, or agency availability.
+Safety guidance and map links inside Guide remain hidden until approved content exists. A static supplied map includes accompanying textual information. Do not invent routes, medical instructions, translations, or agency availability.
 
 ## Offline behavior
 

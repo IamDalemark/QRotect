@@ -81,3 +81,9 @@ The `202610280001_quick_calls.sql` migration extends document validation and pub
 In Administration → Home quick calls, select each category's exact active contact and voice line. Save draft, open Preview saved draft and inspect Home in both languages, then publish. Empty assignments offer Browse contacts on Home. If a contact is withdrawn, changes category or loses its selected voice line, clear or reassign the shortcut before publication. Never assume record order or priority determines the destination. Existing published records without assignments require deliberate administrator configuration; real destinations are never auto-selected.
 
 `pnpm test:db` now includes transaction-rolled-back quick-call publication checks against local PostgreSQL. `pnpm test:browser` uses temporary local accounts/data and includes assignment persistence, private-preview isolation, publication, and withdrawal after clearing. No test sends a real call or changes hosted data.
+
+## Public Home and navigation
+
+Home has six category groups with separate Call and View contacts actions and search. The former School & local contacts list and priority checkbox are removed; existing stored priority values remain compatible and do not affect display. Use Home quick-call assignments to choose destinations.
+
+Public navigation is Home / All contacts / Guide, with fixed labeled bottom navigation on phones and top links on desktop. About and administrator access are in the footer. Guide reuses `/guidance`, provides website help immediately, and includes safety guidance and a campus-map link only when approved content exists. No new routes, schema migration or dependency is introduced by this navigation update. Existing installed workers need the normal explicit website update to receive the revised shell.

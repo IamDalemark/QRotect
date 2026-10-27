@@ -4,20 +4,20 @@
 
 Public pages are pre-rendered from a validated publication with 60-second incremental regeneration, then enhanced for filtering, language selection, call confirmation and offline recovery. A shared Next.js Data Cache stores only validated public publications, keyed by Supabase URL and tagged for invalidation. It uses `unstable_cache` to retain the existing non-Cache-Components/Webpack setup; a Cache Components migration is separate work. No public authentication is required. Configured database errors never substitute demonstration fixtures. A failed page regeneration throws so Next.js retains the last successful page; a configured production build needs a readable publication source.
 
-| Route                                                                  | Responsibility                                                       |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `/`                                                                    | National confirmation, six quick calls, search, priority contacts    |
-| `/directory?category=&area=&q=`                                        | Filterable contact rows with browser Back support                    |
-| `/guidance`, `/campus-map`                                             | Approved supplied content; unavailable explanations until published  |
-| `/about`                                                               | Research/privacy explanation                                         |
-| `/admin/login`, `/admin/password`                                      | Sign-in/recovery and protected password change                       |
-| `/admin`, `/admin/{contacts,quick-calls,guidance,map,publish,history}` | Verified administrator maintenance                                   |
-| `/admin/preview`                                                       | Private saved-draft preview using either language                    |
-| `/api/public/snapshot`                                                 | Validated current publication only                                   |
-| `/api/public/maps/[id]`                                                | Image only when referenced by current publication                    |
-| `/api/admin/map`                                                       | Verified administrator's private map preview                         |
-| `/api/health`                                                          | Minimal health response, no records or credentials                   |
-| `/offline`                                                             | Public fallback shell; chooses requested public screen on the client |
+| Route                                                                  | Responsibility                                                            |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `/`                                                                    | National confirmation, six category call/browse groups, search            |
+| `/directory?category=&area=&q=`                                        | Filterable contact rows with browser Back support                         |
+| `/guidance`, `/campus-map`                                             | Practical Guide with approved safety content; supplied map when published |
+| `/about`                                                               | Research/privacy explanation                                              |
+| `/admin/login`, `/admin/password`                                      | Sign-in/recovery and protected password change                            |
+| `/admin`, `/admin/{contacts,quick-calls,guidance,map,publish,history}` | Verified administrator maintenance                                        |
+| `/admin/preview`                                                       | Private saved-draft preview using either language                         |
+| `/api/public/snapshot`                                                 | Validated current publication only                                        |
+| `/api/public/maps/[id]`                                                | Image only when referenced by current publication                         |
+| `/api/admin/map`                                                       | Verified administrator's private map preview                              |
+| `/api/health`                                                          | Minimal health response, no records or credentials                        |
+| `/offline`                                                             | Public fallback shell; chooses requested public screen on the client      |
 
 ## Database and publication model
 
@@ -33,7 +33,7 @@ Database types are generated from the applied schema. `scripts/write-schema.ts <
 
 ## Home quick calls
 
-The optional v1 `quickCalls` array has at most six `{category, contactId, numberId}` assignments. Both application publication checks and SQL reject duplicates, missing or inactive contacts, category mismatches, ambiguous number IDs, text-only lines and all-zero dial values. Drafts can hold references needing repair. A shared client resolver checks the exact IDs, never array order, and renders category browsing when no usable assignment exists. Phone handoff reuses the existing frozen-target confirmation with a custom native button trigger. No query runs on activation.
+Home shows one category group per service with separate Call and View contacts controls. It has no priority contact list; the legacy stored `priority` flag is preserved without a maintenance checkbox. The optional v1 `quickCalls` array has at most six `{category, contactId, numberId}` assignments. Both application publication checks and SQL reject duplicates, missing or inactive contacts, category mismatches, ambiguous number IDs, text-only lines and all-zero dial values. Drafts can hold references needing repair. A shared client resolver checks the exact IDs, never array order, and renders category browsing when no usable assignment exists. Phone handoff reuses the existing frozen-target confirmation with a custom native button trigger. No query runs on activation.
 
 Older v1 snapshots without this field remain readable. Known legacy fixture IDs receive the explicit authored demo assignments at normalization boundaries; non-fixture publications never infer assignments. Explicit `quickCalls: []` remains cleared. The six demo lines retain `09123456789`. New strict-schema fields require deploying the updated reader/worker before publishing assignments; older installed clients may retain their last readable snapshot until the explicit website update is accepted.
 
@@ -46,6 +46,12 @@ Map storage is private. Uploads accept PNG/JPEG/WebP signatures up to 5 MB. Publ
 Voice actions open an accessible confirmation showing the selected agency, branch, line label, displayed number and extension. A completed swipe release or the visible keyboard/tap alternative activates a validated `tel:` link synchronously within that user event. Text-only entries have no call control. All-zero legacy placeholders are rejected. The owner-requested `09123456789` remains callable. Display formatting, dial values and extensions remain distinct; only the raw dial value enters the URL. No connection/completion status is inferred. See CALLING.md.
 
 The retired `/practice` route redirects online bookmarks to `/directory` and is removed from the worker allowlist. The v1 `testContact` field and `mode` literal remain unchanged to preserve existing database schema, publications and offline caches. There is no test-contact screen/editor or use of that field. Exact retired descriptions in known fixture copy are normalized at public read/cache boundaries, without editing real content or changing any dial values.
+
+## Public navigation and Guide
+
+The three ordinary page links are `/`, `/directory`, and `/guidance`; About moves to the footer. At widths up to 760px, the bar is fixed at the bottom, uses device safe-area insets and reports its measured height through ResizeObserver to reserve content space. A visible call panel hides the mobile bar without losing its reservation. Desktop navigation stays above content. Current-page state uses an empty deterministic server snapshot followed by the browser's actual pathname: the HTML served by the saved `/offline` shell must not freeze the active item on Home or cause hydration attribute mismatches.
+
+The existing `/guidance` route now renders the Guide hub. Static bilingual help describes existing calling and offline behavior; approved published guidance and the approved map link appear conditionally. Existing URLs and the worker's route allowlist remain unchanged. These are page-navigation links, not an ARIA tab widget.
 
 ## Offline boundaries
 

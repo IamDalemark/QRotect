@@ -1,3 +1,20 @@
+# Home categories and three-destination navigation — 28 October 2026
+
+Implemented on `feature/home-navigation` for local review, including the previously reviewed filter and quick-call work. No merge, push, hosted publication change or deployment was performed for this update.
+
+- Each Home category now presents its heading, assigned agency/branch, a Call button and a separate View contacts link. Calling opens the existing exact-recipient confirmation immediately; browsing opens the filtered directory. Missing destinations offer browsing only. All six demo numbers remain `09123456789`.
+- Removed the School & local contacts list from Home and its obsolete administrator priority checkbox. Stored priority flags remain compatible. Search stays below the six groups.
+- Exactly three page links: Home, All contacts and Guide. Desktop navigation stays at the top; phones use a labeled/icon bottom bar up to 760px, safe-area insets and ResizeObserver-measured content reservation. The bar hides during confirmation and returns afterward. About is in the footer. Browser Back, query links and offline routes remain intact.
+- Guide reuses `/guidance`: practical bilingual calling and saved-directory help is always present, while safety guidance and the campus-map link require approved records. No new API, schema, worker allowlist route or dependency was introduced. Existing installed clients receive the shell through the normal explicit website update.
+- Final `pnpm check` passed formatting, ESLint, TypeScript, production Next/Webpack and Serwist; **39 unit tests passed**. Final isolated browser runner completed both source-specific phases successfully: **96 public checks passed with fifteen intentional profile skips**, plus **one local administrator flow passed with two duplicate-profile skips**. Browser targets were desktop Chromium, Android Chromium and iPhone WebKit. Telephone links were intercepted; no real calls or external emails were sent. Temporary local administrator data was cleaned up.
+- Initial new navigation checks exposed an active-item hydration mismatch when the shared saved shell served a different URL. Using a deterministic empty server pathname followed by the actual browser address fixed current-page state on online/offline navigation. Desktop links were also enlarged to meet the project's 48px target. Final checks cover those regressions, all category browse paths, missing targets, practical Guide, approved-only content/map links, Back, offline Hiligaynon, confirmation hiding/focus return and footer clearance.
+- Inspected **17 final captures**: Home and Guide at 320/390/1440px in both languages, both screens at 320px Hiligaynon/200% text, and actual 390×844 Home/Guide/confirmation viewports. Public and Guide automated accessibility checks passed. The inherited enlarged-text Home search collapse is resolved by wrapping the search form so its input stays usable.
+- Manual Impeccable detector returned `[]`. Fresh independent finish review: **ship**, no material fixes for this extension. The documenter confirmed that the existing visual-system files require no change; pre-existing format/sidecar drift was preserved.
+
+Physical-device safe-area/Phone behavior, manual screen readers and reviewed Hiligaynon remain separate release checks. The earlier quick-call database migration is still local-only; follow its existing rollout instructions before hosted assignment editing/publication.
+
+---
+
 # Home quick calls — 28 October 2026
 
 Implemented on `feature/home-quick-call` for local review, including the previously reviewed compact-filter feature. No merge, push, hosted content change or deployment was performed for this work.

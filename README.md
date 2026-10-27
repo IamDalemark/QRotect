@@ -4,7 +4,7 @@ A QR-accessible emergency contact directory covering campus, Iloilo City, and na
 
 ## Current delivery
 
-Implemented locally: English/Hiligaynon browsing, category/area/search filters, six Home quick calls with explicit administrator-selected destinations, copy controls, confirmation and swipe-to-call, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and offline public access after a successful first visit.
+Implemented locally: English/Hiligaynon browsing, category/area/search filters, six Home category groups with separate call/browse actions and explicit administrator-selected destinations, a practical Guide, three-item top/phone-bottom navigation, copy controls, confirmation and swipe-to-call, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and offline public access after a successful first visit.
 
 Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, physical phone checks, and the participant pilot remain content/release gates. The configured existing hosted Supabase project is now initialized with the three initial database migrations. The additional quick-call migration is verified locally and still needs hosted application before assignment editing. No Vercel deployment was performed by this implementation.
 
