@@ -20,7 +20,7 @@ Invited administrators maintain working records, preview changes, and explicitly
 
 Guidance and map navigation remain hidden until approved content exists. A static supplied map includes accompanying textual information. Do not invent routes, medical instructions, translations, or agency availability.
 
-## Offline behavior to implement
+## Offline behavior
 
 After the first successful online visit, save the public directory, both languages, approved guidance, and a supplied map when downloaded. Show saved, published, and verified dates distinctly. First-time uncached QR access needs internet. Flag snapshots older than seven days and contacts not verified within 30 days; retain saved information with warnings.
 
@@ -30,6 +30,6 @@ No student records, medical profiles, personal emergency contacts, GPS, automati
 
 ## Technical foundation
 
-Next.js, Vercel, Supabase, TypeScript, Tailwind CSS, Zod, and Serwist. Use Supabase clients, SQL migrations, and database-generated types rather than an ORM. The development foundation is installed; application features and service connections remain to be implemented.
+Next.js, Vercel, Supabase, TypeScript, Tailwind CSS, Zod, and Serwist. Use Supabase clients, SQL migrations, and database-generated types rather than an ORM. Public browsing, administrator editing and publication, private map storage, and offline recovery are implemented and verified locally. No hosted Supabase project or Vercel deployment is connected. Approved school content, reviewed Hiligaynon wording, physical-device checks, and participant pilot remain release gates.
 
 See `DESIGN.md` before interface changes.

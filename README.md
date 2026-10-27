@@ -1,77 +1,67 @@
 # QROTECT
 
-A QR-accessible emergency contact research prototype for Central Philippine University Senior High School, covering school contacts, Iloilo City services, and selected national emergency contacts.
+A QR-accessible emergency contact **research prototype** for CPU Senior High School, covering school, Iloilo City, and national services. Agency call controls are simulations. Public use has no sign-in, student records, location tracking, or call histories.
 
-## Current status
+## Current delivery
 
-The development foundation is installed. The homepage is an explicitly labeled placeholder; contacts, administrator access, translations, guidance, maps, and offline behavior will be built in subsequent feature branches. No live Supabase project or Vercel deployment is connected.
+Implemented locally: English/Hiligaynon browsing, category/area/search filters, copy controls, call simulations, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and offline public access after a successful first visit.
 
-Initial setup is on `feature/project-setup`. The `main` and `develop` branches currently contain the repository bootstrap. Integrate the reviewed setup into `develop` before branching subsequent features from it.
+Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, test-contact consent, physical phone checks, and the participant pilot remain content/release gates. Nothing has been deployed to Vercel or a hosted Supabase project by this implementation.
 
-## Requirements
+Initial setup and the completed feature branches are integrated into `develop`. `main` receives the same locally verified implementation at the user’s request; approved content and hosted release gates remain separate. Work is in **/Users/daniel/Documents/QRotect**, with the Next.js source in `src/app`.
 
-- Node.js 22.23.2 (recorded in `.nvmrc`).
-- pnpm 11.18.0 (pinned in `package.json`).
-- Git with your own author name and email configured.
+## Local review
 
-## Run locally
+Use Node 22.23.2, pnpm 11.18.0, and Docker Desktop for the administrator database.
 
 ```sh
-git switch feature/project-setup
 pnpm install --frozen-lockfile
-pnpm dev
+pnpm build
+pnpm review:sample
 ```
 
-Open http://localhost:3000. The starter works without database credentials.
+Open [sample directory](http://localhost:3100). This command explicitly isolates the sample preview from any existing Supabase environment file. Offline functionality requires the production build; development mode intentionally does not register a service worker.
 
-Before using database features, copy `.env.example` to `.env.local` and populate the Supabase project URL and publishable key. Keep `.env.local` untracked. Privileged secret/service-role keys must remain server-side and must never have a `NEXT_PUBLIC_` prefix.
+For local administrator review, start Docker Desktop, then in another terminal:
 
-## Stack
+```sh
+pnpm exec supabase start --exclude studio,imgproxy,edge-runtime,logflare,vector,supavisor,realtime
+pnpm exec supabase migration up --local
+pnpm setup:local
+pnpm review:admin
+```
 
-- Next.js 16 App Router, React 19, and strict TypeScript.
-- Tailwind CSS 4 through PostCSS.
-- Supabase JavaScript client and SSR helpers; Zod for validation; no ORM.
-- ESLint, Prettier, Husky, lint-staged, and Commitlint.
-- Vitest and Playwright test runners.
-- Serwist build dependencies for the later offline feature.
+Open [local administration](http://localhost:3102/admin). The one-time setup creates a **local-only** administrator and saves its generated credentials to `.local/administrator.txt`. It sends no email and preserves existing environment files. On later runs, reuse that file and skip setup. The connected public site at [port 3102](http://localhost:3102) stays empty until reviewed content is explicitly published. Sample mode on port 3100 is a separate review surface.
 
-Development and production builds use Webpack for compatibility with the planned Serwist integration. A service worker has not been registered; installing its dependencies alone does not make the website work offline.
+For ordinary development, use `pnpm dev`. It reads the configured environment files; review scripts instead explicitly select sample mode or the local database.
 
-## Commands
+## Stack and commands
 
-| Command             | Purpose                                           |
-| ------------------- | ------------------------------------------------- |
-| `pnpm dev`          | Start local development                           |
-| `pnpm build`        | Build the production application                  |
-| `pnpm start`        | Serve the production build                        |
-| `pnpm lint`         | Check code with zero warnings allowed             |
-| `pnpm typecheck`    | Generate route types and check TypeScript         |
-| `pnpm format`       | Format supported project files                    |
-| `pnpm format:check` | Verify formatting without changing files          |
-| `pnpm check`        | Run formatting, lint, types, and production build |
-| `pnpm test`         | Run unit tests                                    |
-| `pnpm test:watch`   | Watch unit tests                                  |
-| `pnpm test:e2e`     | Run browser tests                                 |
+Next.js 16 App Router, React 19, strict TypeScript, Tailwind 4, self-hosted Public Sans, accessible Radix dialogs, Supabase Postgres/Auth/Storage, Zod, and Serwist. There is **no ORM**: typed Supabase clients call RLS-protected tables and SQL functions.
 
-No feature tests exist yet. Test commands intentionally do not treat an empty suite as success. See [tests/README.md](tests/README.md).
+Builds retain Webpack. Serwist's documented configurator mode runs after Next.js so offline setup cannot break page startup when storage is unavailable. Only public fallback HTML and static assets are precached.
 
-## Repository structure
+| Command                         | Purpose                                                                          |
+| ------------------------------- | -------------------------------------------------------------------------------- |
+| `pnpm dev`                      | Development server                                                               |
+| `pnpm build` / `pnpm start`     | Production build / server                                                        |
+| `pnpm review:sample`            | Isolated sample directory on port 3100                                           |
+| `pnpm setup:local`              | Create the local review administrator once                                       |
+| `pnpm review:admin`             | Local database review on port 3102                                               |
+| `pnpm check`                    | Prettier, ESLint, TypeScript, production build                                   |
+| `pnpm test`                     | Schema, search, phone, and offline-data unit tests                               |
+| `pnpm test:db`                  | Transactional local database authorization/publication checks                    |
+| `pnpm test:browser`             | Production browser checks; requires a current build and clean local test content |
+| `pnpm test:e2e`                 | Build, then run the full browser checks                                          |
+| `pnpm qr -- <stable-https-url>` | Generate local SVG/PNG QR artwork after URL approval                             |
 
-- `src/app`: public and future administrator routes.
-- `src/lib/supabase`: validated configuration and separate browser/server clients.
-- `supabase/migrations`: future versioned schema and Row Level Security migrations.
-- `tests/e2e`: future browser tests.
-- `PRODUCT.md`: agreed product requirements.
-- `DESIGN.md`: visual direction and design constraints.
+Browser checks create and remove an isolated temporary local account, publications, and draft changes. They refuse to run against hosted databases or an existing publication dataset. Install Chromium/WebKit first with `pnpm exec playwright install chromium webkit`.
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before making changes. The initial commits use Daniel Mark Wiegand's configured Git identity.
+## Project guide
 
-## Supabase and Vercel connection
+- [Architecture](docs/ARCHITECTURE.md): routes, publication model, security and offline boundaries.
+- [Operations](docs/OPERATIONS.md): administrator workflow, recovery, backup and future release setup.
+- [Validation](docs/VALIDATION.md): verified scope and pending release gates.
+- [Product brief](PRODUCT.md), [design direction](DESIGN.md), [contribution rules](CONTRIBUTING.md).
 
-Supabase helpers validate settings when called. They are integration primitives, not completed authentication or authorization. Implement session refresh, verified server identity, administrator permissions, and Row Level Security before adding protected admin features. Generate database types from the actual schema once provisioned.
-
-After setup integration, connect the Git repository to Vercel with `main` as the production branch and use preview deployments for feature review. Configure preview and production environment variables separately and keep testing content separate from approved research content. No custom `vercel.json` is required for this standard Next.js application.
-
-## Research safety
-
-The agreed prototype simulates agency calls. Only an explicitly consenting test contact may demonstrate a real phone dialer. Do not test real emergency numbers. Public use requires no student account, personal records, or GPS. Emergency guidance and evacuation information require school-approved content and reviewed English/Hiligaynon wording.
+Credentials, generated workers, build output, screenshots and local QR artwork are untracked. Impeccable is installed; its manual audit and independent design review supplement browser/accessibility testing. Native hook execution requires approval in Codex's hook controls.

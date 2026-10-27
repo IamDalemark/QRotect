@@ -6,7 +6,7 @@
 - `develop`: integration branch.
 - `feature/<short-description>`: scoped implementation work from `develop`.
 
-Bootstrap is the only initial direct commit to `main`. Setup work lives on `feature/project-setup` for review; integrate it into `develop` before starting subsequent features.
+Bootstrap is the only initial direct commit to `main`. The setup, content-model, public-directory, administrator-content and offline branches are integrated into `develop` after their local checks. Continue new work from `develop`; promote to `main` only when explicitly requested after checks. The current local review implementation was promoted at the owner’s request; this does not deploy it or approve research content.
 
 Use the following workflow after that integration:
 

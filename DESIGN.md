@@ -22,7 +22,7 @@ The main maroon is sampled from the supplied poster. Validate actual color combi
 
 ## Typography and layout
 
-Use self-hosted Public Sans for the completed interface, with a system sans-serif fallback. The installation placeholder currently uses the fallback. Body text is 16–18px, numbers approximately 24–28px, and headings compact and bold. Use tabular numerals for numbers.
+The interface uses self-hosted Public Sans through Next.js, with a system sans-serif fallback. Body text is 16–18px, numbers approximately 24–28px, and headings compact and bold. Use tabular numerals for numbers.
 
 Design mobile-first from 320px. Categories use two columns where labels fit; allow them to collapse for large text. Contacts use rows rather than nested cards. Desktop content stays within approximately 1120px. Use restrained 6–8px radii, thin borders, and minimal shadows.
 
@@ -34,4 +34,4 @@ Oversized marketing heroes, decorative statistics, gradients, glass effects, flo
 
 ## Design review
 
-Before interface feature work, read `PRODUCT.md` and this file. The previously discussed Impeccable audit is a later design-stage task; that skill and its hooks have not been installed or run as part of this stack setup. Automated audits supplement visual, accessibility, and emergency-flow review.
+Before interface feature work, read `PRODUCT.md` and this file. Impeccable 4.7.0 is installed for this project. Its manual detector returned no findings on the implemented interface. Desktop and mobile captures receive an independent finish review alongside browser accessibility and emergency-flow checks. Native Codex hook execution still requires hook approval in the app; the installed manifest alone does not prove execution. Automated audits supplement visual, accessibility, and emergency-flow review.

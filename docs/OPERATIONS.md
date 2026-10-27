@@ -1,0 +1,52 @@
+# Operating QROTECT
+
+## Local administrator review
+
+Follow the root README to start local Supabase and run `pnpm setup:local` once. Use the generated `.local/administrator.txt` at `http://localhost:3102/admin`, with `pnpm review:admin` running. These credentials exist only in the local Docker database. Existing `.env` files are preserved; the review process explicitly overrides them with local settings.
+
+Stop a review server with Ctrl+C. Stop local Supabase with `pnpm exec supabase stop` when finished. Do not use a database reset to restart a review with saved work: it can erase the local dataset. The browser test wrapper deliberately refuses datasets containing contacts or publications, so use a separate clean local test project after starting real content work.
+
+## Editing and publication
+
+1. Open **Contacts** and add the agency, branch, category and service area. Enter both descriptions and search aliases. Agency names remain their official names.
+2. Add each verified number separately, with its label in both languages, displayed formatting and a single dial value. Enter extensions separately. Choose **Text only** when voice calling is unsupported.
+3. Record the official verification source and date. Supply service hours only if verified. Mark approval only after the responsible reviewer checks the record and both languages.
+4. Save the draft. It remains private. If another administrator saved first, reload and reconcile instead of overwriting their work.
+5. Add guidance only from approved supplied instructions. Add the supplied map with accessible descriptions, ordered text instructions, source, reviewer and review date. Do not infer an evacuation route.
+6. Open **Preview & publish**, preview the saved draft in both languages, resolve validation messages, then choose **Publish updates**. Saving and publishing are separate actions.
+7. Check the public directory at port 3102. Connected visitors adopt the complete new publication on opening/reconnecting. Devices remaining offline cannot receive withdrawals.
+
+To withdraw a contact, clear **Active contact**, save and publish. To replace/remove the map, update its draft, save and publish. Historical image files remain private unless referenced by the current publication.
+
+The publication screen also holds the optional consenting test contact. Enter it only after explicit consent. It becomes a publicly readable phone number after publication; agency calling remains simulated. Remove it and publish when consent is withdrawn.
+
+## Recovery and history
+
+If sign-in expires, sign in again before saving. Password recovery sends through Supabase Auth; local mail is captured by the local mail service, not delivered externally. A hosted release needs approved redirect URLs and mail configuration before recovery can be relied on.
+
+Use **History → Restore as new publication** to restore an earlier version. This explicitly replaces the saved working draft and publishes a new version. It preserves the historical version and original verification dates. Recheck those dates before treating the restored content as current.
+
+A failed publication leaves the prior publication available. If the database is unavailable, the public app can use previously saved information, with a refresh-failure notice. No saved copy means a retry state. Keep printed fallback information on QR materials for first-time offline visitors.
+
+## Content backups
+
+Before a substantial update, export the current public JSON to a dated local file from `/api/public/snapshot`, and retain approved source materials. A trusted operator can also create a local public-schema data dump:
+
+```sh
+pnpm exec supabase db dump --local --data-only --schema public -f .local/content-backup.sql
+```
+
+Store draft backups privately. Restore backups in a separate test database first; validate the document and publish through the normal workflow. A content dump does not back up Auth accounts or Storage image bytes—retain those separately. Publication history is convenient rollback, not an independent backup.
+
+## Future hosted release — not executed
+
+Only after approval to deploy:
+
+- Provision a separate research Supabase project, apply all migrations and generate matching database types.
+- Disable public Auth registration, configure the canonical site origin/recovery redirects, and invite the authorized administrator. A trusted project operator adds that user's UUID to `public.administrators`; browser metadata cannot grant access.
+- Configure Vercel production and preview variables separately. Set `main` as the approved production branch. Keep preview content separate from the approved dataset.
+- Verify RLS, password recovery, safe calling, both languages, map delivery and offline recovery on the actual host.
+- Monitor `/api/health` with an approved availability service without visitor tracking. No external monitor is configured for local review.
+- Record the content owner, hosting/account owner, maintenance schedule and backup responsibility.
+
+After choosing the stable approved HTTPS destination, run `pnpm qr -- https://approved-stable-domain/`. Artwork is generated into `.local/qr` as SVG/PNG with a four-module quiet zone. Print the readable destination and approved fallback information alongside it. No production QR has been generated because a destination has not been approved. Test screen and printed scans on actual Android Chrome and iPhone Safari before release.

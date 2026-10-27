@@ -1,14 +1,14 @@
 # Tests
 
-Vitest is configured for unit tests next to source files (`*.test.ts` or `*.test.tsx`) and under `tests/unit`. Playwright is configured for browser tests under `tests/e2e`, with desktop Chromium, Android Chromium, and iPhone WebKit profiles.
+Use Node 22.23.2 and pnpm 11.18.0. `pnpm check` verifies formatting, lint, TypeScript and the production build. No empty suite is counted as a pass.
 
-No feature tests exist yet. Add meaningful cases with the feature they verify. Test commands intentionally fail when no tests exist; an empty suite is not a passing feature check.
+- `pnpm test`: unit checks for strict schemas, safe phone values, bilingual search, explicit fallback, saved snapshot integrity, map failure and age warnings.
+- `pnpm test:db`: local Postgres transaction checks for anonymous/non-admin access, self-promotion denial, draft privacy, schema validation, revision conflicts, failed-publication rollback and historical restoration. All changes roll back.
+- `pnpm test:e2e`: production build followed by the isolated browser runner. Requires local Supabase, no existing publications/contact dataset, and installed Chromium/WebKit (`pnpm exec playwright install chromium webkit`).
+- `pnpm test:browser`: the same runner using an already current production build.
 
-- `pnpm test`: run unit tests once.
-- `pnpm test:watch`: watch unit tests.
-- `pnpm test:e2e`: run browser tests with a local development server on port 3100.
-- `pnpm exec playwright install chromium webkit`: install browser binaries before the first browser-test run.
+The browser runner serves samples on port 3100 and the local database application on 3102, creates a temporary local administrator, tests draft saving/publication/withdrawal, and cleans up its account and data. It refuses hosted databases. Do not run while another process uses those review ports. The standalone Playwright configuration can run public checks against a production sample server; use the wrapper for admin coverage.
 
-The shared `pnpm check` command verifies formatting, lint, types, and the production build. Add relevant feature tests to required checks when those tests are introduced.
+Browser projects are desktop Chromium, emulated Android Chromium and emulated iPhone WebKit. These are not physical-device certifications. Duplicate admin and viewport-matrix checks are intentionally skipped on the two phone profiles. Screenshots and traces are untracked.
 
-Never place research test calls to real emergency services. Use simulations or an explicitly consenting test contact.
+Tests never place calls to real emergency agencies or send external email. Invalid network payloads are deliberately injected in browser tests, including a WebKit-compatible fetch fault because its service-worker-controlled requests bypass page routing.
