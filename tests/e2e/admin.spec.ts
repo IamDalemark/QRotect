@@ -87,7 +87,9 @@ test('invited admin saves private drafts and unreviewed content cannot publish',
   const requests: string[] = [];
   preview.on('request', (request) => requests.push(request.url()));
   await preview.goto('http://127.0.0.1:3102/admin/preview');
-  await preview.getByRole('button', { name: /Call Campus Emergency QROTECT browser test/ }).click();
+  await preview
+    .getByRole('button', { name: /Call Campus Emergency: QROTECT browser test/ })
+    .click();
   await expect(preview.getByRole('dialog')).toContainText('QROTECT browser test');
   await preview.keyboard.press('Escape');
   expect(requests.filter((url) => url.includes('/api/public/snapshot'))).toEqual([]);

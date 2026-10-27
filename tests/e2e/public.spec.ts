@@ -4,7 +4,7 @@ import AxeBuilder from '@axe-core/playwright';
 test('Home quick call opens confirmation in one action', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('banner')).toContainText('Emergency Hotline System');
-  await page.getByRole('button', { name: /Call Fire Sample fire station/ }).click();
+  await page.getByRole('button', { name: /Call Fire: Sample fire station/ }).click();
   await expect(page).toHaveURL('/');
   await expect(page.getByRole('dialog')).toContainText('Sample fire station');
   await expect(page.getByRole('dialog')).toContainText('Check the number, then swipe');
@@ -44,7 +44,9 @@ test('copy failure gives selectable-number recovery', async ({ page }) => {
     'Select the visible number',
   );
 });
-test('unapproved guidance and map are hidden and unavailable directly', async ({ page }) => {
+test('Guide has practical help while unapproved safety content and map stay hidden', async ({
+  page,
+}) => {
   await page.goto('/');
   await expect(
     page
@@ -52,7 +54,10 @@ test('unapproved guidance and map are hidden and unavailable directly', async ({
       .getByRole('link', { name: 'Campus map' }),
   ).toHaveCount(0);
   await page.goto('/guidance');
-  await expect(page.getByText('Approved emergency guidance is not available yet.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'How to call a contact' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Emergency guidance', exact: true })).toHaveCount(
+    0,
+  );
   await page.goto('/campus-map');
   await expect(
     page.getByText('An approved campus evacuation map is not available yet.'),

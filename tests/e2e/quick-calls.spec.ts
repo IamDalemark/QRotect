@@ -27,7 +27,7 @@ test('all six Home shortcuts open exact confirmation in one action without navig
   page,
 }) => {
   await page.goto('/');
-  const group = page.getByRole('region', { name: 'Quick call', exact: true });
+  const group = page.getByRole('region', { name: 'Emergency contacts', exact: true });
   await expect(group.getByRole('button')).toHaveCount(6);
   await expect(page.getByText('Available offline', { exact: true })).toBeVisible({
     timeout: 30000,
@@ -55,7 +55,9 @@ test('all six Home shortcuts open exact confirmation in one action without navig
     await page.evaluate(() => (window as unknown as { __phoneAttempts: string[] }).__phoneAttempts),
   ).toEqual([]);
   await page.goto('/directory?category=police');
-  await expect(page.getByRole('region', { name: 'Quick call', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('region', { name: 'Emergency contacts', exact: true })).toHaveCount(
+    0,
+  );
 });
 
 test('saved Home shortcuts work offline in Hiligaynon with the tap alternative', async ({
@@ -85,10 +87,13 @@ test('withdrawn assignments offer category browsing without selecting another co
   snapshot.publishedAt = new Date().toISOString();
   await page.route('**/api/public/snapshot', (route) => route.fulfill({ json: snapshot }));
   await page.goto('/');
-  const group = page.getByRole('region', { name: 'Quick call', exact: true });
+  const group = page.getByRole('region', { name: 'Emergency contacts', exact: true });
   await expect(group.getByRole('button')).toHaveCount(0);
   await expect(group.getByText('Quick call unavailable', { exact: true })).toHaveCount(6);
-  await group.getByRole('link', { name: 'Browse contacts' }).first().click();
+  await group
+    .getByRole('link', { name: /View contacts/ })
+    .first()
+    .click();
   await expect(page).toHaveURL(/directory\?category=police$/);
 });
 
