@@ -5,8 +5,11 @@ import { emptySnapshot, fixtureSnapshot } from './fixtures';
 import { snapshotSchema, type Snapshot } from './schema';
 
 export function databaseConfigured() {
+  if (process.env.QROTECT_REVIEW_MODE === 'sample') return false;
+  const environment = process.env;
   return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    (environment.SUPABASE_URL ?? environment.NEXT_PUBLIC_SUPABASE_URL) &&
+    (environment.SUPABASE_PUBLISHABLE_KEY ?? environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY),
   );
 }
 export function publicDatabase() {

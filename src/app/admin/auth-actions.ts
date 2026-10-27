@@ -31,7 +31,8 @@ export async function requestRecovery(_state: { message: string }, form: FormDat
   if (!email.success || !databaseConfigured())
     return { message: 'Enter your administrator email. Supabase must be connected.' };
   const client = await createClient();
-  const site = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const environment = process.env;
+  const site = environment.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   await client.auth.resetPasswordForEmail(email.data, {
     redirectTo: new URL('/auth/callback', site).toString(),
   });

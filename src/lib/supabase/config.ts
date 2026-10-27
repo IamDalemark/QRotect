@@ -5,11 +5,19 @@ const configSchema = z.object({
   publishableKey: z.string().trim().min(1),
 });
 
-export function getSupabaseConfig() {
-  const result = configSchema.safeParse({
-    url: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    publishableKey: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  });
+export function getSupabaseConfig(input?: {
+  url: string | undefined;
+  publishableKey: string | undefined;
+}) {
+  // Server-only overrides keep local review isolated from frozen NEXT_PUBLIC build settings.
+  const environment = process.env;
+  const result = configSchema.safeParse(
+    input ?? {
+      url: environment.SUPABASE_URL ?? environment.NEXT_PUBLIC_SUPABASE_URL,
+      publishableKey:
+        environment.SUPABASE_PUBLISHABLE_KEY ?? environment.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    },
+  );
 
   if (!result.success) {
     throw new Error(
