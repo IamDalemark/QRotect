@@ -385,25 +385,51 @@ textarea::placeholder {
   color: var(--color-success);
   margin: 6px 0 0;
 }
-.directory-layout {
-  display: grid;
-  grid-template-columns: 245px minmax(0, 1fr);
-  gap: 48px;
+.directory-tools {
+  margin-bottom: 20px;
 }
-.filters {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding-top: 12px;
-}
-.filters label {
+.directory-search-label,
+.filter-panel label {
   display: grid;
   gap: 8px;
   font-size: 0.85rem;
   font-weight: 600;
 }
-.filters > a {
-  min-height: 48px;
+.directory-search-label {
+  margin-bottom: 8px;
+}
+.directory-toolbar {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+}
+.directory-toolbar input {
+  flex: 1;
+  min-width: 0;
+}
+.filter-toggle {
+  flex: 0 0 auto;
+  max-width: 50%;
+  border-color: var(--color-primary);
+}
+.filter-toggle[aria-expanded='true'] {
+  background: var(--color-primary-soft);
+}
+.filter-toggle svg {
+  flex-shrink: 0;
+}
+.filter-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 16px;
+  padding-top: 20px;
+}
+.filter-panel[hidden] {
+  display: none;
+}
+.filter-panel label {
+  min-width: 0;
 }
 .result-count {
   border-bottom: 1px solid var(--color-divider);
@@ -555,9 +581,11 @@ textarea::placeholder {
     width: calc(100% - 36px);
   }
   .header-inner {
+    flex-wrap: wrap;
     padding-block: 20px;
   }
   .brand {
+    flex: 1 1 min-content;
     font-size: 1.35rem;
     gap: 8px;
   }
@@ -606,17 +634,17 @@ textarea::placeholder {
   .category-link svg:last-child {
     display: none;
   }
-  .directory-layout {
-    grid-template-columns: 1fr;
-    gap: 24px;
+  .directory-toolbar {
+    gap: 8px;
   }
-  .filters {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+  .filter-toggle {
+    padding-inline: 12px;
   }
-  .filters label:first-child {
-    grid-column: 1 / -1;
+  .filter-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .filter-panel > button {
+    justify-self: start;
   }
   .number-line {
     align-items: flex-start;
@@ -652,8 +680,7 @@ textarea::placeholder {
   }
 }
 @media (max-width: 350px) {
-  .category-grid,
-  .filters {
+  .category-grid {
     grid-template-columns: 1fr;
   }
   .emergency-copy {

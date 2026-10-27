@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- full document navigation keeps offline routes independent of RSC requests */
 'use client';
-import { useState, useSyncExternalStore } from 'react';
+import { useId, useState, useSyncExternalStore } from 'react';
 import {
   ArrowRight,
   ArrowLeft,
@@ -11,6 +11,7 @@ import {
   CloudLightning,
   School,
   Search,
+  SlidersHorizontal,
   Map,
   ZoomIn,
   ZoomOut,
@@ -122,14 +123,20 @@ export function DirectoryScreen({ initialSearch }: { initialSearch: string }) {
     () => window.location.search,
     () => initialSearch,
   );
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const panelId = useId();
+  const searchId = useId();
   const params = new URLSearchParams(query);
   const q = params.get('q') || '';
   const category = params.get('category') || '';
   const area = params.get('area') || '';
-  function update(key: string, value: string, replace = false) {
+  const filterCount = Number(Boolean(category)) + Number(Boolean(area));
+  function update(changes: Record<string, string>, replace = false) {
     const next = new URLSearchParams(window.location.search);
-    if (value) next.set(key, value);
-    else next.delete(key);
+    for (const [key, value] of Object.entries(changes)) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
     window.history[replace ? 'replaceState' : 'pushState'](
       null,
       '',
@@ -151,19 +158,36 @@ export function DirectoryScreen({ initialSearch }: { initialSearch: string }) {
         </h1>
         <p>{t.intro}</p>
       </div>
-      <div className="directory-layout">
-        <aside className="filters" aria-label={t.filters}>
-          <label>
-            {t.search}
-            <input
-              value={q}
-              placeholder={t.searchHint}
-              onChange={(e) => update('q', e.target.value, true)}
-            />
-          </label>
+      <div className="directory-tools">
+        <label className="directory-search-label" htmlFor={searchId}>
+          {t.search}
+        </label>
+        <div className="directory-toolbar">
+          <input
+            id={searchId}
+            type="search"
+            value={q}
+            placeholder={t.searchHint}
+            onChange={(e) => update({ q: e.target.value }, true)}
+          />
+          <button
+            type="button"
+            className="button secondary filter-toggle"
+            aria-expanded={filtersOpen}
+            aria-controls={panelId}
+            onClick={() => setFiltersOpen(!filtersOpen)}
+          >
+            <SlidersHorizontal size={18} aria-hidden="true" />
+            <span>
+              {t.filterButton}
+              {filterCount > 0 && ` (${filterCount})`}
+            </span>
+          </button>
+        </div>
+        <section className="filter-panel" id={panelId} aria-label={t.filters} hidden={!filtersOpen}>
           <label>
             {t.category}
-            <select value={category} onChange={(e) => update('category', e.target.value)}>
+            <select value={category} onChange={(e) => update({ category: e.target.value })}>
               <option value="">{t.allCategories}</option>
               {categoryIds.map((id) => (
                 <option key={id} value={id}>
@@ -174,7 +198,7 @@ export function DirectoryScreen({ initialSearch }: { initialSearch: string }) {
           </label>
           <label>
             {t.area}
-            <select value={area} onChange={(e) => update('area', e.target.value)}>
+            <select value={area} onChange={(e) => update({ area: e.target.value })}>
               <option value="">{t.allAreas}</option>
               {Object.entries(areas).map(([id, name]) => (
                 <option key={id} value={id}>
@@ -183,23 +207,35 @@ export function DirectoryScreen({ initialSearch }: { initialSearch: string }) {
               ))}
             </select>
           </label>
-          <a href="/directory">{t.reset}</a>
-        </aside>
-        <section aria-live="polite" aria-label={t.contactResults}>
-          <p className="result-count">
-            {results.length} {t.results}
-          </p>
-          {results.map((c) => (
-            <ContactRow key={c.id} contact={c} />
-          ))}
-          {!results.length && (
-            <div className="empty-state">
-              <h2>{t.empty}</h2>
-              <a href="/directory">{t.reset}</a>
-            </div>
-          )}
+          <button
+            type="button"
+            className="button secondary"
+            onClick={() => update({ category: '', area: '' })}
+          >
+            {t.reset}
+          </button>
         </section>
       </div>
+      <section aria-label={t.contactResults}>
+        <p className="result-count" role="status" aria-live="polite" aria-atomic="true">
+          {results.length} {t.results}
+        </p>
+        {results.map((c) => (
+          <ContactRow key={c.id} contact={c} />
+        ))}
+        {!results.length && (
+          <div className="empty-state">
+            <h2>{t.empty}</h2>
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => update({ q: '', category: '', area: '' })}
+            >
+              {t.reset}
+            </button>
+          </div>
+        )}
+      </section>
     </>
   );
 }
