@@ -131,6 +131,7 @@ h3 {
 }
 .public-nav {
   display: flex;
+  justify-content: center;
   gap: 28px;
   border-bottom: 1px solid var(--color-divider);
   flex-wrap: wrap;

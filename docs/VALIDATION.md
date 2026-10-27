@@ -2,6 +2,8 @@
 
 Implemented on `feature/home-navigation` for local review, including the previously reviewed filter and quick-call work. No merge, push, hosted publication change or deployment was performed for this update.
 
+Follow-up: renamed the first public destination to Get help / Pangayo bulig, updated the Guide references, and centered the desktop navigation group. `pnpm check` and 15 focused navigation checks passed (three intentional profile skips), including both-language centering geometry, narrow/enlarged text and offline behavior. All nine updated captures were inspected; the detector returned `[]` and the independent scoped finish review returned ship with no material fixes.
+
 - Each Home category now presents its heading, assigned agency/branch, a Call button and a separate View contacts link. Calling opens the existing exact-recipient confirmation immediately; browsing opens the filtered directory. Missing destinations offer browsing only. All six demo numbers remain `09123456789`.
 - Removed the School & local contacts list from Home and its obsolete administrator priority checkbox. Stored priority flags remain compatible. Search stays below the six groups.
 - Exactly three page links: Home, All contacts and Guide. Desktop navigation stays at the top; phones use a labeled/icon bottom bar up to 760px, safe-area insets and ResizeObserver-measured content reservation. The bar hides during confirmation and returns afterward. About is in the footer. Browser Back, query links and offline routes remain intact.

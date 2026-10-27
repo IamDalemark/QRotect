@@ -48,9 +48,9 @@ test('three page destinations retain direct links, active state and browser Back
   await page.goBack();
   await expect(page).toHaveURL('/directory?category=fire&q=station');
   await expect(page.getByRole('heading', { name: 'Sample fire station' })).toBeVisible();
-  await page.locator('.public-nav').getByRole('link', { name: 'Home', exact: true }).click();
+  await page.locator('.public-nav').getByRole('link', { name: 'Get help', exact: true }).click();
   await expect(page).toHaveURL('/');
-  await expect(page.locator('.public-nav a[aria-current="page"]')).toHaveText('Home');
+  await expect(page.locator('.public-nav a[aria-current="page"]')).toHaveText('Get help');
   await expect(
     page.locator('.site-footer').getByRole('link', { name: 'About QROTECT' }),
   ).toHaveAttribute('href', '/about');
@@ -87,7 +87,10 @@ test('all three destinations work from the saved shell offline in Hiligaynon', a
     'href',
     '/directory',
   );
-  await page.locator('.public-nav').getByRole('link', { name: 'Panguna', exact: true }).click();
+  await page
+    .locator('.public-nav')
+    .getByRole('link', { name: 'Pangayo bulig', exact: true })
+    .click();
   await expect(page.locator('.home-category')).toHaveCount(6);
   await expect(page.locator('.public-nav a[aria-current="page"]')).toHaveAttribute('href', '/');
 });
@@ -175,6 +178,15 @@ test('Guide and navigation reflow at narrow widths, enlarged text and in both la
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true,
       );
+      if (width === 1440) {
+        const links = page.locator('.public-nav a');
+        const first = await links.first().boundingBox();
+        const last = await links.last().boundingBox();
+        const bar = await page.locator('.public-nav').boundingBox();
+        expect(
+          Math.abs((first!.x + last!.x + last!.width) / 2 - (bar!.x + bar!.width / 2)),
+        ).toBeLessThan(1);
+      }
       for (const link of await page.locator('.public-nav a').all()) {
         const box = await link.boundingBox();
         expect(box!.height).toBeGreaterThanOrEqual(48);

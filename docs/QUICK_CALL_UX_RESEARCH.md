@@ -21,7 +21,7 @@ The W3C Understanding pages explain normative success criteria; APG and GOV.UK p
 
 ## Confirmed scope
 
-The owner selected Home only and all six existing categories. After review, the owner chose a combined category group: keep a category heading and exact assigned agency with separate Call and View contacts actions. Remove the School & local contacts section. Use Home / All contacts / Guide navigation, fixed at the bottom on phones and at the top on desktop. The directory retains its current search/filter layout.
+The owner selected Home only and all six existing categories. After review, the owner chose a combined category group: keep a category heading and exact assigned agency with separate Call and View contacts actions. Remove the School & local contacts section. Use Get help / All contacts / Guide navigation, fixed at the bottom on phones and at the top on desktop. The directory retains its current search/filter layout.
 
 ## Recommended interaction
 

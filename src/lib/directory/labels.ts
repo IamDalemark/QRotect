@@ -34,7 +34,7 @@ export const copy = {
     connection: 'Directory connection status',
     nationalEmergency: 'National emergency line',
     adminSignIn: 'Admin sign in',
-    home: 'Home',
+    home: 'Get help',
     emergencyContacts: 'Emergency contacts',
     campusEmergency: 'Campus emergency',
     viewContacts: 'View contacts',
@@ -42,7 +42,7 @@ export const copy = {
     guideIntro: 'Help with calling, finding contacts, and using the saved directory.',
     guideCalling: 'How to call a contact',
     guideChoose:
-      'On Home, choose Call for the help you need. Choose View contacts to browse other agencies, or use All contacts to search and filter.',
+      'On Get help, choose Call for the help you need. Choose View contacts to browse other agencies, or use All contacts to search and filter.',
     guideConfirm:
       'Check the agency, branch, and number in the confirmation card. Swipe to call, or choose Open Phone instead. Cancel to return without opening Phone.',
     guidePhone:
@@ -123,7 +123,7 @@ export const copy = {
     connection: 'Kahimtangan sang koneksyon',
     nationalEmergency: 'Nasyonal nga linya sa emerhensya',
     adminSignIn: 'Mag-sign in ang administrador',
-    home: 'Panguna',
+    home: 'Pangayo bulig',
     emergencyContacts: 'Mga kontak sa emerhensya',
     campusEmergency: 'Emerhensya sa kampus',
     viewContacts: 'Tan-awa ang mga kontak',
@@ -132,7 +132,7 @@ export const copy = {
       'Bulig sa pagtawag, pagpangita sang kontak, kag paggamit sang na-save nga listahan.',
     guideCalling: 'Paano magtawag sa kontak',
     guideChoose:
-      'Sa Panguna, pilia ang Tawag para sa kinahanglan nga bulig. Pilia ang Tan-awa ang mga kontak para sa iban nga ahensya, ukon gamita ang Tanan nga kontak sa pagpangita kag pag-filter.',
+      'Sa pahina nga Pangayo bulig, pilia ang Tawag para sa kinahanglan nga bulig. Pilia ang Tan-awa ang mga kontak para sa iban nga ahensya, ukon gamita ang Tanan nga kontak sa pagpangita kag pag-filter.',
     guideConfirm:
       'Tan-awa ang ahensya, sangay, kag numero sa kumpirmasyon. I-swipe para magtawag ukon pilia ang Buksan ang Telepono. Pilia ang Kanselahon para magbalik nga wala ginabuksan ang Telepono.',
     guidePhone:
