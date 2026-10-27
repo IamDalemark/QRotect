@@ -60,6 +60,9 @@ export const mapSchema = z
     approved: z.boolean(),
   })
   .strict();
+export const quickCallSchema = z
+  .object({ category: z.enum(categoryIds), contactId: z.uuid(), numberId: z.uuid() })
+  .strict();
 export const snapshotSchema = z
   .object({
     schemaVersion: z.literal(1),
@@ -68,6 +71,8 @@ export const snapshotSchema = z
     mode: z.literal('research'),
     fixture: z.boolean(),
     contacts: z.array(contactSchema).max(300),
+    // Optional so existing v1 publications and saved directories still load.
+    quickCalls: z.array(quickCallSchema).max(6).optional(),
     guidance: z.array(guideSchema).max(30),
     map: mapSchema.nullable(),
     // Legacy v1 field retained only to read existing publications and offline caches.
@@ -98,6 +103,7 @@ export function publicationIssues(data: Snapshot): string[] {
     if (c.verifiedAt > new Date().toISOString().slice(0, 10))
       issues.push(`${c.agency}: verification cannot be in the future.`);
   }
+  issues.push(...quickCallIssues(data));
   for (const g of data.guidance)
     if (!g.approved || !g.title.hil || g.steps.some((s) => !s.hil))
       issues.push('Guidance requires approval and both languages.');
@@ -106,6 +112,29 @@ export function publicationIssues(data: Snapshot): string[] {
     (!data.map.approved || !data.map.description.hil || data.map.instructions.some((s) => !s.hil))
   )
     issues.push('Map content requires approval and both languages.');
+  return issues;
+}
+export function quickCallIssues(data: Snapshot): string[] {
+  const issues: string[] = [];
+  const seen = new Set<Category>();
+  for (const assignment of data.quickCalls ?? []) {
+    if (seen.has(assignment.category))
+      issues.push(`${assignment.category}: choose one quick-call destination.`);
+    seen.add(assignment.category);
+    const matches = data.contacts.filter((c) => c.id === assignment.contactId);
+    const contact = matches.length === 1 ? matches[0] : undefined;
+    const numbers = contact?.numbers.filter((n) => n.id === assignment.numberId) ?? [];
+    if (
+      !contact?.active ||
+      contact.category !== assignment.category ||
+      numbers.length !== 1 ||
+      numbers[0].channel !== 'voice' ||
+      /^\+?0+$/.test(numbers[0].dial)
+    )
+      issues.push(
+        `${assignment.category}: quick call requires an active contact in this category and its exact callable voice line. Reassign or clear it.`,
+      );
+  }
   return issues;
 }
 export function localized(value: { en: string; hil: string }, language: Language) {

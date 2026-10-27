@@ -84,7 +84,11 @@ try {
       dial: '09123456789',
     })),
   }));
-  const working = snapshotSchema.parse({ ...draft.data.payload, contacts });
+  const working = snapshotSchema.parse({
+    ...draft.data.payload,
+    contacts,
+    quickCalls: fixtureSnapshot.quickCalls,
+  });
   const id = randomUUID(),
     publishedAt = new Date().toISOString();
   const demo = snapshotSchema.parse({ ...fixtureSnapshot, contacts, version: id, publishedAt });

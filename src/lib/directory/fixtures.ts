@@ -1,4 +1,5 @@
 import { categoryIds, type Snapshot } from './schema';
+import { demoQuickCalls } from './quick-calls';
 
 export const emptySnapshot: Snapshot = {
   schemaVersion: 1,
@@ -14,6 +15,7 @@ export const emptySnapshot: Snapshot = {
 export const fixtureSnapshot: Snapshot = {
   ...emptySnapshot,
   version: 'sample-v1',
+  quickCalls: demoQuickCalls,
   fixture: true,
   contacts: categoryIds.map((category, index) => ({
     id: `10000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,

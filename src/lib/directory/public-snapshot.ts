@@ -1,4 +1,5 @@
 import type { Snapshot } from './schema';
+import { demoQuickCalls } from './quick-calls';
 
 // Old fixture publications and saved v1 directories carry retired interface copy.
 // Only these exact authored sample descriptions change; numbers and real records stay intact.
@@ -6,6 +7,8 @@ export function publicSnapshot(snapshot: Snapshot): Snapshot {
   if (!snapshot.fixture) return snapshot;
   return {
     ...snapshot,
+    // Upgrade only the known authored demo IDs; never infer a real destination.
+    quickCalls: snapshot.quickCalls ?? demoQuickCalls,
     contacts: snapshot.contacts.map((contact) => ({
       ...contact,
       description: {
