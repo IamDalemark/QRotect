@@ -1,5 +1,11 @@
 # Local validation — 27 October 2026
 
+## Campus wording and notice cleanup
+
+The owner approved removing the sample-directory, prototype/simulation and translation-review notices, and using Campus/Kampus for visible campus references. The masthead now leads directly to navigation; About explains directory usage, phone handoff, saved information and privacy. Page metadata, manifest description and administrator sign-in copy use campus wording. Existing contact numbers, verification/source data and stored service-area identifiers remain unchanged.
+
+`pnpm check`, 16 unit tests and 51 public browser checks pass, with six intentional profile skips. The existing queued-refresh test now waits until its injected request actually starts, avoiding a race with the initial offline save; application refresh behavior is unchanged. Additional bilingual About, service-area label, metadata and manifest checks pass. Desktop/mobile captures were inspected, the detector returned no findings, and the fresh independent finish reviewer returned **ship**, with no material fixes. No hosted data mutation, frontend push or deployment was performed.
+
 ## Real-calling update — current verification
 
 The owner approved replacing all call simulations and practice screens with a confirmation card and phone handoff, while retaining `09123456789` for the six demo contacts. This supersedes the older simulation behavior recorded below. No hosted data or database schema changed.

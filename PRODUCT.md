@@ -2,11 +2,11 @@
 
 ## Purpose and audience
 
-Help CPU Senior High School learners, teachers, and staff quickly identify the correct school or public emergency contact after scanning a QR code. Initial coverage is CPU, Iloilo City, and selected national contacts.
+Help learners, teachers, and staff quickly identify the correct campus or public emergency contact after scanning a QR code. Initial coverage is the campus, Iloilo City, and selected national contacts.
 
 ## First release
 
-A school research website with English and Hiligaynon public interfaces, no visitor registration, and contact confirmation followed by swipe-to-call or an accessible button alternative. Confirmation hands the selected number to the phone app through a telephone link; the website does not place or monitor the call itself.
+A campus emergency contact website with English and Hiligaynon public interfaces, no visitor registration, and contact confirmation followed by swipe-to-call or an accessible button alternative. Confirmation hands the selected number to the phone app through a telephone link; the website does not place or monitor the call itself.
 
 ## Primary experience
 
@@ -43,3 +43,7 @@ The public demo contains six sample contacts, one per category, using `0912 345 
 The confirmation card shows the exact agency, branch, number label, display number and extension. It uses a bottom sheet on mobile and a centered dialog on desktop. Swipe completion requires a deliberate release near the end; partial/cancelled gestures never initiate a handoff. The same card offers a tap/keyboard phone link. The operating system can show its own final confirmation. No ringing, connected, completed or responder-arrival states are fabricated.
 
 Calling works from a saved public directory without a Supabase request. Legacy all-zero fixture numbers remain non-callable. Selected recipient details are frozen while the card is open. The old v1 test-contact field remains inert for database/cache compatibility; it has no interface or calling path.
+
+## Public wording
+
+Use “Campus” in the masthead and English service-area label, and “Kampus” in the Hiligaynon service-area label. Do not display CPU branding, prototype/simulation banners, sample-directory notices, or translation-review notices. About describes the directory, phone handoff, offline access and privacy directly. Preserve verification/source information and existing stored service-area identifiers for compatibility.

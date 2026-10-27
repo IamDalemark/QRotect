@@ -1,6 +1,6 @@
 # QROTECT
 
-A QR-accessible emergency contact **research prototype** for CPU Senior High School, covering school, Iloilo City, and national services. Call controls show the selected contact, then open the phone app after a deliberate swipe or accessible confirmation button. Public use has no sign-in, student records, location tracking, or call histories.
+A QR-accessible emergency contact directory covering campus, Iloilo City, and national services. Call controls show the selected contact, then open the phone app after a deliberate swipe or accessible confirmation button. Public use has no sign-in, student records, location tracking, or call histories.
 
 ## Current delivery
 
@@ -12,7 +12,7 @@ Initial setup and the earlier feature branches are integrated into `develop`. `m
 
 The hosted project now includes six owner-requested demo contacts, one per category, using `0912 345 6789`. They are also available in the working draft for editing. The owner approved retaining this number for phone handoffs. No guidance or map was invented. The code omits the supplemental placeholder banner; hosted frontend changes take effect when the corresponding code is deployed.
 
-The real-calling update is on `feature/real-calling` for local review. See [Calling behavior](docs/CALLING.md) for the interaction, compatibility and verification details.
+The call flow uses contact confirmation and an intentional phone handoff. Public wording uses “Campus” and omits prototype, sample-directory and translation-review notices. See [Calling behavior](docs/CALLING.md) for the interaction, compatibility and verification details.
 
 ## Local review
 
