@@ -741,64 +741,6 @@ export function Workbench({ initial, initialRevision, section, history, events }
           >
             Publish updates
           </button>
-          <h2 className="admin-section-title">Consenting dialer test contact</h2>
-          <p>
-            This is the only public contact allowed to open the real phone dialer. Record explicit
-            consent first.
-          </p>
-          {draft.testContact ? (
-            <div className="editor-fields">
-              <Field
-                label="Test contact name"
-                value={draft.testContact.name}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.testContact!.name = v;
-                  })
-                }
-              />
-              <Field
-                label="Test phone number"
-                value={draft.testContact.dial}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.testContact!.dial = v;
-                  })
-                }
-              />
-              <Field
-                label="Consent date"
-                type="date"
-                value={draft.testContact.consentedAt}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.testContact!.consentedAt = v;
-                  })
-                }
-              />
-              <button
-                className="button secondary"
-                onClick={() =>
-                  edit((d) => {
-                    d.testContact = null;
-                  })
-                }
-              >
-                Remove test contact
-              </button>
-            </div>
-          ) : (
-            <button
-              className="button secondary"
-              onClick={() =>
-                edit((d) => {
-                  d.testContact = { name: '', dial: '', consentedAt: '' };
-                })
-              }
-            >
-              Add consenting test contact
-            </button>
-          )}
         </>
       )}
       {section === 'history' && (

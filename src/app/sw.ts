@@ -3,15 +3,7 @@ import { Serwist, NetworkOnly, type PrecacheEntry } from 'serwist';
 declare const self: ServiceWorkerGlobalScope & {
   __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
 };
-const publicPaths = new Set([
-  '/',
-  '/directory',
-  '/guidance',
-  '/campus-map',
-  '/about',
-  '/practice',
-  '/offline',
-]);
+const publicPaths = new Set(['/', '/directory', '/guidance', '/campus-map', '/about', '/offline']);
 const worker = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
   skipWaiting: false,

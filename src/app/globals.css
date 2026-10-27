@@ -889,3 +889,102 @@ textarea::placeholder {
   margin: 10px 0 0;
   line-height: 1.8;
 }
+
+.call-description {
+  color: var(--color-muted);
+  margin-top: 8px;
+}
+.call-recipient {
+  margin-block: 24px;
+  padding-block: 20px;
+  border-block: 1px solid var(--color-divider);
+  overflow-wrap: anywhere;
+}
+.call-recipient h3 {
+  font-size: 1.2rem;
+  margin-bottom: 4px;
+}
+.call-recipient .number-label {
+  display: block;
+  margin-top: 16px;
+}
+.call-recipient .phone-number {
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  margin-bottom: 0;
+}
+.swipe-track {
+  min-height: 64px;
+  position: relative;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius);
+  background: var(--color-primary-soft);
+  user-select: none;
+}
+.swipe-label {
+  min-height: 62px;
+  padding: 12px 14px 12px 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-primary);
+}
+.swipe-label svg {
+  flex-shrink: 0;
+}
+.swipe-handle {
+  position: absolute;
+  left: 5px;
+  top: calc(50% - 26px);
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  background: var(--color-primary);
+  color: var(--paper);
+  touch-action: pan-y;
+  cursor: grab;
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.is-dragging .swipe-handle {
+  cursor: grabbing;
+  transition: none;
+}
+.call-hint {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+.call-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+}
+.call-cancel {
+  background: transparent;
+  color: var(--color-primary);
+}
+.call-handoff {
+  color: var(--color-ink);
+}
+@media (max-width: 600px) {
+  .call-panel {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    transform: none;
+    width: 100%;
+    max-height: calc(100dvh - 16px);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 28px 24px max(16px, env(safe-area-inset-bottom));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .swipe-handle {
+    transition: none;
+  }
+}

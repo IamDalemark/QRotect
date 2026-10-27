@@ -66,10 +66,6 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             {t.research}
           </p>
           <div>
-            <a href="/practice">
-              {t.practiceTitle}
-              <ArrowUpRight size={15} aria-hidden="true" />
-            </a>
             <a href="/admin">
               {t.adminSignIn}
               <ArrowUpRight size={15} aria-hidden="true" />

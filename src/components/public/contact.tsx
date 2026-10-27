@@ -1,48 +1,9 @@
 'use client';
 import { useState } from 'react';
-import * as Dialog from '@radix-ui/react-dialog';
-import { Phone, Copy, X, Check, ExternalLink } from 'lucide-react';
+import { Copy, Check, ExternalLink } from 'lucide-react';
 import { localized, type Contact } from '@/lib/directory/schema';
 import { usePublic } from './context';
-export function PracticeCall({
-  agency,
-  branch = '',
-  number,
-}: {
-  agency: string;
-  branch?: string;
-  number: string;
-}) {
-  const { t } = usePublic();
-  return (
-    <Dialog.Root
-      onOpenChange={(open) => {
-        if (!open) window.dispatchEvent(new Event('qrotect-dialog-closed'));
-      }}
-    >
-      <Dialog.Trigger asChild>
-        <button className="button primary">
-          <Phone size={17} aria-hidden="true" />
-          {t.practice}
-        </button>
-      </Dialog.Trigger>
-      <Dialog.Portal>
-        <Dialog.Overlay className="dialog-shade" />
-        <Dialog.Content className="dialog-panel">
-          <Dialog.Title>{t.simulation}</Dialog.Title>
-          <Dialog.Description>{t.noCall}</Dialog.Description>
-          <p className="dialog-agency">{agency}</p>
-          {branch && <p>{branch}</p>}
-          <p className="phone-number">{number}</p>
-          <Dialog.Close className="button primary">{t.close}</Dialog.Close>
-          <Dialog.Close className="icon-button dialog-x" aria-label={t.close}>
-            <X aria-hidden="true" size={20} />
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
-  );
-}
+import { CallConfirmation } from './call-confirmation';
 export function ContactRow({ contact }: { contact: Contact }) {
   const { t, language } = usePublic();
   const [feedback, setFeedback] = useState('');
@@ -80,7 +41,7 @@ export function ContactRow({ contact }: { contact: Contact }) {
             </div>
             <div className="number-actions">
               {n.channel === 'voice' && (
-                <PracticeCall agency={contact.agency} branch={contact.branch} number={n.display} />
+                <CallConfirmation agency={contact.agency} branch={contact.branch} number={n} />
               )}
               <button
                 className="button secondary"

@@ -15,12 +15,12 @@ import {
   ZoomIn,
   ZoomOut,
   Download,
-  Phone,
 } from 'lucide-react';
 import { categoryIds, localized, searchContacts, type Category } from '@/lib/directory/schema';
 import { categories, areas } from '@/lib/directory/labels';
 import { usePublic } from './context';
-import { ContactRow, PracticeCall } from './contact';
+import { ContactRow } from './contact';
+import { CallConfirmation } from './call-confirmation';
 const icons = {
   police: Shield,
   fire: Flame,
@@ -38,15 +38,25 @@ export function HomeScreen() {
         <h1>{t.title}</h1>
         <p>{t.intro}</p>
       </div>
-      <section className="emergency-line" aria-label={t.nationalPractice}>
+      <section className="emergency-line" aria-label={t.nationalEmergency}>
         <div className="emergency-number">911</div>
         <div className="emergency-copy">
           <h2>
             {language === 'en' ? 'National emergency line' : 'Nasyonal nga linya sa emerhensya'}
           </h2>
-          <p>{t.research}</p>
+          <p>{t.phoneHint}</p>
         </div>
-        <PracticeCall agency="National Emergency Hotline" number="911" />
+        <CallConfirmation
+          agency={t.nationalEmergency}
+          number={{
+            id: 'national-emergency',
+            label: { en: 'Voice line', hil: 'Linya sa pagtawag' },
+            display: '911',
+            dial: '911',
+            extension: '',
+            channel: 'voice',
+          }}
+        />
       </section>
       <section className="category-section">
         <h2>{t.category}</h2>
@@ -304,8 +314,8 @@ export function AboutScreen() {
       <h2>{language === 'en' ? 'A school research prototype' : 'Prototipo para sa panaliksik'}</h2>
       <p>
         {language === 'en'
-          ? 'QROTECT helps CPU Senior High School learners find school and public emergency contacts. It is a research demonstration, not an official dispatch service. Agency call buttons simulate a call; they do not contact responders.'
-          : 'Ang QROTECT nagabulig sa mga estudyante sang CPU sa pagpangita sang mga kontak. Prototipo ini sa panaliksik. Pagpraktis lamang ang pagtawag sa mga ahensya.'}
+          ? 'QROTECT helps CPU Senior High School learners find school and public emergency contacts. It is a school research project, not an official dispatch service. Confirm a contact and swipe to open the selected number in your phone app. Your device handles the call.'
+          : 'Ang QROTECT nagabulig sa mga estudyante sang CPU sa pagpangita sang mga kontak. Proyekto ini sa panaliksik. Kumpirmaha ang kontak kag i-swipe para buksan ang napilian nga numero sa telepono.'}
       </p>
       <h2>
         {language === 'en'
@@ -322,31 +332,5 @@ export function AboutScreen() {
         {t.back}
       </a>
     </article>
-  );
-}
-export function PracticeScreen() {
-  const { data, t } = usePublic();
-  return (
-    <>
-      <div className="page-heading">
-        <h1>{t.practiceTitle}</h1>
-      </div>
-      {data?.testContact && !data.fixture ? (
-        <section className="practice-test">
-          <h2>{t.testConsent}</h2>
-          <p>{data.testContact.name}</p>
-          <p className="phone-number">{data.testContact.dial}</p>
-          <a className="button primary" href={`tel:${data.testContact.dial}`}>
-            <Phone size={18} aria-hidden="true" />
-            {t.callTest}
-          </a>
-        </section>
-      ) : (
-        <div className="empty-state">
-          <h2>{t.noTest}</h2>
-          <a href="/directory">{t.back}</a>
-        </div>
-      )}
-    </>
   );
 }

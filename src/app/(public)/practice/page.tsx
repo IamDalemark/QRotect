@@ -1,4 +1,6 @@
-import { PracticeScreen } from '@/components/public/screens';
+import { redirect } from 'next/navigation';
+
+// Keep old bookmarks useful without retaining the retired practice screen.
 export default function Page() {
-  return <PracticeScreen />;
+  redirect('/directory');
 }
