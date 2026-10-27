@@ -7,7 +7,7 @@ export const bilingualSchema = z
   .object({ en: z.string().trim().min(1).max(2000), hil: z.string().trim().max(2000) })
   .strict();
 const date = z.iso.date();
-const source = z.union([z.url({ protocol: /^https?:$/ }).max(500), z.literal('')]);
+const source = z.union([z.url({ protocol: /^https?$/ }).max(500), z.literal('')]);
 export const numberSchema = z
   .object({
     id: z.uuid(),
@@ -42,7 +42,7 @@ export const guideSchema = z
     title: bilingualSchema,
     category: z.enum(categoryIds),
     steps: z.array(bilingualSchema).min(1).max(12),
-    source: z.url({ protocol: /^https?:$/ }),
+    source: z.url({ protocol: /^https?$/ }),
     reviewedAt: date,
     reviewer: z.string().trim().min(1).max(120),
     approved: z.boolean(),
@@ -54,7 +54,7 @@ export const mapSchema = z
     assetPath: z.string().regex(/^[0-9a-f-]{36}\.(png|jpg|webp)$/),
     description: bilingualSchema,
     instructions: z.array(bilingualSchema).min(1).max(20),
-    source: z.url({ protocol: /^https?:$/ }),
+    source: z.url({ protocol: /^https?$/ }),
     reviewedAt: date,
     reviewer: z.string().trim().min(1).max(120),
     approved: z.boolean(),

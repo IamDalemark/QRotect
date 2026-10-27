@@ -1,69 +1,21 @@
 import { writeFileSync } from 'node:fs';
 import { z } from 'zod';
-import { emptySnapshot } from '../src/lib/directory/fixtures';
 import { snapshotSchema } from '../src/lib/directory/schema';
-const schema = JSON.stringify(z.toJSONSchema(snapshotSchema));
+const filename = process.argv[2];
+if (!filename || !/^\d{12,14}_[a-z_]+\.sql$/.test(filename))
+  throw new Error('Supply a new timestamped validation migration filename.');
+const schema = z.toJSONSchema(snapshotSchema);
+// Zod's URL protocol option is not represented by toJSONSchema.
+// Keep the same HTTP-only boundary when a client calls database functions directly.
+function constrainSources(value: unknown) {
+  if (!value || typeof value !== 'object') return;
+  const object = value as Record<string, unknown>;
+  if (object.format === 'uri') object.pattern = '^https?://';
+  for (const child of Object.values(object)) constrainSources(child);
+}
+constrainSources(schema);
 writeFileSync(
-  'supabase/migrations/202610270001_directory.sql',
-  `
-create extension if not exists pg_jsonschema with schema extensions;
-create table public.administrators (user_id uuid primary key references auth.users(id) on delete cascade, active boolean not null default true);
-create function public.is_admin() returns boolean language sql stable security definer set search_path = '' as $$ select exists(select 1 from public.administrators where user_id = auth.uid() and active); $$;
-create table public.directory_drafts (id boolean primary key default true check(id), revision bigint not null default 0, payload jsonb not null, updated_at timestamptz not null default now());
-create table public.publications (id uuid primary key default gen_random_uuid(), snapshot jsonb not null, current boolean not null default false, created_at timestamptz not null default now());
-create unique index publications_one_current on public.publications(current) where current;
-create table public.audit_events (id bigint generated always as identity primary key, actor uuid references auth.users(id), action text not null, revision bigint, created_at timestamptz not null default now());
-insert into public.directory_drafts(payload) values ($data$${JSON.stringify(emptySnapshot)}$data$::jsonb);
-create function public.valid_directory(document jsonb) returns boolean language sql immutable set search_path = '' as $$ select extensions.jsonb_matches_schema($schema$${schema}$schema$::json, document); $$;
-alter table public.directory_drafts add constraint valid_payload check(public.valid_directory(payload));
-alter table public.publications add constraint valid_snapshot check(public.valid_directory(snapshot));
-alter table public.administrators enable row level security;
-alter table public.directory_drafts enable row level security;
-alter table public.publications enable row level security;
-alter table public.audit_events enable row level security;
-revoke all on public.administrators,public.directory_drafts,public.publications,public.audit_events from anon,authenticated;
-grant select on public.administrators,public.directory_drafts,public.audit_events to authenticated;
-grant select on public.publications to anon,authenticated;
-create policy admin_membership_read on public.administrators for select to authenticated using(public.is_admin());
-create policy admin_draft_read on public.directory_drafts for select to authenticated using(public.is_admin());
-create policy publication_read on public.publications for select to anon,authenticated using(current or public.is_admin());
-create policy admin_audit_read on public.audit_events for select to authenticated using(public.is_admin());
-create function public.save_directory(document jsonb, expected_revision bigint) returns bigint language plpgsql security definer set search_path = '' as $$
-declare new_revision bigint;
-begin
- if not public.is_admin() then raise exception 'Administrator access required' using errcode='42501'; end if;
- if not public.valid_directory(document) or (document->>'fixture')::boolean then raise exception 'Invalid draft'; end if;
- update public.directory_drafts set payload=document,revision=revision+1,updated_at=now() where id and revision=expected_revision returning revision into new_revision;
- if new_revision is null then raise exception 'Conflict: another administrator saved changes. Reload before saving.' using errcode='40001'; end if;
- insert into public.audit_events(actor,action,revision) values(auth.uid(),'save',new_revision);
- return new_revision;
-end $$;
-create function public.publish_directory(expected_revision bigint) returns uuid language plpgsql security definer set search_path = '' as $$
-declare draft public.directory_drafts; next_id uuid := gen_random_uuid(); document jsonb;
-begin
- if not public.is_admin() then raise exception 'Administrator access required' using errcode='42501'; end if;
- select * into draft from public.directory_drafts where id for update;
- if draft.revision <> expected_revision then raise exception 'Conflict: draft changed. Reload before publishing.' using errcode='40001'; end if;
- document := draft.payload;
- if (document->>'fixture')::boolean then raise exception 'Sample content cannot be published'; end if;
- if exists(select 1 from jsonb_array_elements(document->'contacts') c where (c->>'active')::boolean and (not (c->>'approved')::boolean or c->>'source'='' or c->>'verifiedAt'='' or c->>'verifiedAt'>current_date::text or c->'description'->>'hil'='' or exists(select 1 from jsonb_array_elements(c->'numbers') n where n->'label'->>'hil'=''))) then raise exception 'Contacts require approval, source, verification, and both languages'; end if;
- if (select count(*) from jsonb_array_elements(document->'contacts')) <> (select count(distinct c->>'id') from jsonb_array_elements(document->'contacts') c) then raise exception 'Duplicate contact identifiers'; end if;
- if exists(select 1 from jsonb_array_elements(document->'guidance') g where not (g->>'approved')::boolean or g->'title'->>'hil'='' or exists(select 1 from jsonb_array_elements(g->'steps') s where s->>'hil'='')) then raise exception 'Guidance requires reviewed translations'; end if;
- if document->'map' <> 'null'::jsonb and (not (document->'map'->>'approved')::boolean or document->'map'->'description'->>'hil'='' or exists(select 1 from jsonb_array_elements(document->'map'->'instructions') s where s->>'hil'='')) then raise exception 'Map requires reviewed translations'; end if;
- document := jsonb_set(document,'{contacts}',coalesce((select jsonb_agg(c) from jsonb_array_elements(document->'contacts') c where (c->>'active')::boolean),'[]'::jsonb));
- document := jsonb_set(jsonb_set(document,'{version}',to_jsonb(next_id::text)),'{publishedAt}',to_jsonb(now()));
- update public.publications set current=false where current;
- insert into public.publications(id,snapshot,current) values(next_id,document,true);
- insert into public.audit_events(actor,action,revision) values(auth.uid(),'publish',draft.revision);
- return next_id;
-end $$;
-revoke execute on function public.is_admin(),public.valid_directory(jsonb),public.save_directory(jsonb,bigint),public.publish_directory(bigint) from public;
-grant execute on function public.is_admin() to anon,authenticated;
-grant execute on function public.valid_directory(jsonb) to authenticated;
-grant execute on function public.save_directory(jsonb,bigint),public.publish_directory(bigint) to authenticated;
-insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types) values('campus-maps','campus-maps',false,5242880,array['image/png','image/jpeg','image/webp']);
-create policy admin_map_read on storage.objects for select to authenticated using(bucket_id='campus-maps' and public.is_admin());
-create policy admin_map_insert on storage.objects for insert to authenticated with check(bucket_id='campus-maps' and public.is_admin());
-create policy published_map_read on storage.objects for select to anon,authenticated using(bucket_id='campus-maps' and exists(select 1 from public.publications p where p.current and p.snapshot->'map'->>'assetPath'=name));
-`,
+  `supabase/migrations/${filename}`,
+  `-- Generated from snapshotSchema; do not overwrite previously applied migrations.\ncreate or replace function public.valid_directory(document jsonb) returns boolean language sql immutable set search_path = '' as $$ select extensions.jsonb_matches_schema($schema$${JSON.stringify(schema)}$schema$::json, document); $$;\n`,
+  { flag: 'wx' },
 );

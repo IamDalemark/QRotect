@@ -41,6 +41,17 @@ describe('public directory boundaries', () => {
   it('labels a missing translated description instead of silently inventing it', () => {
     expect(localized({ en: 'Campus', hil: '' }, 'hil')).toBe('Campus (English)');
   });
+  it('accepts HTTP verification sources and rejects executable URL schemes', () => {
+    const contact = fixtureSnapshot.contacts[0];
+    for (const source of ['https://example.test/source', 'http://example.test/source'])
+      expect(
+        snapshotSchema.safeParse({ ...emptySnapshot, contacts: [{ ...contact, source }] }).success,
+      ).toBe(true);
+    for (const source of ['javascript:alert(1)', 'data:text/html,test', 'ftp://example.test'])
+      expect(
+        snapshotSchema.safeParse({ ...emptySnapshot, contacts: [{ ...contact, source }] }).success,
+      ).toBe(false);
+  });
   it('allows an empty publication without manufacturing hotline records', () => {
     expect(publicationIssues(emptySnapshot)).toEqual([]);
   });
