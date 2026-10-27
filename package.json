@@ -20,7 +20,9 @@
     "setup:local": "tsx scripts/setup-local.mts",
     "review:sample": "tsx scripts/preview-sample.mts",
     "qr": "tsx scripts/generate-qr.mts",
-    "review:admin": "tsx scripts/preview-admin.mts"
+    "review:admin": "tsx scripts/preview-admin.mts",
+    "supabase:check": "tsx scripts/check-supabase.mts",
+    "supabase:prepare": "tsx scripts/prepare-supabase.mts"
   },
   "dependencies": {
     "@fontsource-variable/public-sans": "5.3.0",
