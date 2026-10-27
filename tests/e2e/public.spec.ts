@@ -1,16 +1,16 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test('category to safe call simulation takes two actions', async ({ page }) => {
+test('category to call confirmation takes two actions', async ({ page }) => {
   await page.goto('/');
-  await expect(
-    page.getByText('Research prototype · agency calls are simulated').first(),
-  ).toBeVisible();
+  await expect(page.getByText('A CPU Senior High School research project').first()).toBeVisible();
   await page.getByRole('link', { name: 'Fire', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Sample fire station' })).toBeVisible();
-  await page.getByRole('button', { name: 'Practice call', exact: true }).click();
-  await expect(page.getByRole('dialog')).toContainText('No call was placed');
-  await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Call', exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText('Check the number, then swipe');
+  await expect(
+    page.getByRole('dialog').getByRole('link', { name: 'Open Phone instead' }),
+  ).toHaveAttribute('href', 'tel:09123456789');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(0);
 });
@@ -55,7 +55,8 @@ test('unapproved guidance and map are hidden and unavailable directly', async ({
     page.getByText('An approved campus evacuation map is not available yet.'),
   ).toBeVisible();
   await page.goto('/practice');
-  await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
+  await expect(page).toHaveURL(/\/directory$/);
+  await expect(page.getByRole('link', { name: 'Practice the phone dialer' })).toHaveCount(0);
 });
 test('saved directory survives offline direct links and language switching', async ({
   page,
@@ -68,8 +69,8 @@ test('saved directory survives offline direct links and language switching', asy
   await context.setOffline(true);
   await page.goto('/directory?category=fire');
   await expect(page.getByRole('heading', { name: 'Sample fire station' })).toBeVisible();
-  await page.getByRole('button', { name: 'Practice call', exact: true }).click();
-  await expect(page.getByRole('dialog')).toContainText('No call was placed');
+  await page.getByRole('button', { name: 'Call', exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText('Check the number, then swipe');
   await page.keyboard.press('Escape');
   await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('hil');
   await page.goto('/about');
@@ -165,7 +166,7 @@ test('responsive screens have no overflow or automated accessibility violations'
   await page.screenshot({ path: '.impeccable/review/mobile.png', fullPage: true });
   await page.goto('/directory?category=fire');
   await page.screenshot({ path: '.impeccable/review/directory-mobile.png', fullPage: true });
-  await page.getByRole('button', { name: 'Practice call', exact: true }).click();
+  await page.getByRole('button', { name: 'Call', exact: true }).click();
   await page.screenshot({ path: '.impeccable/review/dialog-mobile.png' });
   await page.keyboard.press('Escape');
   await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('hil');
