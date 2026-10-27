@@ -50,3 +50,16 @@ Only after approval to deploy:
 - Record the content owner, hosting/account owner, maintenance schedule and backup responsibility.
 
 After choosing the stable approved HTTPS destination, run `pnpm qr -- https://approved-stable-domain/`. Artwork is generated into `.local/qr` as SVG/PNG with a four-module quiet zone. Print the readable destination and approved fallback information alongside it. No production QR has been generated because a destination has not been approved. Test screen and printed scans on actual Android Chrome and iPhone Safari before release.
+
+## Vercel build settings
+
+| Setting          | Value                                              |
+| ---------------- | -------------------------------------------------- |
+| Framework preset | Next.js                                            |
+| Root directory   | Repository root (`.`)                              |
+| Install command  | `pnpm install --frozen-lockfile`                   |
+| Build command    | `pnpm build`                                       |
+| Output directory | Next.js default (`.next`); leave override disabled |
+| Node.js          | 22.x                                               |
+
+Set `ENABLE_EXPERIMENTAL_COREPACK=1` so Vercel uses the package manager pinned in `package.json` (`pnpm@11.18.0`). Keep development dependencies available during the build because Serwist is part of the production build step. These are configuration instructions only; no deployment was performed. See [Vercel build configuration](https://vercel.com/docs/builds/configure-a-build).

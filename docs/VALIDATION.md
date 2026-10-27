@@ -15,6 +15,8 @@
 
 Tests use local services and clearly synthetic records, not real agency calls. No hosted deployment or hosted database migration was performed. Existing environment files are preserved; review scripts explicitly select local/sample settings.
 
+The database and 29-browser-check passes were completed while the local stack was running. The final database repeat was interrupted because Docker Desktop was paused and its resume controls timed out; no database implementation changed after the earlier passing run.
+
 ## Still required before the research release
 
 - Official school/local contacts and verification evidence, with a named maintenance owner.
