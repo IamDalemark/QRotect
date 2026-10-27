@@ -1,4 +1,5 @@
 import 'server-only';
+import { publicSnapshot } from './public-snapshot';
 import { createClient } from '@supabase/supabase-js';
 import { getSupabaseConfig } from '@/lib/supabase/config';
 import { emptySnapshot, fixtureSnapshot } from './fixtures';
@@ -30,5 +31,5 @@ export async function currentSnapshot(): Promise<Snapshot> {
     .eq('current', true)
     .maybeSingle();
   if (error) throw new Error('The published directory could not be loaded.');
-  return data ? snapshotSchema.parse(data.snapshot) : emptySnapshot;
+  return data ? publicSnapshot(snapshotSchema.parse(data.snapshot)) : emptySnapshot;
 }

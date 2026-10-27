@@ -1,3 +1,4 @@
+import { publicSnapshot } from './public-snapshot';
 import { snapshotSchema, type Snapshot } from './schema';
 export const DATA_CACHE = 'qrotect-public-data-v1';
 export const MAP_CACHE = 'qrotect-public-maps-v1';
@@ -9,10 +10,14 @@ export async function readSaved(): Promise<SavedDirectory | null> {
   const value = await response.json();
   const parsed = snapshotSchema.safeParse(value.snapshot);
   if (!parsed.success || typeof value.savedAt !== 'number') return null;
-  return { snapshot: parsed.data, savedAt: value.savedAt, mapSaved: Boolean(value.mapSaved) };
+  return {
+    snapshot: publicSnapshot(parsed.data),
+    savedAt: value.savedAt,
+    mapSaved: Boolean(value.mapSaved),
+  };
 }
 export async function saveSnapshot(snapshot: Snapshot): Promise<SavedDirectory> {
-  const valid = snapshotSchema.parse(snapshot);
+  const valid = publicSnapshot(snapshotSchema.parse(snapshot));
   let mapSaved = false;
   const maps = await caches.open(MAP_CACHE);
   if (valid.map) {
@@ -48,7 +53,7 @@ export async function fetchSnapshot(): Promise<Snapshot> {
     signal: AbortSignal.timeout(3000),
   });
   if (!response.ok) throw new Error('Refresh unavailable');
-  return snapshotSchema.parse(await response.json());
+  return publicSnapshot(snapshotSchema.parse(await response.json()));
 }
 export function snapshotIsOld(savedAt: number, now: number) {
   return now - savedAt > 7 * 86400000;

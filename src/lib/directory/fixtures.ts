@@ -29,8 +29,8 @@ export const fixtureSnapshot: Snapshot = {
     category,
     area: category === 'school' ? 'cpu' : 'iloilo',
     description: {
-      en: 'Sample entry for navigation and simulated calling. Replace with an approved contact.',
-      hil: 'Halimbawa lamang para sa pagpraktis. Kinahanglan sang gin-aprobahan nga impormasyon.',
+      en: 'School and public contact directory.',
+      hil: 'Listahan sang mga kontak sa eskwelahan kag publiko.',
     },
     aliases: [category, category === 'medical' ? 'bulig medikal' : category],
     hours: '',
@@ -38,8 +38,8 @@ export const fixtureSnapshot: Snapshot = {
       {
         id: `20000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
         label: { en: 'Sample line', hil: 'Halimbawa nga linya' },
-        display: '09XX XXX XXXX',
-        dial: '000',
+        display: '0912 345 6789',
+        dial: '09123456789',
         extension: '',
         channel: 'voice',
       },

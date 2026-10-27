@@ -70,6 +70,8 @@ export const snapshotSchema = z
     contacts: z.array(contactSchema).max(300),
     guidance: z.array(guideSchema).max(30),
     map: mapSchema.nullable(),
+    // Legacy v1 field retained only to read existing publications and offline caches.
+    // No public or administrator interface uses it.
     testContact: z
       .object({
         name: z.string().min(1).max(100),
