@@ -2,12 +2,13 @@
 'use client';
 import { QrCode, ArrowUpRight, ShieldCheck } from 'lucide-react';
 import { usePublic } from './context';
+import { OfflineStatus } from './offline-status';
 export function PublicShell({ children }: { children: React.ReactNode }) {
-  const { data, language, setLanguage, t } = usePublic();
+  const { data, language, setLanguage, t, hydrated } = usePublic();
   return (
     <>
       <a className="skip-link" href="#main">
-        Skip to content
+        {t.skip}
       </a>
       <header className="masthead">
         <div className="header-inner">
@@ -18,9 +19,10 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
             </span>
           </a>
           <label className="language-label">
-            Language
+            {t.language}
             <select
-              aria-label="Language"
+              aria-label={t.language}
+              disabled={!hydrated}
               value={language}
               onChange={(e) => setLanguage(e.target.value === 'hil' ? 'hil' : 'en')}
             >
@@ -36,7 +38,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           {t.research}
         </div>
       </div>
-      <nav className="public-nav container" aria-label="Main navigation">
+      <nav className="public-nav container" aria-label={t.navigation}>
         <a href="/">{t.home}</a>
         <a href="/directory">{t.directory}</a>
         {Boolean(data?.guidance.length) && <a href="/guidance">{t.guidance}</a>}
@@ -60,6 +62,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           children
         )}
       </main>
+      <OfflineStatus />
       <footer className="site-footer">
         <div className="container footer-inner">
           <p>
@@ -73,7 +76,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
               <ArrowUpRight size={15} aria-hidden="true" />
             </a>
             <a href="/admin">
-              Admin sign in
+              {t.adminSignIn}
               <ArrowUpRight size={15} aria-hidden="true" />
             </a>
           </div>

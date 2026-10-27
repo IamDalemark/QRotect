@@ -14,6 +14,14 @@ export const areas = {
 };
 export const copy = {
   en: {
+    skip: 'Skip to content',
+    language: 'Language',
+    navigation: 'Main navigation',
+    filters: 'Directory filters',
+    contactResults: 'Contact results',
+    connection: 'Directory connection status',
+    nationalPractice: 'National emergency practice',
+    adminSignIn: 'Admin sign in',
     home: 'Home',
     directory: 'All contacts',
     guidance: 'Emergency guidance',
@@ -75,6 +83,14 @@ export const copy = {
     translation: 'Hiligaynon wording is awaiting research-team review.',
   },
   hil: {
+    skip: 'Laktawi pakadto sa sulod',
+    language: 'Lengguwahe',
+    navigation: 'Panguna nga nabigasyon',
+    filters: 'Mga filter sang listahan',
+    contactResults: 'Mga resulta sang kontak',
+    connection: 'Kahimtangan sang koneksyon',
+    nationalPractice: 'Pagpraktis sa nasyonal nga emerhensya',
+    adminSignIn: 'Mag-sign in ang administrador',
     home: 'Panguna',
     directory: 'Tanan nga kontak',
     guidance: 'Giya sa emerhensya',

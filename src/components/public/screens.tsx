@@ -3,6 +3,7 @@
 import { useState, useSyncExternalStore } from 'react';
 import {
   ArrowRight,
+  ArrowLeft,
   Shield,
   Flame,
   HeartPulse,
@@ -37,7 +38,7 @@ export function HomeScreen() {
         <h1>{t.title}</h1>
         <p>{t.intro}</p>
       </div>
-      <section className="emergency-line" aria-label="National emergency practice">
+      <section className="emergency-line" aria-label={t.nationalPractice}>
         <div className="emergency-number">911</div>
         <div className="emergency-copy">
           <h2>
@@ -131,7 +132,7 @@ export function DirectoryScreen({ initialSearch }: { initialSearch: string }) {
     <>
       <div className="page-heading">
         <a className="back-link" href="/">
-          ← {t.home}
+          <ArrowLeft size={16} aria-hidden="true" /> {t.home}
         </a>
         <h1>
           {categoryIds.includes(category as Category)
@@ -141,7 +142,7 @@ export function DirectoryScreen({ initialSearch }: { initialSearch: string }) {
         <p>{t.intro}</p>
       </div>
       <div className="directory-layout">
-        <aside className="filters" aria-label="Directory filters">
+        <aside className="filters" aria-label={t.filters}>
           <label>
             {t.search}
             <input
@@ -174,7 +175,7 @@ export function DirectoryScreen({ initialSearch }: { initialSearch: string }) {
           </label>
           <a href="/directory">{t.reset}</a>
         </aside>
-        <section aria-live="polite" aria-label="Contact results">
+        <section aria-live="polite" aria-label={t.contactResults}>
           <p className="result-count">
             {results.length} {t.results}
           </p>

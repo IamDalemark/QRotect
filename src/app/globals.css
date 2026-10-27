@@ -873,3 +873,19 @@ textarea::placeholder {
     grid-template-columns: 1fr;
   }
 }
+.offline-status {
+  border-top: 1px solid var(--color-divider);
+  padding-block: 20px;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+}
+.offline-status > div {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.offline-status p {
+  margin: 10px 0 0;
+  line-height: 1.8;
+}

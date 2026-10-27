@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "next build --webpack && serwist build serwist.config.mjs",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
-    "typecheck": "next typegen && tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit --incremental false",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm build",

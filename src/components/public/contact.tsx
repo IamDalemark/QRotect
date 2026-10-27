@@ -15,7 +15,11 @@ export function PracticeCall({
 }) {
   const { t } = usePublic();
   return (
-    <Dialog.Root>
+    <Dialog.Root
+      onOpenChange={(open) => {
+        if (!open) window.dispatchEvent(new Event('qrotect-dialog-closed'));
+      }}
+    >
       <Dialog.Trigger asChild>
         <button className="button primary">
           <Phone size={17} aria-hidden="true" />
