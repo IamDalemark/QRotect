@@ -4,7 +4,7 @@ import { QrCode, ArrowUpRight } from 'lucide-react';
 import { usePublic } from './context';
 import { OfflineStatus } from './offline-status';
 export function PublicShell({ children }: { children: React.ReactNode }) {
-  const { data, language, setLanguage, t, hydrated } = usePublic();
+  const { data, language, setLanguage, t, hydrated, preview } = usePublic();
   return (
     <>
       <a className="skip-link" href="#main">
@@ -51,7 +51,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           children
         )}
       </main>
-      <OfflineStatus />
+      {!preview && <OfflineStatus />}
       <footer className="site-footer">
         <div className="container footer-inner">
           <p>

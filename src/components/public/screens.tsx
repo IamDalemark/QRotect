@@ -12,14 +12,16 @@ import {
   School,
   Search,
   SlidersHorizontal,
+  Phone,
   Map,
   ZoomIn,
   ZoomOut,
   Download,
 } from 'lucide-react';
 import { categoryIds, localized, searchContacts, type Category } from '@/lib/directory/schema';
-import { categories, areas } from '@/lib/directory/labels';
+import { categories, areas, quickCallLabels } from '@/lib/directory/labels';
 import { usePublic } from './context';
+import { quickCallTarget } from '@/lib/directory/quick-calls';
 import { ContactRow } from './contact';
 import { CallConfirmation } from './call-confirmation';
 const icons = {
@@ -59,17 +61,46 @@ export function HomeScreen() {
           }}
         />
       </section>
-      <section className="category-section">
-        <h2>{t.category}</h2>
-        <div className="category-grid">
+      <section className="quick-call-section" aria-labelledby="quick-call-heading">
+        <div className="section-heading">
+          <h2 id="quick-call-heading">{t.quickCall}</h2>
+          <a href="/directory">
+            {t.directory}
+            <ArrowRight size={16} aria-hidden="true" />
+          </a>
+        </div>
+        <div className="quick-call-grid">
           {categoryIds.map((id) => {
             const Icon = icons[id];
-            return (
-              <a className="category-link" href={`/directory?category=${id}`} key={id}>
-                <Icon size={25} aria-hidden="true" />
-                <span>{localized(categories[id], language)}</span>
-                <ArrowRight size={18} aria-hidden="true" />
-              </a>
+            const target = quickCallTarget(data, id);
+            const label = localized(quickCallLabels[id], language);
+            return target ? (
+              <CallConfirmation
+                key={id}
+                {...target}
+                trigger={
+                  <button className="quick-call-button" type="button">
+                    <Icon size={23} aria-hidden="true" />
+                    <span>
+                      <strong>{label}</strong>
+                      <span>{target.agency}</span>
+                    </span>
+                    <Phone size={18} aria-hidden="true" />
+                  </button>
+                }
+              />
+            ) : (
+              <div className="quick-call-missing" key={id}>
+                <Icon size={23} aria-hidden="true" />
+                <div>
+                  <strong>{localized(categories[id], language)}</strong>
+                  <span>{t.quickCallUnavailable}</span>
+                  <a href={`/directory?category=${id}`}>
+                    {t.browseContacts}
+                    <ArrowRight size={14} aria-hidden="true" />
+                  </a>
+                </div>
+              </div>
             );
           })}
         </div>

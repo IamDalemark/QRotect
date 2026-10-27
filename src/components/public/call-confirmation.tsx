@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ArrowRight, Phone, X } from 'lucide-react';
 import { telephoneHref } from '@/lib/directory/calling';
@@ -139,7 +139,7 @@ function CallDetails({ target }: { target: CallTarget }) {
   );
 }
 
-export function CallConfirmation(target: CallTarget) {
+export function CallConfirmation({ trigger, ...target }: CallTarget & { trigger?: ReactNode }) {
   const { t } = usePublic();
   return (
     <Dialog.Root
@@ -148,10 +148,12 @@ export function CallConfirmation(target: CallTarget) {
       }}
     >
       <Dialog.Trigger asChild>
-        <button className="button primary" disabled={!telephoneHref(target.number)}>
-          <Phone size={17} aria-hidden="true" />
-          {t.call}
-        </button>
+        {trigger ?? (
+          <button className="button primary" disabled={!telephoneHref(target.number)}>
+            <Phone size={17} aria-hidden="true" />
+            {t.call}
+          </button>
+        )}
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="dialog-shade" />

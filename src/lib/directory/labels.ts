@@ -7,6 +7,14 @@ export const categories: Record<Category, { en: string; hil: string }> = {
   disaster: { en: 'Disaster response', hil: 'Bulig sa kalamidad' },
   school: { en: 'School emergency', hil: 'Emerhensya sa eskwelahan' },
 };
+export const quickCallLabels: Record<Category, { en: string; hil: string }> = {
+  police: { en: 'Call Police', hil: 'Tawag sa Pulis' },
+  fire: { en: 'Call Fire', hil: 'Tawag sa Bombero' },
+  medical: { en: 'Call Medical / Ambulance', hil: 'Tawag sa Medikal / Ambulansya' },
+  hospital: { en: 'Call Hospital', hil: 'Tawag sa Ospital' },
+  disaster: { en: 'Call Disaster Response', hil: 'Tawag sa Bulig sa Kalamidad' },
+  school: { en: 'Call Campus Emergency', hil: 'Tawag sa Emerhensya sa Kampus' },
+};
 export const areas = {
   cpu: { en: 'Campus', hil: 'Kampus' },
   iloilo: { en: 'Iloilo City', hil: 'Iloilo City' },
@@ -19,6 +27,9 @@ export const copy = {
     navigation: 'Main navigation',
     filters: 'Directory filters',
     filterButton: 'Filters',
+    quickCall: 'Quick call',
+    quickCallUnavailable: 'Quick call unavailable',
+    browseContacts: 'Browse contacts',
     contactResults: 'Contact results',
     connection: 'Directory connection status',
     nationalEmergency: 'National emergency line',
@@ -87,6 +98,9 @@ export const copy = {
     navigation: 'Panguna nga nabigasyon',
     filters: 'Mga filter sang listahan',
     filterButton: 'Mga filter',
+    quickCall: 'Madasig nga pagtawag',
+    quickCallUnavailable: 'Wala sing madasig nga tawag',
+    browseContacts: 'Tan-awa ang mga kontak',
     contactResults: 'Mga resulta sang kontak',
     connection: 'Kahimtangan sang koneksyon',
     nationalEmergency: 'Nasyonal nga linya sa emerhensya',

@@ -30,6 +30,7 @@ const Context = createContext<{
   offline: OfflineState;
   refresh: () => void;
   hydrated: boolean;
+  preview: boolean;
 }>(null!);
 function subscribe(callback: () => void) {
   window.addEventListener('storage', callback);
@@ -51,9 +52,11 @@ function getLanguage(): Language {
 export function PublicProvider({
   initial,
   children,
+  preview = false,
 }: {
   initial: Snapshot | null;
   children: ReactNode;
+  preview?: boolean;
 }) {
   const hydrated = useSyncExternalStore(
     () => () => {},
@@ -73,6 +76,8 @@ export function PublicProvider({
     document.documentElement.lang = language;
   }, [language]);
   useEffect(() => {
+    // Private previews must neither read nor write the visitor publication cache.
+    if (preview) return;
     let active = true;
     let refreshing = false;
     let lastRefresh = 0;
@@ -204,7 +209,7 @@ export function PublicProvider({
       window.removeEventListener('qrotect-dialog-closed', closed);
       navigator.serviceWorker?.removeEventListener('controllerchange', readiness);
     };
-  }, [initial]);
+  }, [initial, preview]);
   function setLanguage(value: Language) {
     memoryLanguage = value;
     try {
@@ -219,6 +224,7 @@ export function PublicProvider({
       value={{
         data,
         hydrated,
+        preview,
         language,
         t: copy[language],
         setLanguage,

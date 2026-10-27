@@ -19,6 +19,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
           {[
             ['', 'Overview'],
             ['contacts', 'Contacts'],
+            ['quick-calls', 'Home quick calls'],
             ['guidance', 'Guidance'],
             ['map', 'Campus map'],
             ['publish', 'Preview & publish'],

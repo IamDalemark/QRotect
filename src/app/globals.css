@@ -234,41 +234,65 @@ h3 {
 .secondary:hover {
   background: var(--color-primary-soft);
 }
-.category-section,
+.quick-call-section,
 .directory-search {
   margin-block: 38px;
 }
-.category-grid {
+.quick-call-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0 26px;
   border-top: 1px solid var(--color-divider);
 }
-.category-link {
+.quick-call-button,
+.quick-call-missing {
   display: flex;
   align-items: center;
-  gap: 14px;
-  min-height: 84px;
+  gap: 12px;
+  min-width: 0;
+  min-height: 100px;
+  border: 0;
   border-bottom: 1px solid var(--color-divider);
-  text-decoration: none;
-  font-weight: 650;
+  border-radius: 0;
+  background: var(--paper);
   color: var(--color-ink);
-  padding: 16px 8px;
+  padding: 18px 8px;
+  text-align: left;
+  overflow-wrap: anywhere;
 }
-.category-link svg:first-child {
+.quick-call-button > svg,
+.quick-call-missing > svg {
   color: var(--color-primary);
   flex-shrink: 0;
 }
-.category-link span {
+.quick-call-button > span,
+.quick-call-missing > div {
   flex: 1;
+  min-width: 0;
 }
-.category-link svg:last-child {
+.quick-call-button strong,
+.quick-call-missing strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+.quick-call-button span span,
+.quick-call-missing span {
+  display: block;
   color: var(--color-muted);
-  flex-shrink: 0;
+  font-size: 0.85rem;
+  margin-top: 4px;
 }
-.category-link:hover {
-  text-decoration: none;
+.quick-call-button:hover {
   background: var(--color-primary-soft);
+}
+.quick-call-missing a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  font-size: 0.85rem;
 }
 .search-form {
   display: flex;
@@ -302,6 +326,7 @@ textarea::placeholder {
 }
 .section-heading {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 20px;
   align-items: center;
@@ -622,16 +647,16 @@ textarea::placeholder {
   .emergency-line > button {
     width: 100%;
   }
-  .category-grid {
+  .quick-call-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0 14px;
   }
-  .category-link {
-    gap: 10px;
-    font-size: 0.88rem;
+  .quick-call-button,
+  .quick-call-missing {
+    gap: 8px;
     padding-inline: 3px;
   }
-  .category-link svg:last-child {
+  .quick-call-button > svg:last-child {
     display: none;
   }
   .directory-toolbar {
@@ -680,7 +705,7 @@ textarea::placeholder {
   }
 }
 @media (max-width: 350px) {
-  .category-grid {
+  .quick-call-grid {
     grid-template-columns: 1fr;
   }
   .emergency-copy {

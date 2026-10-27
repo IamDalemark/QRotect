@@ -9,6 +9,8 @@ import {
 } from '@/app/admin/content-actions';
 import { categoryIds, publicationIssues, type Snapshot } from '@/lib/directory/schema';
 import { categories, areas } from '@/lib/directory/labels';
+import { telephoneHref } from '@/lib/directory/calling';
+import { quickCallTarget } from '@/lib/directory/quick-calls';
 type Props = {
   initial: Snapshot;
   initialRevision: number;
@@ -151,6 +153,7 @@ export function Workbench({ initial, initialRevision, section, history, events }
                 {
                   overview: 'Directory overview',
                   contacts: 'Manage contacts',
+                  'quick-calls': 'Home quick calls',
                   guidance: 'Approved guidance',
                   map: 'Campus evacuation map',
                   publish: 'Preview & publish',
@@ -441,6 +444,70 @@ export function Workbench({ initial, initialRevision, section, history, events }
               Add a contact to begin. Unreviewed entries cannot be published.
             </p>
           )}
+        </div>
+      )}
+      {section === 'quick-calls' && (
+        <div className="editor-fields">
+          <p>
+            Choose the exact contact and voice line for each Home action. Save the draft, preview,
+            then publish to update visitors. Clear an assignment to offer category browsing instead.
+          </p>
+          {categoryIds.map((category) => {
+            const assignment = draft.quickCalls?.find((q) => q.category === category);
+            const value = assignment ? `${assignment.contactId}:${assignment.numberId}` : '';
+            const target = quickCallTarget(draft, category);
+            return (
+              <fieldset className="number-editor" key={category}>
+                <legend>{categories[category].en}</legend>
+                <label>
+                  {categories[category].en} destination
+                  <select
+                    value={value}
+                    onChange={(e) =>
+                      edit((d) => {
+                        d.quickCalls = (d.quickCalls ?? []).filter((q) => q.category !== category);
+                        if (e.target.value) {
+                          const [contactId, numberId] = e.target.value.split(':');
+                          d.quickCalls.push({ category, contactId, numberId });
+                        }
+                      })
+                    }
+                  >
+                    <option value="">No quick call — browse contacts</option>
+                    {assignment && !target && (
+                      <option value={value}>Unavailable destination — reassign or clear</option>
+                    )}
+                    {draft.contacts
+                      .filter((c) => c.active && c.category === category)
+                      .flatMap((c) =>
+                        c.numbers
+                          .filter((n) => telephoneHref(n))
+                          .map((n) => (
+                            <option key={`${c.id}:${n.id}`} value={`${c.id}:${n.id}`}>
+                              {c.agency}
+                              {c.branch ? ` / ${c.branch}` : ''} — {n.label.en} — {n.display}
+                              {n.extension ? ` ext. ${n.extension}` : ''}
+                            </option>
+                          )),
+                      )}
+                  </select>
+                </label>
+                {target && (
+                  <p>
+                    {target.agency}
+                    {target.branch ? ` / ${target.branch}` : ''} · {target.number.label.en} ·{' '}
+                    {target.number.display}
+                    {target.number.extension ? ` · Extension ${target.number.extension}` : ''}
+                  </p>
+                )}
+                {assignment && !target && (
+                  <p className="warning-text">
+                    This destination is unavailable. Reassign or clear it before publishing.
+                  </p>
+                )}
+              </fieldset>
+            );
+          })}
         </div>
       )}
       {section === 'guidance' && (
