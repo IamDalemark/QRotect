@@ -33,3 +33,7 @@ No student records, medical profiles, personal emergency contacts, GPS, automati
 Next.js, Vercel, Supabase, TypeScript, Tailwind CSS, Zod, and Serwist. Use Supabase clients, SQL migrations, and database-generated types rather than an ORM. Public browsing, administrator editing and publication, private map storage, and offline recovery are implemented and verified locally. The configured hosted Supabase schema is initialized. Vercel deployments remain user-managed. Approved school content, reviewed Hiligaynon wording, physical-device checks, and participant pilot remain release gates.
 
 See `DESIGN.md` before interface changes.
+
+## Owner-requested public demo
+
+The public demo contains six sample contacts, one per category, using `0912 345 6789`. Sample agency names, unverified status, and the research/simulation notice remain visible. The separate placeholder banner is omitted at the owner's request. A controlled first-time installer supplies this demo snapshot without fabricating approvals, sources or verification dates; the ordinary administrator publisher still requires reviewed real content.

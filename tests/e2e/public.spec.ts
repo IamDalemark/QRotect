@@ -3,7 +3,9 @@ import AxeBuilder from '@axe-core/playwright';
 
 test('category to safe call simulation takes two actions', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Sample directory —', { exact: false })).toBeVisible();
+  await expect(
+    page.getByText('Research prototype · agency calls are simulated').first(),
+  ).toBeVisible();
   await page.getByRole('link', { name: 'Fire', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Sample fire station' })).toBeVisible();
   await page.getByRole('button', { name: 'Practice call', exact: true }).click();

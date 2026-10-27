@@ -45,11 +45,6 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
         {data?.map && <a href="/campus-map">{t.map}</a>}
         <a href="/about">{t.about}</a>
       </nav>
-      {data?.fixture && (
-        <div className="sample-notice container" role="note">
-          {t.samples}
-        </div>
-      )}
       <main id="main" className="container page-content">
         {!data ? (
           <div className="empty-state">
