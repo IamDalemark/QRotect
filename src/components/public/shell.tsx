@@ -15,7 +15,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           <a className="brand" href="/">
             <QrCode size={27} aria-hidden="true" />
             <span>
-              QROTECT<small>Campus</small>
+              QROTECT<small>Emergency Hotline System</small>
             </span>
           </a>
           <label className="language-label">

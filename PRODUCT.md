@@ -46,4 +46,4 @@ Calling works from a saved public directory without a Supabase request. Legacy a
 
 ## Public wording
 
-Use “Campus” in the masthead and English service-area label, and “Kampus” in the Hiligaynon service-area label. Do not display CPU branding, prototype/simulation banners, sample-directory notices, or translation-review notices. About describes the directory, phone handoff, offline access and privacy directly. Preserve verification/source information and existing stored service-area identifiers for compatibility.
+Use “Emergency Hotline System” as the tagline under QROTECT in both languages. Use “Campus” in the English service-area label and “Kampus” in the Hiligaynon service-area label. Do not display CPU branding, prototype/simulation banners, sample-directory notices, or translation-review notices. About describes the directory, phone handoff, offline access and privacy directly. Preserve verification/source information and existing stored service-area identifiers for compatibility.
