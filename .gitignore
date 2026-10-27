@@ -30,3 +30,5 @@ next-env.d.ts
 .agents/skills/impeccable/scripts/bin/
 .impeccable/review/
 .impeccable/live/
+
+.local/
