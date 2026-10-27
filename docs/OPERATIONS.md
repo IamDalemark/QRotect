@@ -18,7 +18,7 @@ Stop a review server with Ctrl+C. Stop local Supabase with `pnpm exec supabase s
 
 To withdraw a contact, clear **Active contact**, save and publish. To replace/remove the map, update its draft, save and publish. Historical image files remain private unless referenced by the current publication.
 
-The publication screen also holds the optional consenting test contact. Enter it only after explicit consent. It becomes a publicly readable phone number after publication; agency calling remains simulated. Remove it and publish when consent is withdrawn.
+Voice numbers use a contact confirmation card, then a deliberate swipe or the accessible **Open Phone instead** link. The exact selected dial value is handed to the device; extensions stay visible for manual entry. The former test-contact editor is removed. Its legacy v1 field remains readable but is never displayed or used for calls.
 
 ## Recovery and history
 
@@ -68,8 +68,8 @@ Set `ENABLE_EXPERIMENTAL_COREPACK=1` so Vercel uses the package manager pinned i
 
 ## Public demo contacts
 
-At the owner's request, six sample contacts were installed in the hosted public demo and working draft, all using `0912 345 6789` (`09123456789` as the stored number). Names remain sample names, verification is unset, and all agency actions remain simulations. The supplemental placeholder banner is omitted from the updated interface.
+At the owner's request, six sample contacts were installed in the hosted public demo and working draft, all using `0912 345 6789` (`09123456789` as the stored number). Names remain sample names, verification is unset, and the owner has approved retaining that number for phone handoffs. The supplemental placeholder banner is omitted from the updated interface.
 
-For a separate empty demonstration project, `pnpm seed:demo -- --public-demo` is the explicit first-time installer. It requires the matching local demo-administrator credentials and authenticated CLI project management access. It refuses existing drafts with contacts or an existing current publication, backs up the previous draft locally, saves with a revision check, and installs only a fixture snapshot with no consenting dialer contact. It does not mark samples approved or weaken the normal publishing function. Privileged keys stay in process memory and are not printed or saved.
+For a separate empty demonstration project, `pnpm seed:demo -- --public-demo` is the explicit first-time installer. It requires the matching local demo-administrator credentials and authenticated CLI project management access. It refuses existing drafts with contacts or an existing current publication, backs up the previous draft locally, saves with a revision check, and installs only a fixture snapshot with the inert legacy test-contact field set to null. It does not mark samples approved or weaken the normal publishing function. Privileged keys stay in process memory and are not printed or saved.
 
 Edit the draft in administration and replace the samples with verified records before ordinary publication. The fixture snapshot is demonstration data; it does not establish hotline accuracy or school approval.

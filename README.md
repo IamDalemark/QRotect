@@ -1,16 +1,18 @@
 # QROTECT
 
-A QR-accessible emergency contact **research prototype** for CPU Senior High School, covering school, Iloilo City, and national services. Agency call controls are simulations. Public use has no sign-in, student records, location tracking, or call histories.
+A QR-accessible emergency contact **research prototype** for CPU Senior High School, covering school, Iloilo City, and national services. Call controls show the selected contact, then open the phone app after a deliberate swipe or accessible confirmation button. Public use has no sign-in, student records, location tracking, or call histories.
 
 ## Current delivery
 
-Implemented locally: English/Hiligaynon browsing, category/area/search filters, copy controls, call simulations, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and offline public access after a successful first visit.
+Implemented locally: English/Hiligaynon browsing, category/area/search filters, copy controls, confirmation and swipe-to-call, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and offline public access after a successful first visit.
 
-Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, test-contact consent, physical phone checks, and the participant pilot remain content/release gates. The configured existing hosted Supabase project is now initialized with all three database migrations. No Vercel deployment was performed by this implementation.
+Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, physical phone checks, and the participant pilot remain content/release gates. The configured existing hosted Supabase project is now initialized with all three database migrations. No Vercel deployment was performed by this implementation.
 
-Initial setup and the completed feature branches are integrated into `develop`. `main` receives the same locally verified implementation at the user’s request; approved content and hosted release gates remain separate. Work is in **/Users/daniel/Documents/QRotect**, with the Next.js source in `src/app`.
+Initial setup and the earlier feature branches are integrated into `develop`. `main` receives the same locally verified implementation at the user’s request; approved content and hosted release gates remain separate. Work is in **/Users/daniel/Documents/QRotect**, with the Next.js source in `src/app`.
 
-The hosted project now includes six owner-requested demo contacts, one per category, using `0912 345 6789`. They are also available in the working draft for editing. No guidance, map or consenting dialer contact was invented. The code omits the supplemental placeholder banner; hosted frontend changes take effect when the corresponding code is deployed.
+The hosted project now includes six owner-requested demo contacts, one per category, using `0912 345 6789`. They are also available in the working draft for editing. The owner approved retaining this number for phone handoffs. No guidance or map was invented. The code omits the supplemental placeholder banner; hosted frontend changes take effect when the corresponding code is deployed.
+
+The real-calling update is on `feature/real-calling` for local review. See [Calling behavior](docs/CALLING.md) for the interaction, compatibility and verification details.
 
 ## Local review
 

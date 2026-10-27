@@ -6,17 +6,17 @@ Help CPU Senior High School learners, teachers, and staff quickly identify the c
 
 ## First release
 
-A clearly labeled research demonstration, with English and Hiligaynon public interfaces, no visitor registration, simulated agency calling, and one separately identified consenting test contact for a real dialer demonstration.
+A school research website with English and Hiligaynon public interfaces, no visitor registration, and contact confirmation followed by swipe-to-call or an accessible button alternative. Confirmation hands the selected number to the phone app through a telephone link; the website does not place or monitor the call itself.
 
 ## Primary experience
 
-The homepage prioritizes the national emergency practice action, six categories, priority school/local contacts, and search. Categories are Police, Fire, Medical/Ambulance, Hospitals, Disaster Response, and School Emergency. Users should reach a category's action in two taps from the homepage.
+The homepage prioritizes the national emergency call action, six categories, priority school/local contacts, and search. Categories are Police, Fire, Medical/Ambulance, Hospitals, Disaster Response, and School Emergency. Users should reach a category's confirmation card in two taps from the homepage, followed by a deliberate swipe or accessible alternative to open Phone.
 
 Contacts show agency, branch, area, individual numbers, channel, and verification information. Number ranges are expanded into individually verified entries; extensions stay separate. Text-only services never receive voice-call actions.
 
 ## Content and administration
 
-Invited administrators maintain working records, preview changes, and explicitly publish a complete version. Unpublished content is private. The research group supplies or approves contact sources, verification dates, translations, emergency guidance, evacuation map, and test contact consent.
+Invited administrators maintain working records, preview changes, and explicitly publish a complete version. Unpublished content is private. The research group supplies or approves contact sources, verification dates, translations, emergency guidance, and evacuation map.
 
 Guidance and map navigation remain hidden until approved content exists. A static supplied map includes accompanying textual information. Do not invent routes, medical instructions, translations, or agency availability.
 
@@ -36,4 +36,10 @@ See `DESIGN.md` before interface changes.
 
 ## Owner-requested public demo
 
-The public demo contains six sample contacts, one per category, using `0912 345 6789`. Sample agency names, unverified status, and the research/simulation notice remain visible. The separate placeholder banner is omitted at the owner's request. A controlled first-time installer supplies this demo snapshot without fabricating approvals, sources or verification dates; the ordinary administrator publisher still requires reviewed real content.
+The public demo contains six sample contacts, one per category, using `0912 345 6789`. The owner explicitly approved retaining this number for the real phone handoff. Sample agency names and unverified status remain visible; no approval or verification evidence is fabricated. All simulation and practice interfaces are removed. The separate placeholder banner remains omitted at the owner's request. A controlled first-time installer supplies this demo snapshot without fabricating approvals, sources or verification dates; the ordinary administrator publisher still requires reviewed real content.
+
+## Calling behavior
+
+The confirmation card shows the exact agency, branch, number label, display number and extension. It uses a bottom sheet on mobile and a centered dialog on desktop. Swipe completion requires a deliberate release near the end; partial/cancelled gestures never initiate a handoff. The same card offers a tap/keyboard phone link. The operating system can show its own final confirmation. No ringing, connected, completed or responder-arrival states are fabricated.
+
+Calling works from a saved public directory without a Supabase request. Legacy all-zero fixture numbers remain non-callable. Selected recipient details are frozen while the card is open. The old v1 test-contact field remains inert for database/cache compatibility; it has no interface or calling path.

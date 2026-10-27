@@ -1,6 +1,19 @@
 # Local validation — 27 October 2026
 
-## Verified
+## Real-calling update — current verification
+
+The owner approved replacing all call simulations and practice screens with a confirmation card and phone handoff, while retaining `09123456789` for the six demo contacts. This supersedes the older simulation behavior recorded below. No hosted data or database schema changed.
+
+- `pnpm check` passes: formatting, lint, strict TypeScript, production Next.js/Webpack build and Serwist generation.
+- **16 unit tests** pass, including voice-only telephone URLs, short codes, unsafe values, all-zero legacy placeholders, owner-supplied demo numbers and compatibility with old saved fixture copy.
+- **51 public browser checks pass**, with **six intentional profile skips**, across desktop Chromium, emulated Android Chromium and emulated iPhone WebKit. This run includes actual emulated touch input on Android, pointer release/cancel, no handoff on opening or partial swipes, single activation/retry, keyboard alternative, selected-number/extension separation, queued directory refresh, offline behavior and both languages. Every activated telephone link is intercepted; no phone application or call is launched.
+- Responsive checks cover 320px, 390px and desktop confirmation cards. Enlarged root text at 200% preserves the swipe label inside its growing track and keeps controls accessible within the scrollable sheet.
+- Automated axe checks, including WCAG 2.2 AA on the dialog, report no violations. This is not a full accessibility certification.
+- Final desktop/mobile, bilingual, enlarged-text and handoff-state captures were opened and inspected. The manual detector reports no findings on changed interface targets. A fresh independent Impeccable finish reviewer returned **ship**, with no material fixes; the documenter confirmed the existing design files remain faithful and require no system changes.
+
+The earlier local administrator/database checks below are historical and were not repeated for this UI update. The test-contact editor was removed while the v1 wire field remains inert for compatibility. Physical Android/iPhone phone-app handoff, manual screen-reader checks, reviewed Hiligaynon and research-release content checks remain pending. This update stays on the feature branch for local review; it has not been pushed or deployed.
+
+## Earlier baseline (before the real-calling update)
 
 - Production Next.js/Webpack build and post-build Serwist generation succeed.
 - Prettier, ESLint with zero warnings, and strict TypeScript checks pass.
@@ -21,8 +34,7 @@ The database and 29-browser-check passes were completed while the local stack wa
 
 - Official school/local contacts and verification evidence, with a named maintenance owner.
 - Reviewed Hiligaynon wording, approved guidance and supplied map/text equivalent.
-- Explicit consent for any public test dialer number.
-- Actual Android/iPhone QR scanning, offline revisits and dialer demonstration using the consenting number only.
+- Actual Android/iPhone QR scanning, offline revisits and phone handoff using a consenting number.
 - Manual screen-reader, keyboard, text resizing/200% zoom and daylight usability checks.
 - Map replacement/download-failure checks using the approved supplied image, and a controlled application-update/eviction exercise on real devices.
 - Performance measurements under agreed mobile network/CPU conditions. LCP/CLS/INP and transfer targets remain targets, not measured claims.
