@@ -12,6 +12,8 @@ Initial setup and the earlier feature branches are integrated into `develop`. `m
 
 The hosted project now includes six owner-requested demo contacts, one per category, using `0912 345 6789`. They are also available in the working draft for editing. The owner approved retaining this number for phone handoffs. No guidance or map was invented. The code omits the supplemental placeholder banner; hosted frontend changes take effect when the corresponding code is deployed.
 
+Public pages now use cached publications with background validation and offline saved-shell navigation; see [Architecture](docs/ARCHITECTURE.md) for cache freshness and failure behavior.
+
 The call flow uses contact confirmation and an intentional phone handoff. Public wording uses “Campus” and omits prototype, sample-directory and translation-review notices. See [Calling behavior](docs/CALLING.md) for the interaction, compatibility and verification details.
 
 ## Local review
@@ -20,11 +22,10 @@ Use Node 22.23.2, pnpm 11.18.0, and Docker Desktop for the administrator databas
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm build
 pnpm review:sample
 ```
 
-Open [sample directory](http://localhost:3100). This command explicitly isolates the sample preview from any existing Supabase environment file. Offline functionality requires the production build; development mode intentionally does not register a service worker.
+Open [sample directory](http://localhost:3100). This command builds and serves the sample preview using an isolated data source. Stop other production/review servers first: review modes rebuild the shared `.next` output and generated worker. Run sample and local-admin review one at a time. Offline functionality requires the production build; development mode intentionally does not register a service worker.
 
 For local administrator review, start Docker Desktop, then in another terminal:
 
@@ -35,7 +36,7 @@ pnpm setup:local
 pnpm review:admin
 ```
 
-Open [local administration](http://localhost:3102/admin). The one-time setup creates a **local-only** administrator and saves its generated credentials to `.local/administrator.txt`. It sends no email and preserves existing environment files. On later runs, reuse that file and skip setup. The connected public site at [port 3102](http://localhost:3102) stays empty until reviewed content is explicitly published. Sample mode on port 3100 is a separate review surface.
+Open [local administration](http://localhost:3102/admin). The one-time setup creates a **local-only** administrator and saves its generated credentials to `.local/administrator.txt`. It sends no email and preserves existing environment files. On later runs, reuse that file and skip setup. The connected public site at [port 3102](http://localhost:3102) stays empty until reviewed content is explicitly published. Stop this server before rebuilding for sample mode on port 3100.
 
 For ordinary development, use `pnpm dev`. It reads the configured environment files; review scripts instead explicitly select sample mode or the local database.
 
@@ -45,19 +46,19 @@ Next.js 16 App Router, React 19, strict TypeScript, Tailwind 4, self-hosted Publ
 
 Builds retain Webpack. Serwist's documented configurator mode runs after Next.js so offline setup cannot break page startup when storage is unavailable. Only public fallback HTML and static assets are precached.
 
-| Command                         | Purpose                                                                          |
-| ------------------------------- | -------------------------------------------------------------------------------- |
-| `pnpm dev`                      | Development server                                                               |
-| `pnpm build` / `pnpm start`     | Production build / server                                                        |
-| `pnpm review:sample`            | Isolated sample directory on port 3100                                           |
-| `pnpm setup:local`              | Create the local review administrator once                                       |
-| `pnpm review:admin`             | Local database review on port 3102                                               |
-| `pnpm check`                    | Prettier, ESLint, TypeScript, production build                                   |
-| `pnpm test`                     | Schema, search, phone, and offline-data unit tests                               |
-| `pnpm test:db`                  | Transactional local database authorization/publication checks                    |
-| `pnpm test:browser`             | Production browser checks; requires a current build and clean local test content |
-| `pnpm test:e2e`                 | Build, then run the full browser checks                                          |
-| `pnpm qr -- <stable-https-url>` | Generate local SVG/PNG QR artwork after URL approval                             |
+| Command                         | Purpose                                                                  |
+| ------------------------------- | ------------------------------------------------------------------------ |
+| `pnpm dev`                      | Development server                                                       |
+| `pnpm build` / `pnpm start`     | Production build / server                                                |
+| `pnpm review:sample`            | Isolated sample directory on port 3100                                   |
+| `pnpm setup:local`              | Create the local review administrator once                               |
+| `pnpm review:admin`             | Local database review on port 3102                                       |
+| `pnpm check`                    | Prettier, ESLint, TypeScript, production build                           |
+| `pnpm test`                     | Schema, search, phone, and offline-data unit tests                       |
+| `pnpm test:db`                  | Transactional local database authorization/publication checks            |
+| `pnpm test:browser`             | Build and test each source separately; requires clean local test content |
+| `pnpm test:e2e`                 | Build and run the full isolated browser checks                           |
+| `pnpm qr -- <stable-https-url>` | Generate local SVG/PNG QR artwork after URL approval                     |
 
 Browser checks create and remove an isolated temporary local account, publications, and draft changes. They refuse to run against hosted databases or an existing publication dataset. Install Chromium/WebKit first with `pnpm exec playwright install chromium webkit`.
 

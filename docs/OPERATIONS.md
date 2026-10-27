@@ -2,7 +2,7 @@
 
 ## Local administrator review
 
-Follow the root README to start local Supabase and run `pnpm setup:local` once. Use the generated `.local/administrator.txt` at `http://localhost:3102/admin`, with `pnpm review:admin` running. These credentials exist only in the local Docker database. Existing `.env` files are preserved; the review process explicitly overrides them with local settings.
+Follow the root README to start local Supabase and run `pnpm setup:local` once. Use the generated `.local/administrator.txt` at `http://localhost:3102/admin`, with `pnpm review:admin` running. These credentials exist only in the local Docker database. Existing `.env` files are preserved; the review process explicitly builds and starts with local settings. Stop other production/review servers first, and run one review source at a time because they share build output.
 
 Stop a review server with Ctrl+C. Stop local Supabase with `pnpm exec supabase stop` when finished. Do not use a database reset to restart a review with saved work: it can erase the local dataset. The browser test wrapper deliberately refuses datasets containing contacts or publications, so use a separate clean local test project after starting real content work.
 
@@ -14,7 +14,7 @@ Stop a review server with Ctrl+C. Stop local Supabase with `pnpm exec supabase s
 4. Save the draft. It remains private. If another administrator saved first, reload and reconcile instead of overwriting their work.
 5. Add guidance only from approved supplied instructions. Add the supplied map with accessible descriptions, ordered text instructions, source, reviewer and review date. Do not infer an evacuation route.
 6. Open **Preview & publish**, preview the saved draft in both languages, resolve validation messages, then choose **Publish updates**. Saving and publishing are separate actions.
-7. Check the public directory at port 3102. Connected visitors adopt the complete new publication on opening/reconnecting. Devices remaining offline cannot receive withdrawals.
+7. Check the public directory at port 3102. Publishing expires the shared public cache and checks its replacement. Open pages check on reconnect and every minute while visible. If the publication commits but public refresh cannot be confirmed, the status explains this; inspect the public directory before repeating the publication. Devices remaining offline cannot receive withdrawals.
 
 To withdraw a contact, clear **Active contact**, save and publish. To replace/remove the map, update its draft, save and publish. Historical image files remain private unless referenced by the current publication.
 
@@ -26,7 +26,7 @@ If sign-in expires, sign in again before saving. Password recovery sends through
 
 Use **History → Restore as new publication** to restore an earlier version. This explicitly replaces the saved working draft and publishes a new version. It preserves the historical version and original verification dates. Recheck those dates before treating the restored content as current.
 
-A failed publication leaves the prior publication available. If the database is unavailable, the public app can use previously saved information, with a refresh-failure notice. No saved copy means a retry state. Keep printed fallback information on QR materials for first-time offline visitors.
+A failed publication leaves the prior publication available. If the database is unavailable, the public app can use previously saved information, with a refresh-failure notice. A warm server/page cache can serve the last successful publication even for new visitors; a cold or evicted cache still depends on the database. Health bypasses caching to report origin failure. Keep printed fallback information on QR materials for first-time offline visitors.
 
 ## Content backups
 

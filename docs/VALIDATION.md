@@ -1,3 +1,21 @@
+# Public directory performance update — 28 October 2026
+
+Implemented on `feature/public-directory-cache`, for local review. No hosted publication changes or deployment were made for this update.
+
+- Public pages pre-render successfully with a 60-second regeneration policy; admin/auth routes remain dynamic/private. A shared validated publication cache removes repeated database reads. Successful publish/restore actions expire its tag, invalidate public layouts and warm/check the data cache.
+- The snapshot endpoint uses a full-document ETag and returns 304 for unchanged data, without an independent CDN response cache. The browser starts one validation request, checks periodically while visible, and deduplicates worker readiness/resume triggers.
+- Returning public navigation uses the precached shell and validated saved directory immediately. A new timestamped publication cannot be replaced by an older cache node. Offline navigation preserves the original saved-at timestamp; versioned maps are reused and withdrawn maps removed. Calling details stay frozen until the card closes.
+- `pnpm check` passed: formatting, lint, TypeScript, production Next/Webpack build and Serwist generation. The route report lists `/`, `/directory`, `/about`, `/guidance` and `/campus-map` as pre-rendered with one-minute revalidation.
+- 26 unit checks passed, including conditional responses, publication ordering, map reuse, authorized publication invalidation, failed transactions and committed-publication/failed-refresh reporting.
+- Public/calling/performance browser suites: **63 passed, six intentional duplicate-profile skips** across desktop Chromium, Android Chromium and iPhone WebKit. Includes rendered contacts/call confirmation while the initial refresh is held, 304 responses, saved-shell response identity, refresh failure retention, original offline saved-at time, existing calling/offline/privacy, responsive layout and automated accessibility checks. Telephone activations were intercepted; no calls were placed.
+- The isolated real production-cache experiment (`scripts/check-public-cache.mts`) uses a local fake PostgREST origin with 200 ms latency. Warm requests made zero additional database reads and completed around 3–5 ms; unchanged responses returned 304. After the actual 60-second TTL, an origin outage retained the last valid directory, uncached health returned 503, and recovery adopted a publication with withdrawn contacts. A cold-cache outage returns 503 and does not poison the cache with an error document.
+- Local normal production HTTP comparison before/after caching: typical homepage/directory/snapshot responses changed from roughly 160–180 ms to 2–17 ms. One earlier first request took about one second. These are small local samples with hosted Supabase, not deployed-site or mobile-network benchmarks; no Vercel CDN timing/SLA is claimed.
+- Sample review now builds using its own selected data source and was exercised end to end. The local-admin preview/browser wrapper also builds each source before serving, sequentially, to avoid hosted/sample HTML leaking into a different review source. **Full local admin/database integration was not rerun because Docker Desktop is paused.** Publication cache hooks have focused mocked-action coverage; rerun the clean local browser/database suites after Docker is available.
+
+Time-based regeneration is request-driven and layers can add delay; the 60-second interval is not a maximum staleness guarantee. Cold/evicted caches still need Supabase, offline/suspended clients cannot receive corrections, and new deployments require a readable configured source. Existing installations receive the new service worker through the existing explicit update control. Physical-device and hosted deployment verification remain pending.
+
+---
+
 # Local validation — 27 October 2026
 
 ## Campus wording and notice cleanup

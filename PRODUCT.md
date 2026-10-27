@@ -22,7 +22,7 @@ Guidance and map navigation remain hidden until approved content exists. A stati
 
 ## Offline behavior
 
-After the first successful online visit, save the public directory, both languages, approved guidance, and a supplied map when downloaded. Show saved, published, and verified dates distinctly. First-time uncached QR access needs internet. Flag snapshots older than seven days and contacts not verified within 30 days; retain saved information with warnings.
+Public pages include a cached, validated publication at first load. After the first successful online visit, save the public directory, both languages, approved guidance, and a supplied map when downloaded. Returning visits open the saved public shell immediately and check for updates separately. Public server data/pages revalidate on demand after 60 seconds, and publication explicitly invalidates caches; this is a refresh policy rather than a guaranteed update deadline. Show saved, published, and verified dates distinctly. First-time uncached QR access needs internet. Flag snapshots older than seven days and contacts not verified within 30 days; retain saved information with warnings.
 
 ## Boundaries
 
