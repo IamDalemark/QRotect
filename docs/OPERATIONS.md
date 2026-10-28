@@ -6,6 +6,10 @@ Follow the root README to start local Supabase and run `pnpm setup:local` once. 
 
 Stop a review server with Ctrl+C. Stop local Supabase with `pnpm exec supabase stop` when finished. Do not use a database reset to restart a review with saved work: it can erase the local dataset. The browser test wrapper deliberately refuses datasets containing contacts or publications, so use a separate clean local test project after starting real content work.
 
+## Relational database release
+
+The relational migrations `202610290001_relational_directory.sql` and `202610290002_scoped_relational_save.sql` are implemented and applied locally. Hosted application requires a backup and a coordinated administrator maintenance window with the matching frontend: older code reads the removed draft payload column. Existing public snapshots are preserved. Follow [the complete migration and rollback procedure](RELATIONAL_DATABASE.md#migration-and-release); do not rerun the first-time installer or reset existing content.
+
 ## Editing and publication
 
 1. Open **Contacts** and add the agency, branch, category and service area. Enter both descriptions and search aliases. Agency names remain their official names.
@@ -14,7 +18,7 @@ Stop a review server with Ctrl+C. Stop local Supabase with `pnpm exec supabase s
 4. Save the draft. It remains private. If another administrator saved first, reload and reconcile instead of overwriting their work.
 5. Add guidance only from approved supplied instructions. Add the supplied map with accessible descriptions, ordered text instructions, source, reviewer and review date. Do not infer an evacuation route.
 6. Open **Preview & publish**, preview the saved draft in both languages, resolve validation messages, then choose **Publish updates**. Saving and publishing are separate actions.
-7. Check the public directory at port 3102. Publishing expires the shared public cache and checks its replacement. Open pages check on reconnect and every minute while visible. If the publication commits but public refresh cannot be confirmed, the status explains this; inspect the public directory before repeating the publication. Devices remaining offline cannot receive withdrawals.
+7. Check the public directory at port 3102. Publishing expires the shared public cache and checks its replacement. Open pages check on reconnect and every minute while visible. If the publication commits but public refresh cannot be confirmed, the status explains this; inspect the public directory before repeating the publication. Disconnected devices cannot receive withdrawals.
 
 To withdraw a contact, clear **Active contact**, save and publish. To replace/remove the map, update its draft, save and publish. Historical image files remain private unless referenced by the current publication.
 
@@ -26,7 +30,7 @@ If sign-in expires, sign in again before saving. Password recovery sends through
 
 Use **History → Restore as new publication** to restore an earlier version. This explicitly replaces the saved working draft and publishes a new version. It preserves the historical version and original verification dates. Recheck those dates before treating the restored content as current.
 
-A failed publication leaves the prior publication available. If the database is unavailable, the public app can use previously saved information, with a refresh-failure notice. A warm server/page cache can serve the last successful publication even for new visitors; a cold or evicted cache still depends on the database. Health bypasses caching to report origin failure. Keep printed fallback information on QR materials for first-time offline visitors.
+A failed publication leaves the prior publication available. If a background refresh fails, an already-open page retains its in-memory information and shows a connection notice. Opening new pages requires internet. A warm server/page cache can serve the last successful publication even for new visitors; a cold or evicted cache still depends on the database. Health bypasses caching to report origin failure. Keep approved readable contact information alongside QR materials for users without internet.
 
 ## Content backups
 
@@ -47,7 +51,7 @@ For future independent deployments and remaining release setup:
 - Provision a separate research Supabase project, apply all migrations and generate matching database types.
 - Disable public Auth registration, configure the canonical site origin/recovery redirects, and invite the authorized administrator. A trusted project operator adds that user's UUID to `public.administrators`; browser metadata cannot grant access.
 - Configure Vercel production and preview variables separately. Set `main` as the approved production branch. Keep preview content separate from the approved dataset.
-- Verify RLS, password recovery, safe calling, both languages, map delivery and offline recovery on the actual host.
+- Verify RLS, password recovery, safe calling, both languages, map delivery and connection/failure notices on the actual host.
 - Monitor `/api/health` with an approved availability service without visitor tracking. No external monitor is configured for local review.
 - Record the content owner, hosting/account owner, maintenance schedule and backup responsibility.
 
@@ -64,7 +68,7 @@ After choosing the stable approved HTTPS destination, run `pnpm qr -- https://ap
 | Output directory | Next.js default (`.next`); leave override disabled |
 | Node.js          | 22.x                                               |
 
-Set `ENABLE_EXPERIMENTAL_COREPACK=1` so Vercel uses the package manager pinned in `package.json` (`pnpm@11.18.0`). Keep development dependencies available during the build because Serwist is part of the production build step. These are configuration instructions only; no deployment was performed. See [Vercel build configuration](https://vercel.com/docs/builds/configure-a-build).
+Set `ENABLE_EXPERIMENTAL_COREPACK=1` so Vercel uses the package manager pinned in `package.json` (`pnpm@11.18.0`). Keep development dependencies available during the build for TypeScript and Tailwind compilation. These are configuration instructions only; no deployment was performed. See [Vercel build configuration](https://vercel.com/docs/builds/configure-a-build).
 
 ## Public demo contacts
 
@@ -76,9 +80,9 @@ Edit the draft in administration and replace the samples with verified records b
 
 ## Home quick-call assignments
 
-The `202610280001_quick_calls.sql` migration extends document validation and publication reference checks without changing existing content. It has been applied and tested locally; hosted application is still pending. Back up and apply the versioned migration to the intended project before saving assignments there. Deploy the updated app/worker before publishing the new field, and accept the existing Update website action on older installed clients. Do not rerun the first-time demo installer against existing data.
+The `202610280001_quick_calls.sql` migration extends document validation and publication reference checks without changing existing content. It has been applied and tested locally; hosted application is still pending. Back up and apply the versioned migration to the intended project before saving assignments there. Deploy the updated application before publishing the new field. Keep the static retirement worker at `/sw.js` so previously installed versions can unregister and clear their owned caches after reconnecting. Do not rerun the first-time demo installer against existing data.
 
-In Administration → Home quick calls, select each category's exact active contact and voice line. Save draft, open Preview saved draft and inspect Home in both languages, then publish. Empty assignments offer Browse contacts on Home. If a contact is withdrawn, changes category or loses its selected voice line, clear or reassign the shortcut before publication. Never assume record order or priority determines the destination. Existing published records without assignments require deliberate administrator configuration; real destinations are never auto-selected.
+In Administration → Home quick calls, select each category's exact active contact and voice line. Save draft, open Preview saved draft and inspect Home in both languages, then publish. Empty assignments offer Browse contacts on Home. If a contact is withdrawn, changes category or loses its selected voice line, clear or reassign the shortcut before publication. Removing an assigned line/contact entirely requires clearing or reassigning its shortcut before saving; the database now enforces that reference. Never assume record order or priority determines the destination. Existing published records without assignments require deliberate administrator configuration; real destinations are never auto-selected.
 
 `pnpm test:db` now includes transaction-rolled-back quick-call publication checks against local PostgreSQL. `pnpm test:browser` uses temporary local accounts/data and includes assignment persistence, private-preview isolation, publication, and withdrawal after clearing. No test sends a real call or changes hosted data.
 
@@ -86,4 +90,4 @@ In Administration → Home quick calls, select each category's exact active cont
 
 Home has six category groups with separate Call and View contacts actions and search. The former School & local contacts list and priority checkbox are removed; existing stored priority values remain compatible and do not affect display. Use Home quick-call assignments to choose destinations.
 
-Public navigation is Get help / All contacts / Guide, with fixed labeled bottom navigation on phones and top links on desktop. About and administrator access are in the footer. Guide reuses `/guidance`, provides website help immediately, and includes safety guidance and a campus-map link only when approved content exists. No new routes, schema migration or dependency is introduced by this navigation update. Existing installed workers need the normal explicit website update to receive the revised shell.
+Public navigation is Get help / All contacts / Guide, with fixed labeled bottom navigation on phones and top links on desktop. About and administrator access are in the footer. Guide reuses `/guidance`, provides website help immediately, and includes safety guidance and a campus-map link only when approved content exists. No new routes, schema migration or dependency is introduced by this navigation update. New pages use the network. Previously installed QROTECT workers are retired on reconnect; no new offline worker is registered.

@@ -1,3 +1,36 @@
+# Relational database redesign — 29 October 2026
+
+Implemented on `feature/relational-directory`, retaining the earlier offline-removal work. Migrations `202610290001_relational_directory.sql` and `202610290002_scoped_relational_save.sql` are applied to local Supabase only. Hosted schema/content and frontend deployment are unchanged.
+
+- Seven new relational content/lookup tables replace the stored whole-directory working payload. Stable IDs, ordering, bilingual text, aliases, original verification dates, optional shortcut-field presence and compatibility metadata round-trip exactly. Published v1 snapshots remain compatible and historical snapshot content is not rewritten.
+- Administrator loading/preview, save, publish and restore use the relational model. Foreign keys enforce ownership, and duplicate/missing references fail at save. Publication checks still enforce active/approved/callable targets and translations. Publisher/source revision and audit-publication references are recorded; history survives account removal.
+- Four isolated migration scenarios passed: populated content, legacy metadata/optional fields, missing-reference rollback, and duplicate-ID rollback. Each preserved the original publication. The disposable local database was removed.
+- Existing authorization/publication/restore and eight quick-call rejection checks pass, plus 34 recorded relational checks covering private-table/helper denial, controlled writes, complete content round-trip, foreign keys, save rollback, null/stale revisions, immutable history, restoration and account deletion. SQL test records roll back.
+- **39 unit tests pass.** Public browser phase: **93 passed, 15 intentional profile skips**, across desktop Chromium, Android Chromium and iPhone WebKit. The final focused local administrator phase passed its full save/preview/publish/withdraw/restore scenario, with two duplicate-profile skips. Telephone links were intercepted; no real calls or external email were sent. Temporary account, content and test publications were cleaned up.
+- Real API testing exposed Supabase's safe-update protection against unscoped deletes. The follow-up migration scopes replacement deletes to the working directory without disabling that protection. Restore testing exposed a workbench remount clearing its confirmation; server-confirmed revisions now update the workbench while preserving action feedback.
+- Browser tests now use isolated ports 3120/3122 and refuse occupied ports. Server logs survive Playwright output cleanup. An existing public refresh test injects invalid data before startup to avoid racing a pending refresh.
+- Production formatting, lint, strict types and sample build are checked with `pnpm check`. The browser phases also build each selected sample/local source separately. See `docs/RELATIONAL_DATABASE.md` for the model, limits, backup requirements and coordinated administrator-release procedure.
+
+Hosted migration, hosted content changes and deployment remain pending. The owner requested integration through develop into main after these checks; Git records the branch integration.
+
+---
+
+# Offline access removal — 29 October 2026
+
+Implemented on `feature/remove-offline-access` following the owner's scope change. The website requires internet to load pages and refresh contacts. New visits do not register a service worker or persist public directories/maps. The previous worker URL now serves a retirement worker; cleanup removes only QROTECT-owned legacy caches and registrations. The old `/offline` address redirects to `/directory`. Ordinary server caching, language preferences, and phone confirmation remain supported.
+
+- `pnpm check` passed formatting, ESLint, TypeScript and the production Next.js/Webpack build using the isolated sample-review data source.
+- **35 unit tests passed**, including scoped legacy-worker/cache removal and cleanup failure handling.
+- **93 public browser checks passed**, with **15 intentional profile skips**, across desktop Chromium, Android Chromium and iPhone WebKit. Coverage includes network-served navigation, no new offline storage/registration, retirement-worker cleanup, the legacy route redirect, calling confirmation, filters, both languages, responsive navigation and automated accessibility checks. Telephone links were intercepted; no real calls were placed.
+- Database-backed administrator and database integration tests were not rerun because Docker Desktop is manually paused. No database schema or publication logic changed.
+- The methodology draft and editable Excalidraw diagrams were updated to the same internet-required scope. No merge, push, hosted publication change or deployment was performed.
+
+Earlier entries below are historical records and may describe the removed feature.
+
+---
+
+> Scope update — 29 October 2026: the owner removed offline access. References below to saved directories, Serwist, or offline tests describe earlier research/implementation, not the current product scope. See ARCHITECTURE.md for the online-only behavior.
+
 # Home categories and three-destination navigation — 28 October 2026
 
 Implemented on `feature/home-navigation` for local review, including the previously reviewed filter and quick-call work. No merge, push, hosted publication change or deployment was performed for this update.

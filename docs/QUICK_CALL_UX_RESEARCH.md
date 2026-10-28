@@ -1,3 +1,5 @@
+> Scope update — 29 October 2026: the owner removed offline access. References below to saved directories, Serwist, or offline tests describe earlier research/implementation, not the current product scope. See ARCHITECTURE.md for the online-only behavior.
+
 # Quick-call UX research
 
 Research date: 28 October 2026

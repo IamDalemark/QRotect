@@ -4,7 +4,7 @@ A QR-accessible emergency contact directory covering campus, Iloilo City, and na
 
 ## Current delivery
 
-Implemented locally: English/Hiligaynon browsing, category/area/search filters, six Home category groups with separate call/browse actions and explicit administrator-selected destinations, a practical Guide, three-item top/phone-bottom navigation, copy controls, confirmation and swipe-to-call, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and offline public access after a successful first visit.
+Implemented locally: English/Hiligaynon browsing, category/area/search filters, six Home category groups with separate call/browse actions and explicit administrator-selected destinations, a practical Guide, three-item top/phone-bottom navigation, copy controls, confirmation and swipe-to-call, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and online background publication refresh.
 
 Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, physical phone checks, and the participant pilot remain content/release gates. The configured existing hosted Supabase project is now initialized with the three initial database migrations. The additional quick-call migration is verified locally and still needs hosted application before assignment editing. No Vercel deployment was performed by this implementation.
 
@@ -12,7 +12,7 @@ Initial setup and the earlier feature branches are integrated into `develop`. `m
 
 The hosted project now includes six owner-requested demo contacts, one per category, using `0912 345 6789`. They are also available in the working draft for editing. The owner approved retaining this number for phone handoffs. No guidance or map was invented. The code omits the supplemental placeholder banner; hosted frontend changes take effect when the corresponding code is deployed.
 
-Public pages now use cached publications with background validation and offline saved-shell navigation; see [Architecture](docs/ARCHITECTURE.md) for cache freshness and failure behavior.
+Public pages use server-cached publications with online background validation; see [Architecture](docs/ARCHITECTURE.md) for cache freshness and failure behavior.
 
 The call flow uses contact confirmation and an intentional phone handoff. Public wording uses “Campus” and omits prototype, sample-directory and translation-review notices. See [Calling behavior](docs/CALLING.md) for the interaction, compatibility and verification details.
 
@@ -25,7 +25,7 @@ pnpm install --frozen-lockfile
 pnpm review:sample
 ```
 
-Open [sample directory](http://localhost:3100). This command builds and serves the sample preview using an isolated data source. Stop other production/review servers first: review modes rebuild the shared `.next` output and generated worker. Run sample and local-admin review one at a time. Offline functionality requires the production build; development mode intentionally does not register a service worker.
+Open [sample directory](http://localhost:3100). This command builds and serves the sample preview using an isolated data source. Stop other production/review servers first: review modes rebuild the shared `.next` output. Run sample and local-admin review one at a time. Internet is required for page access. No new offline worker or saved directory is created.
 
 For local administrator review, start Docker Desktop, then in another terminal:
 
@@ -42,23 +42,23 @@ For ordinary development, use `pnpm dev`. It reads the configured environment fi
 
 ## Stack and commands
 
-Next.js 16 App Router, React 19, strict TypeScript, Tailwind 4, self-hosted Public Sans, accessible Radix dialogs, Supabase Postgres/Auth/Storage, Zod, and Serwist. There is **no ORM**: typed Supabase clients call RLS-protected tables and SQL functions.
+Next.js 16 App Router, React 19, strict TypeScript, Tailwind 4, self-hosted Public Sans, accessible Radix dialogs, Supabase Postgres/Auth/Storage, and Zod. There is **no ORM**: typed Supabase clients call RLS-protected tables and SQL functions.
 
-Builds retain Webpack. Serwist's documented configurator mode runs after Next.js so offline setup cannot break page startup when storage is unavailable. Only public fallback HTML and static assets are precached.
+Builds retain Webpack. Normal server-side publication caching remains for performance. A small static `/sw.js` retirement worker only cleans previous QROTECT installations and unregisters; new pages do not register it. The old `/offline` URL redirects to the online directory.
 
-| Command                         | Purpose                                                                  |
-| ------------------------------- | ------------------------------------------------------------------------ |
-| `pnpm dev`                      | Development server                                                       |
-| `pnpm build` / `pnpm start`     | Production build / server                                                |
-| `pnpm review:sample`            | Isolated sample directory on port 3100                                   |
-| `pnpm setup:local`              | Create the local review administrator once                               |
-| `pnpm review:admin`             | Local database review on port 3102                                       |
-| `pnpm check`                    | Prettier, ESLint, TypeScript, production build                           |
-| `pnpm test`                     | Schema, search, phone, and offline-data unit tests                       |
-| `pnpm test:db`                  | Transactional local database authorization/publication checks            |
-| `pnpm test:browser`             | Build and test each source separately; requires clean local test content |
-| `pnpm test:e2e`                 | Build and run the full isolated browser checks                           |
-| `pnpm qr -- <stable-https-url>` | Generate local SVG/PNG QR artwork after URL approval                     |
+| Command                         | Purpose                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------- |
+| `pnpm dev`                      | Development server                                                        |
+| `pnpm build` / `pnpm start`     | Production build / server                                                 |
+| `pnpm review:sample`            | Isolated sample directory on port 3100                                    |
+| `pnpm setup:local`              | Create the local review administrator once                                |
+| `pnpm review:admin`             | Local database review on port 3102                                        |
+| `pnpm check`                    | Prettier, ESLint, TypeScript, production build                            |
+| `pnpm test`                     | Schema, search, phone, publication refresh, and legacy cleanup unit tests |
+| `pnpm test:db`                  | Transactional local database authorization/publication checks             |
+| `pnpm test:browser`             | Build and test each source separately; requires clean local test content  |
+| `pnpm test:e2e`                 | Build and run the full isolated browser checks                            |
+| `pnpm qr -- <stable-https-url>` | Generate local SVG/PNG QR artwork after URL approval                      |
 
 Browser checks create and remove an isolated temporary local account, publications, and draft changes. They refuse to run against hosted databases or an existing publication dataset. Install Chromium/WebKit first with `pnpm exec playwright install chromium webkit`.
 
@@ -66,9 +66,13 @@ Browser checks create and remove an isolated temporary local account, publicatio
 
 - [Quick-call UX research](docs/QUICK_CALL_UX_RESEARCH.md): direct Home actions, destination selection and accessibility tradeoffs.
 - [Filter UX research](docs/FILTER_UX_RESEARCH.md): primary-source evidence and the compact inline filter interaction.
-- [Architecture](docs/ARCHITECTURE.md): routes, publication model, security and offline boundaries.
+- [Architecture](docs/ARCHITECTURE.md): routes, publication model, security and online access boundaries.
 - [Operations](docs/OPERATIONS.md): administrator workflow, recovery, backup and future release setup.
 - [Validation](docs/VALIDATION.md): verified scope and pending release gates.
 - [Product brief](PRODUCT.md), [design direction](DESIGN.md), [contribution rules](CONTRIBUTING.md).
 
-Credentials, generated workers, build output, screenshots and local QR artwork are untracked. Impeccable is installed; its manual audit and independent design review supplement browser/accessibility testing. Native hook execution requires approval in Codex's hook controls.
+Credentials, build output, screenshots and local QR artwork are untracked. Impeccable is installed; its manual audit and independent design review supplement browser/accessibility testing. Native hook execution requires approval in Codex's hook controls.
+
+## Relational database redesign
+
+The private directory is stored in related contact, number, category, service-area, shortcut, guidance and map tables. Public delivery retains complete versioned snapshots. The migration is applied locally; hosted migration and frontend release are pending. See [database design and rollout](docs/RELATIONAL_DATABASE.md). Run `pnpm test:migration` for isolated conversion/rollback checks and `pnpm test:db` for privacy, foreign keys, publication and restore checks.
