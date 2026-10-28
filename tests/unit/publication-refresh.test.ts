@@ -20,15 +20,20 @@ beforeEach(() => {
   mocks.auth.mockResolvedValue({
     client: {
       rpc: mocks.rpc,
-      from: () => ({ select: () => ({ single: mocks.single }) }),
     },
   });
   mocks.single.mockResolvedValue({ data: { payload: emptySnapshot, revision: 3 }, error: null });
-  mocks.rpc.mockResolvedValue({ error: null });
+  mocks.rpc.mockImplementation((name: string) =>
+    name === 'get_directory_draft' ? { single: mocks.single } : Promise.resolve({ error: null }),
+  );
   mocks.read.mockResolvedValue(emptySnapshot);
 });
 it('does not invalidate public data when a publication transaction fails', async () => {
-  mocks.rpc.mockResolvedValue({ error: { message: 'Conflict' } });
+  mocks.rpc.mockImplementation((name: string) =>
+    name === 'get_directory_draft'
+      ? { single: mocks.single }
+      : Promise.resolve({ error: { message: 'Conflict' } }),
+  );
   expect((await publishDraft(3)).ok).toBe(false);
   expect(mocks.update).not.toHaveBeenCalled();
   expect(mocks.path).not.toHaveBeenCalled();
@@ -51,7 +56,7 @@ it('reports a committed publication separately from a failed public refresh', as
   expect(result.ok).toBe(true);
   expect(result.message).toContain('in the database');
   expect(result.message).toContain('could not be confirmed');
-  expect(mocks.rpc).toHaveBeenCalledTimes(1);
+  expect(mocks.rpc.mock.calls.filter(([name]) => name === 'publish_directory')).toHaveLength(1);
 });
 it('refreshes the same cache after restoring a historical publication', async () => {
   expect((await restorePublication('10000000-0000-4000-8000-000000000001', 3)).ok).toBe(true);

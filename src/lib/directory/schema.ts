@@ -75,7 +75,7 @@ export const snapshotSchema = z
     quickCalls: z.array(quickCallSchema).max(6).optional(),
     guidance: z.array(guideSchema).max(30),
     map: mapSchema.nullable(),
-    // Legacy v1 field retained only to read existing publications and offline caches.
+    // Legacy v1 field retained only to read existing publications.
     // No public or administrator interface uses it.
     testContact: z
       .object({
@@ -90,6 +90,26 @@ export const snapshotSchema = z
 export type Snapshot = z.infer<typeof snapshotSchema>;
 export type Contact = z.infer<typeof contactSchema>;
 export type Category = (typeof categoryIds)[number];
+// Save-time relational integrity; approval/callability remain publication checks.
+export function workingDirectoryIssues(data: Snapshot): string[] {
+  const issues: string[] = [];
+  const unique = (values: string[]) => new Set(values).size === values.length;
+  if (!unique(data.contacts.map((c) => c.id))) issues.push('Contact identifiers must be unique.');
+  if (!unique(data.contacts.flatMap((c) => c.numbers.map((n) => n.id))))
+    issues.push('Phone-line identifiers must be unique across all contacts.');
+  if (!unique(data.guidance.map((g) => g.id))) issues.push('Guidance identifiers must be unique.');
+  const assignments = data.quickCalls ?? [];
+  if (!unique(assignments.map((q) => q.category)))
+    issues.push('Choose one quick call per category.');
+  if (!unique(assignments.map((q) => q.numberId)))
+    issues.push('A phone line can have only one quick-call assignment.');
+  for (const q of assignments) {
+    const contact = data.contacts.find((c) => c.id === q.contactId);
+    if (!contact?.numbers.some((n) => n.id === q.numberId))
+      issues.push('Reassign or clear quick calls before removing their contact or phone line.');
+  }
+  return issues;
+}
 export function publicationIssues(data: Snapshot): string[] {
   const issues: string[] = [];
   if (data.fixture) issues.push('Sample records cannot be published.');

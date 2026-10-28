@@ -5,6 +5,7 @@ import { createRequire } from 'node:module';
 import { createClient } from '@supabase/supabase-js';
 import { fixtureSnapshot } from '../src/lib/directory/fixtures';
 import { snapshotSchema } from '../src/lib/directory/schema';
+import type { Database } from '../src/lib/supabase/database.types';
 if (!process.argv.includes('--public-demo'))
   throw new Error('Pass --public-demo only for an explicitly requested public demonstration.');
 const require = createRequire(import.meta.resolve('next/package.json'));
@@ -22,17 +23,19 @@ const options = {
       fetch(input, { ...init, signal: AbortSignal.timeout(10000) }),
   },
 };
-const admin = createClient(endpoint, publicKey, options);
+const admin = createClient<Database>(endpoint, publicKey, options);
 try {
   const login = await admin.auth.signInWithPassword({
     email: account.email,
     password: account.password,
   });
   if (login.error) throw new Error('Administrator sign-in failed.');
-  const draft = await admin.from('directory_drafts').select('payload,revision').single();
+  const draft = await admin.rpc('get_directory_draft').single();
   const current = await admin.from('publications').select('id').eq('current', true).maybeSingle();
-  if (draft.error || current.error) throw new Error('Existing content could not be inspected.');
-  if (current.data || draft.data.payload.contacts.length)
+  if (draft.error || !draft.data || current.error)
+    throw new Error('Existing content could not be inspected.');
+  const workingDraft = snapshotSchema.parse(draft.data.payload);
+  if (current.data || workingDraft.contacts.length)
     throw new Error(
       'Content already exists. It was preserved; this first-time seed will not overwrite it.',
     );
@@ -85,7 +88,7 @@ try {
     })),
   }));
   const working = snapshotSchema.parse({
-    ...draft.data.payload,
+    ...workingDraft,
     contacts,
     quickCalls: fixtureSnapshot.quickCalls,
   });
@@ -105,12 +108,16 @@ try {
     throw new Error('The draft changed or could not be saved; no public demo was installed.');
   // Explicit demo installation preserves fixture metadata and does not falsify approvals.
   // The regular administrator publication function continues to reject unapproved content.
-  const management = createClient(endpoint, secret, options);
-  const installed = await management
-    .from('publications')
-    .insert({ id, snapshot: demo, current: true });
+  const management = createClient<Database>(endpoint, secret, options);
+  const installed = await management.from('publications').insert({
+    id,
+    snapshot: demo,
+    current: true,
+    published_by: login.data.user.id,
+    source_revision: saved.data,
+  });
   if (installed.error) throw new Error('Public demo installation failed; the draft remains saved.');
-  const visitor = createClient(endpoint, publicKey, options);
+  const visitor = createClient<Database>(endpoint, publicKey, options);
   const result = await visitor.from('publications').select('snapshot').eq('current', true).single();
   if (result.error) throw new Error('The public result could not be verified.');
   const publicData = snapshotSchema.parse(result.data.snapshot);
@@ -126,7 +133,7 @@ try {
   console.log(
     'Installed six public demo contacts and six editable draft contacts, one per category.',
   );
-  console.log('Display number: 0912 345 6789. Agency calling remains simulated.');
+  console.log('Display number: 0912 345 6789. Phone handoff uses the owner-approved demo number.');
 } finally {
   await admin.auth.signOut({ scope: 'local' });
 }

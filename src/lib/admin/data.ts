@@ -4,7 +4,7 @@ import { snapshotSchema } from '@/lib/directory/schema';
 export async function dashboard() {
   const { client } = await requireAdmin();
   const [draft, history, events] = await Promise.all([
-    client.from('directory_drafts').select('payload,revision').eq('id', true).single(),
+    client.rpc('get_directory_draft').single(),
     client
       .from('publications')
       .select('id,created_at,current')
@@ -12,7 +12,7 @@ export async function dashboard() {
       .limit(20),
     client
       .from('audit_events')
-      .select('id,action,revision,created_at')
+      .select('id,action,revision:draft_revision,created_at')
       .order('created_at', { ascending: false })
       .limit(30),
   ]);

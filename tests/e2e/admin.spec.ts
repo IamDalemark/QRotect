@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+const adminOrigin = process.env.QROTECT_E2E_ADMIN_ORIGIN || 'http://127.0.0.1:3102';
 test('invited admin saves private drafts and unreviewed content cannot publish', async ({
   page,
 }, info) => {
@@ -6,7 +7,7 @@ test('invited admin saves private drafts and unreviewed content cannot publish',
     info.project.name !== 'desktop-chromium' || !process.env.QROTECT_E2E_ADMIN_EMAIL,
     'Uses one isolated local test account.',
   );
-  await page.goto('http://127.0.0.1:3102/admin');
+  await page.goto(`${adminOrigin}/admin`);
   await page.getByLabel('Email', { exact: true }).fill(process.env.QROTECT_E2E_ADMIN_EMAIL!);
   await page.getByLabel('Password', { exact: true }).fill(process.env.QROTECT_E2E_ADMIN_PASSWORD!);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
@@ -54,7 +55,7 @@ test('invited admin saves private drafts and unreviewed content cannot publish',
   });
   await expect(page.getByRole('status')).toContainText('file contents must be a PNG');
   await page.screenshot({ path: '.impeccable/review/admin-map.png', fullPage: true });
-  await page.goto('http://127.0.0.1:3102/admin/contacts');
+  await page.goto(`${adminOrigin}/admin/contacts`);
   await page
     .getByLabel('Official verification source URL', { exact: true })
     .fill('https://example.test/verified');
@@ -66,7 +67,7 @@ test('invited admin saves private drafts and unreviewed content cannot publish',
     .check();
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Draft saved.');
-  await page.goto('http://127.0.0.1:3102/admin/quick-calls');
+  await page.goto(`${adminOrigin}/admin/quick-calls`);
   await page
     .getByRole('combobox', { name: 'School emergency destination', exact: true })
     .selectOption({ index: 1 });
@@ -86,7 +87,7 @@ test('invited admin saves private drafts and unreviewed content cannot publish',
   const preview = await page.context().newPage();
   const requests: string[] = [];
   preview.on('request', (request) => requests.push(request.url()));
-  await preview.goto('http://127.0.0.1:3102/admin/preview');
+  await preview.goto(`${adminOrigin}/admin/preview`);
   await preview
     .getByRole('button', { name: /Call Campus Emergency: QROTECT browser test/ })
     .click();
@@ -94,28 +95,28 @@ test('invited admin saves private drafts and unreviewed content cannot publish',
   await preview.keyboard.press('Escape');
   expect(requests.filter((url) => url.includes('/api/public/snapshot'))).toEqual([]);
   expect(
-    await preview.evaluate(async () => Boolean(await caches.match('/__qrotect/saved-directory'))),
+    await preview.evaluate(
+      async () => (await navigator.serviceWorker.getRegistrations()).length > 0,
+    ),
   ).toBe(false);
   await preview.close();
-  await page.goto('http://127.0.0.1:3102/admin/publish');
+  await page.goto(`${adminOrigin}/admin/publish`);
   await page.getByRole('button', { name: 'Publish updates', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Published.');
-  const published = await (
-    await page.request.get('http://127.0.0.1:3102/api/public/snapshot')
-  ).json();
+  const published = await (await page.request.get(`${adminOrigin}/api/public/snapshot`)).json();
   expect(published.quickCalls).toHaveLength(1);
   expect(published.quickCalls[0].contactId).toBe(published.contacts[0].id);
   expect(published.quickCalls[0].numberId).toBe(published.contacts[0].numbers[0].id);
   expect(published.contacts).toHaveLength(1);
   expect(published.contacts[0].agency).toBe('QROTECT browser test');
-  await page.goto('http://127.0.0.1:3102/admin/contacts');
+  await page.goto(`${adminOrigin}/admin/contacts`);
   await page.getByLabel('Active contact', { exact: true }).uncheck();
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Draft saved.');
-  await page.goto('http://127.0.0.1:3102/admin/publish');
+  await page.goto(`${adminOrigin}/admin/publish`);
   await expect(page.getByRole('button', { name: 'Publish updates', exact: true })).toBeDisabled();
   await expect(page.getByText(/quick call requires an active contact/)).toBeVisible();
-  await page.goto('http://127.0.0.1:3102/admin/quick-calls');
+  await page.goto(`${adminOrigin}/admin/quick-calls`);
   await expect(
     page.getByText('This destination is unavailable. Reassign or clear it before publishing.'),
   ).toBeVisible();
@@ -124,14 +125,23 @@ test('invited admin saves private drafts and unreviewed content cannot publish',
     .selectOption('');
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Draft saved.');
-  await page.goto('http://127.0.0.1:3102/admin/publish');
+  await page.goto(`${adminOrigin}/admin/publish`);
   await page.getByRole('button', { name: 'Publish updates', exact: true }).click();
   await expect(page.getByRole('status')).toContainText('Published.');
-  const withdrawn = await (
-    await page.request.get('http://127.0.0.1:3102/api/public/snapshot')
-  ).json();
+  const withdrawn = await (await page.request.get(`${adminOrigin}/api/public/snapshot`)).json();
   expect(withdrawn.contacts).toEqual([]);
   expect(withdrawn.version).not.toBe(published.version);
+  await page.goto(`${adminOrigin}/admin/history`);
+  const originalRow = page.locator('article').filter({ hasText: published.version });
+  page.once('dialog', (dialog) => dialog.accept());
+  await originalRow.getByRole('button', { name: 'Restore as new publication' }).click();
+  await expect(page.getByRole('status')).toContainText('Restored as a new publication.');
+  const restored = await (await page.request.get(`${adminOrigin}/api/public/snapshot`)).json();
+  expect(restored.version).not.toBe(published.version);
+  expect(restored.contacts).toEqual(published.contacts);
+  expect(restored.quickCalls).toEqual(published.quickCalls);
+  await page.goto(`${adminOrigin}/admin/contacts`);
+  await expect(page.getByLabel('Active contact', { exact: true })).toBeChecked();
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Administrator sign in' })).toBeVisible();
 });

@@ -61,15 +61,16 @@ try {
     if (failure === 'duplicate') bad.quickCalls = [bad.quickCalls![0], bad.quickCalls![0]];
     if (failure === 'duplicate-line')
       bad.contacts[0].numbers.push({ ...bad.contacts[0].numbers[0] });
-    const invalidRevision = await save(bad); // Drafts can be repaired; publication must reject.
     let rejected = false;
     try {
+      // Referential errors now fail at save; eligibility errors fail at publication.
+      const invalidRevision = await save(bad);
       await db.query('select public.publish_directory($1)', [invalidRevision]);
     } catch {
       rejected = true;
     }
     await db.query('rollback to savepoint invalid_assignment');
-    assert.ok(rejected, `Publication must reject ${failure}`);
+    assert.ok(rejected, `Save/publication must reject ${failure}`);
     assert.equal(
       (await db.query('select id from public.publications where current')).rows[0].id,
       published,

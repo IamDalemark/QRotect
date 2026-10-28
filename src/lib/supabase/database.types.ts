@@ -42,69 +42,411 @@ export type Database = {
       audit_events: {
         Row: {
           action: string;
-          actor: string | null;
+          actor_id: string | null;
           created_at: string;
+          draft_revision: number | null;
           id: number;
-          revision: number | null;
+          publication_id: string | null;
         };
         ComputedFields: never;
         Insert: {
           action: string;
-          actor?: string | null;
+          actor_id?: string | null;
           created_at?: string;
+          draft_revision?: number | null;
           id?: never;
-          revision?: number | null;
+          publication_id?: string | null;
         };
         Update: {
           action?: string;
-          actor?: string | null;
+          actor_id?: string | null;
           created_at?: string;
+          draft_revision?: number | null;
           id?: never;
-          revision?: number | null;
+          publication_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'audit_events_publication_id_fkey';
+            columns: ['publication_id'];
+            isOneToOne: false;
+            referencedRelation: 'publications';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      campus_maps: {
+        Row: {
+          approved: boolean;
+          asset_path: string;
+          description_en: string;
+          description_hil: string;
+          draft_id: boolean;
+          id: string;
+          instructions: NonNullable<Json>;
+          reviewed_at: string;
+          reviewer_name: string;
+          source_url: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          approved?: boolean;
+          asset_path: string;
+          description_en: string;
+          description_hil: string;
+          draft_id?: boolean;
+          id: string;
+          instructions: NonNullable<Json>;
+          reviewed_at: string;
+          reviewer_name: string;
+          source_url: string;
+        };
+        Update: {
+          approved?: boolean;
+          asset_path?: string;
+          description_en?: string;
+          description_hil?: string;
+          draft_id?: boolean;
+          id?: string;
+          instructions?: NonNullable<Json>;
+          reviewed_at?: string;
+          reviewer_name?: string;
+          source_url?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'campus_maps_draft_id_fkey';
+            columns: ['draft_id'];
+            isOneToOne: true;
+            referencedRelation: 'directory_drafts';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      categories: {
+        Row: {
+          id: string;
+          name_en: string;
+          name_hil: string;
+          sort_order: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          id: string;
+          name_en: string;
+          name_hil: string;
+          sort_order: number;
+        };
+        Update: {
+          id?: string;
+          name_en?: string;
+          name_hil?: string;
+          sort_order?: number;
         };
         Relationships: [];
       };
+      contact_numbers: {
+        Row: {
+          channel: string;
+          contact_id: string;
+          dial_number: string;
+          display_number: string;
+          extension: string;
+          id: string;
+          label_en: string;
+          label_hil: string;
+          position: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          channel: string;
+          contact_id: string;
+          dial_number: string;
+          display_number: string;
+          extension?: string;
+          id: string;
+          label_en: string;
+          label_hil?: string;
+          position: number;
+        };
+        Update: {
+          channel?: string;
+          contact_id?: string;
+          dial_number?: string;
+          display_number?: string;
+          extension?: string;
+          id?: string;
+          label_en?: string;
+          label_hil?: string;
+          position?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'contact_numbers_contact_id_fkey';
+            columns: ['contact_id'];
+            isOneToOne: false;
+            referencedRelation: 'contacts';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      contacts: {
+        Row: {
+          active: boolean;
+          agency: string;
+          aliases: string[];
+          approved: boolean;
+          branch: string;
+          category_id: string;
+          description_en: string;
+          description_hil: string;
+          draft_id: boolean;
+          hours: string;
+          id: string;
+          legacy_priority: boolean;
+          position: number;
+          service_area_id: string;
+          source_url: string;
+          verified_at: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          active?: boolean;
+          agency: string;
+          aliases?: string[];
+          approved?: boolean;
+          branch?: string;
+          category_id: string;
+          description_en: string;
+          description_hil?: string;
+          draft_id?: boolean;
+          hours?: string;
+          id: string;
+          legacy_priority?: boolean;
+          position: number;
+          service_area_id: string;
+          source_url?: string;
+          verified_at?: string | null;
+        };
+        Update: {
+          active?: boolean;
+          agency?: string;
+          aliases?: string[];
+          approved?: boolean;
+          branch?: string;
+          category_id?: string;
+          description_en?: string;
+          description_hil?: string;
+          draft_id?: boolean;
+          hours?: string;
+          id?: string;
+          legacy_priority?: boolean;
+          position?: number;
+          service_area_id?: string;
+          source_url?: string;
+          verified_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'contacts_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'contacts_draft_id_fkey';
+            columns: ['draft_id'];
+            isOneToOne: false;
+            referencedRelation: 'directory_drafts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'contacts_service_area_id_fkey';
+            columns: ['service_area_id'];
+            isOneToOne: false;
+            referencedRelation: 'service_areas';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       directory_drafts: {
         Row: {
+          document_published_at: string | null;
+          document_version: string;
           id: boolean;
-          payload: NonNullable<Json>;
+          legacy_test_contact: Json | null;
+          quick_calls_defined: boolean;
           revision: number;
           updated_at: string;
         };
         ComputedFields: never;
         Insert: {
+          document_published_at?: string | null;
+          document_version?: string;
           id?: boolean;
-          payload: NonNullable<Json>;
+          legacy_test_contact?: Json | null;
+          quick_calls_defined?: boolean;
           revision?: number;
           updated_at?: string;
         };
         Update: {
+          document_published_at?: string | null;
+          document_version?: string;
           id?: boolean;
-          payload?: NonNullable<Json>;
+          legacy_test_contact?: Json | null;
+          quick_calls_defined?: boolean;
           revision?: number;
           updated_at?: string;
         };
         Relationships: [];
+      };
+      guidance: {
+        Row: {
+          approved: boolean;
+          category_id: string;
+          draft_id: boolean;
+          id: string;
+          position: number;
+          reviewed_at: string;
+          reviewer_name: string;
+          source_url: string;
+          steps: NonNullable<Json>;
+          title_en: string;
+          title_hil: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          approved?: boolean;
+          category_id: string;
+          draft_id?: boolean;
+          id: string;
+          position: number;
+          reviewed_at: string;
+          reviewer_name: string;
+          source_url: string;
+          steps: NonNullable<Json>;
+          title_en: string;
+          title_hil: string;
+        };
+        Update: {
+          approved?: boolean;
+          category_id?: string;
+          draft_id?: boolean;
+          id?: string;
+          position?: number;
+          reviewed_at?: string;
+          reviewer_name?: string;
+          source_url?: string;
+          steps?: NonNullable<Json>;
+          title_en?: string;
+          title_hil?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'guidance_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: false;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'guidance_draft_id_fkey';
+            columns: ['draft_id'];
+            isOneToOne: false;
+            referencedRelation: 'directory_drafts';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       publications: {
         Row: {
           created_at: string;
           current: boolean;
           id: string;
+          published_by: string | null;
           snapshot: NonNullable<Json>;
+          source_revision: number | null;
         };
         ComputedFields: never;
         Insert: {
           created_at?: string;
           current?: boolean;
           id?: string;
+          published_by?: string | null;
           snapshot: NonNullable<Json>;
+          source_revision?: number | null;
         };
         Update: {
           created_at?: string;
           current?: boolean;
           id?: string;
+          published_by?: string | null;
           snapshot?: NonNullable<Json>;
+          source_revision?: number | null;
+        };
+        Relationships: [];
+      };
+      quick_call_assignments: {
+        Row: {
+          category_id: string;
+          draft_id: boolean;
+          number_id: string;
+          position: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          category_id: string;
+          draft_id?: boolean;
+          number_id: string;
+          position: number;
+        };
+        Update: {
+          category_id?: string;
+          draft_id?: boolean;
+          number_id?: string;
+          position?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'quick_call_assignments_category_id_fkey';
+            columns: ['category_id'];
+            isOneToOne: true;
+            referencedRelation: 'categories';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'quick_call_assignments_draft_id_fkey';
+            columns: ['draft_id'];
+            isOneToOne: false;
+            referencedRelation: 'directory_drafts';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'quick_call_assignments_number_id_fkey';
+            columns: ['number_id'];
+            isOneToOne: true;
+            referencedRelation: 'contact_numbers';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      service_areas: {
+        Row: {
+          id: string;
+          name_en: string;
+          name_hil: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id: string;
+          name_en: string;
+          name_hil: string;
+        };
+        Update: {
+          id?: string;
+          name_en?: string;
+          name_hil?: string;
         };
         Relationships: [];
       };
@@ -113,6 +455,15 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      _directory_document: { Args: Record<PropertyKey, never>; Returns: Json };
+      _replace_directory_content: { Args: { document: Json }; Returns: undefined };
+      get_directory_draft: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          payload: Json;
+          revision: number;
+        }[];
+      };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       publish_directory: { Args: { expected_revision: number }; Returns: string };
       restore_directory: {

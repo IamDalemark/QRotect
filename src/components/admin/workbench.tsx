@@ -61,6 +61,17 @@ export function Workbench({ initial, initialRevision, section, history, events }
   const [pending, start] = useTransition();
   const [selected, setSelected] = useState(initial.contacts[0]?.id || '');
   const [search, setSearch] = useState('');
+  const [receivedRevision, setReceivedRevision] = useState(initialRevision);
+  // Adopt a server-confirmed save/restore without remounting the action status.
+  // A section change still remounts the workbench through its section key.
+  if (receivedRevision !== initialRevision) {
+    setReceivedRevision(initialRevision);
+    setDraft(initial);
+    setRevision(initialRevision);
+    setDirty(false);
+    setSelected(initial.contacts[0]?.id || '');
+  }
+
   useEffect(() => {
     if (!dirty) return;
     const unload = (event: BeforeUnloadEvent) => {

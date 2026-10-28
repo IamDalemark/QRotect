@@ -3,6 +3,7 @@ import { randomUUID, randomBytes } from 'node:crypto';
 import { mkdirSync, openSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import pg from 'pg';
+import { createServer } from 'node:net';
 const status = JSON.parse(
   execFileSync('pnpm', ['exec', 'supabase', 'status', '-o', 'json'], {
     encoding: 'utf8',
@@ -12,12 +13,25 @@ const status = JSON.parse(
 const api = status.API_URL as string;
 if (new URL(api).hostname !== '127.0.0.1')
   throw new Error('Browser checks require the local test project.');
+const publicPort = 3120,
+  adminPort = 3122;
+for (const port of [publicPort, adminPort]) {
+  await new Promise<void>((resolve, reject) => {
+    const probe = createServer();
+    probe.once('error', () => reject(new Error(`Browser test port ${port} is already in use.`)));
+    probe.listen(port, '127.0.0.1', () => probe.close(() => resolve()));
+  });
+}
 const admin = createClient(api, status.SECRET_KEY || status.SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
 const db = new pg.Client({ connectionString: status.DB_URL });
 await db.connect();
-const before = (await db.query('select payload,revision from public.directory_drafts')).rows[0];
+const before = (
+  await db.query(
+    'select public._directory_document() payload,revision from public.directory_drafts',
+  )
+).rows[0];
 if (
   before.payload.contacts.length > 0 ||
   (await db.query('select id from public.publications')).rows.length > 0
@@ -29,7 +43,7 @@ const { data, error } = await admin.auth.admin.createUser({ email, password, ema
 if (error || !data.user) throw new Error('Could not create the local test account.');
 const userId = data.user.id;
 await db.query('insert into public.administrators(user_id) values($1)', [userId]);
-mkdirSync('test-results', { recursive: true });
+mkdirSync('.local/browser-checks', { recursive: true });
 const servers: ChildProcess[] = [];
 function environment(connected: boolean) {
   return {
@@ -45,7 +59,7 @@ function environment(connected: boolean) {
   };
 }
 function start(port: number, connected: boolean) {
-  const stream = openSync(`test-results/server-${port}.log`, 'w');
+  const stream = openSync(`.local/browser-checks/server-${port}.log`, 'w');
   const child = spawn('pnpm', ['start', '--hostname', '127.0.0.1', '--port', String(port)], {
     detached: true,
     env: environment(connected),
@@ -54,7 +68,9 @@ function start(port: number, connected: boolean) {
   servers.push(child);
 }
 async function ready(port: number) {
+  const child = servers.at(-1)!;
   for (let attempt = 0; attempt < 60; attempt++) {
+    if (child.exitCode !== null) throw new Error(`Test server ${port} exited before readiness.`);
     try {
       if ((await fetch(`http://127.0.0.1:${port}/admin/login`)).ok) return;
     } catch {}
@@ -62,13 +78,24 @@ async function ready(port: number) {
   }
   throw new Error(`Test server ${port} did not start.`);
 }
+async function stop(child: ChildProcess) {
+  if (!child.pid || child.exitCode !== null || child.signalCode !== null) return;
+  const exited = new Promise<void>((resolve) => child.once('exit', () => resolve()));
+  try {
+    process.kill(-child.pid, 'SIGTERM');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ESRCH') return;
+    throw error;
+  }
+  await exited;
+}
 let result = 1;
 try {
   // Static HTML belongs to the environment used at build time. Run phases
   // sequentially so a hosted/sample build can never seed the local admin site.
-  for (const connected of [false, true]) {
+  for (const connected of process.argv.includes('--admin-only') ? [true] : [false, true]) {
     execFileSync('pnpm', ['build'], { env: environment(connected), stdio: 'inherit' });
-    const port = connected ? 3102 : 3100;
+    const port = connected ? adminPort : publicPort;
     start(port, connected);
     await ready(port);
     const sample = await (await fetch(`http://127.0.0.1:${port}/api/public/snapshot`)).json();
@@ -89,30 +116,38 @@ try {
         env: {
           ...process.env,
           QROTECT_E2E_ADMIN_EMAIL: email,
+          QROTECT_E2E_PUBLIC_ORIGIN: `http://127.0.0.1:${publicPort}`,
+          QROTECT_E2E_ADMIN_ORIGIN: `http://127.0.0.1:${adminPort}`,
           QROTECT_E2E_ADMIN_PASSWORD: password,
         },
       });
       child.on('exit', (code) => resolve(code ?? 1));
     });
     const server = servers.pop()!;
-    if (server.pid) process.kill(-server.pid, 'SIGTERM');
-    await new Promise<void>((resolve) => server.once('exit', () => resolve()));
+    await stop(server);
     if (result) break;
   }
 } finally {
-  for (const child of servers)
-    if (child.pid) {
-      try {
-        process.kill(-child.pid, 'SIGTERM');
-      } catch {}
+  for (const child of servers) await stop(child);
+  const current = (
+    await db.query('select public._directory_document() payload from public.directory_drafts')
+  ).rows[0].payload;
+  await db.query('begin');
+  try {
+    if (current.contacts.length === 1 && current.contacts[0].agency === 'QROTECT browser test') {
+      await db.query('select public._replace_directory_content($1::jsonb)', [before.payload]);
+      await db.query('update public.directory_drafts set revision=revision+1 where id');
     }
-  const current = (await db.query('select payload from public.directory_drafts')).rows[0].payload;
-  if (current.contacts.length === 1 && current.contacts[0].agency === 'QROTECT browser test')
-    await db.query('update public.directory_drafts set payload=$1,revision=revision+1 where id', [
-      before.payload,
-    ]);
-  await db.query('delete from public.publications');
-  await db.query('delete from public.audit_events where actor=$1', [userId]);
+    await db.query('delete from public.audit_events where actor_id=$1', [userId]);
+    // Superuser cleanup of this test's publications only; normal history is immutable.
+    await db.query('alter table public.publications disable trigger publication_immutable');
+    await db.query('delete from public.publications where published_by=$1', [userId]);
+    await db.query('alter table public.publications enable trigger publication_immutable');
+    await db.query('commit');
+  } catch (error) {
+    await db.query('rollback');
+    throw error;
+  }
   await db.query('delete from public.administrators where user_id=$1', [userId]);
   await admin.auth.admin.deleteUser(userId);
   await db.end();

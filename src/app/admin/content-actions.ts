@@ -2,7 +2,7 @@
 import { revalidatePath, updateTag } from 'next/cache';
 import { currentSnapshot, PUBLIC_SNAPSHOT_TAG } from '@/lib/directory/server';
 import { requireAdmin } from '@/lib/admin/auth';
-import { snapshotSchema, publicationIssues } from '@/lib/directory/schema';
+import { snapshotSchema, publicationIssues, workingDirectoryIssues } from '@/lib/directory/schema';
 import { z } from 'zod';
 export async function saveDraft(input: unknown, revision: number) {
   const { client } = await requireAdmin();
@@ -17,6 +17,8 @@ export async function saveDraft(input: unknown, revision: number) {
     };
   if (parsed.data.fixture || !Number.isSafeInteger(revision) || revision < 0)
     return { ok: false, message: 'Invalid draft or revision.' };
+  const issues = workingDirectoryIssues(parsed.data);
+  if (issues.length) return { ok: false, message: issues.join(' ') };
   const { data, error } = await client.rpc('save_directory', {
     document: parsed.data,
     expected_revision: revision,
@@ -39,10 +41,7 @@ export async function publishDraft(revision: number) {
   const { client } = await requireAdmin();
   if (!Number.isSafeInteger(revision) || revision < 0)
     return { ok: false, message: 'Invalid revision.' };
-  const { data: draft, error: loadError } = await client
-    .from('directory_drafts')
-    .select('payload,revision')
-    .single();
+  const { data: draft, error: loadError } = await client.rpc('get_directory_draft').single();
   if (loadError || !draft || draft.revision !== revision)
     return {
       ok: false,

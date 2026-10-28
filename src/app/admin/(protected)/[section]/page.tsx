@@ -6,5 +6,5 @@ export default async function Page({ params }: { params: Promise<{ section: stri
   if (!['contacts', 'quick-calls', 'guidance', 'map', 'publish', 'history'].includes(section))
     notFound();
   const data = await dashboard();
-  return <Workbench key={data.initialRevision} {...data} section={section} />;
+  return <Workbench key={section} {...data} section={section} />;
 }
