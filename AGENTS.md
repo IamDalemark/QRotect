@@ -12,7 +12,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Read `PRODUCT.md` and `DESIGN.md` before product or interface changes.
 - Use pnpm 11.18.0, strict TypeScript, and the installed Next.js documentation.
-- Keep Webpack builds for the planned Serwist integration.
+- Keep Webpack builds. Public access requires internet; do not add offline storage or worker registration.
 - Work on descriptive feature branches from `develop` after the setup branch is integrated. Keep `main` for stable releases.
 - Make small coherent commits with exactly these types: `feat`, `fix`, `docs`, `style`, `refactor`, `chore`, `test`.
 - Preserve the configured Git author identity. Initial setup commits are authored and committed by Daniel Mark Wiegand. Do not add automated co-author trailers.

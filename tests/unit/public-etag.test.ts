@@ -2,7 +2,7 @@ import { expect, it, vi, afterEach } from 'vitest';
 import { fixtureSnapshot } from '../../src/lib/directory/fixtures';
 import { snapshotETag } from '../../src/lib/directory/public-etag';
 import { preferNewerPublication } from '../../src/lib/directory/publication-order';
-import { fetchSnapshot } from '../../src/lib/directory/offline';
+import { fetchSnapshot } from '../../src/lib/directory/network';
 afterEach(() => vi.unstubAllGlobals());
 it('changes the ETag when contact contents change even with the same version', async () => {
   const changed = structuredClone(fixtureSnapshot);
@@ -22,7 +22,7 @@ it('does not accept a 304 without a current snapshot', async () => {
   await expect(fetchSnapshot()).rejects.toThrow('Refresh unavailable');
 });
 
-it('keeps a newer saved publication when a slower node returns an older one', () => {
+it('keeps a newer loaded publication when a slower node returns an older one', () => {
   const older = { ...fixtureSnapshot, publishedAt: '2026-10-27T00:00:00Z' };
   const newer = { ...fixtureSnapshot, publishedAt: '2026-10-28T00:00:00Z', contacts: [] };
   expect(preferNewerPublication(newer, older)).toBe(newer);

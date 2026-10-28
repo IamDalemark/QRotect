@@ -95,12 +95,8 @@ test('accessible alternative works from the keyboard and dialog passes accessibi
   await expect(page.getByRole('dialog')).not.toContainText('connected');
 });
 
-test('calling works offline and in Hiligaynon', async ({ page, context }) => {
+test('calling works in Hiligaynon', async ({ page }) => {
   await page.goto('/directory?category=fire');
-  await expect(page.getByText('Available offline', { exact: true })).toBeVisible({
-    timeout: 30000,
-  });
-  await context.setOffline(true);
   await page.goto('/directory?category=fire');
   await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('hil');
   await page.getByRole('button', { name: 'Tawag', exact: true }).click();
@@ -153,8 +149,7 @@ test('selected number, label and extension remain stable while a new directory q
       return Promise.resolve(Response.json(next));
     };
   }, snapshot);
-  // The initial refresh can still be saving offline data. Wait until the next
-  // online event actually starts the replacement fetch before closing the card.
+  // Wait for the replacement refresh before closing the frozen contact card.
   await expect
     .poll(() =>
       page.evaluate(() => {
@@ -170,7 +165,7 @@ test('selected number, label and extension remain stable while a new directory q
   await expect(page.getByText('Replacement line', { exact: true })).toBeVisible();
 });
 
-test('legacy all-zero cached placeholders never receive a usable call action', async ({ page }) => {
+test('legacy all-zero placeholders never receive a usable call action', async ({ page }) => {
   const snapshot = structuredClone(fixtureSnapshot);
   snapshot.contacts.forEach((c) =>
     c.numbers.forEach((n) => {

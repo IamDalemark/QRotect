@@ -62,15 +62,14 @@ test('keyboard disclosure keeps focus stable and hidden controls out of tab orde
   await expect(page.locator('.result-count')).toHaveAttribute('role', 'status');
 });
 
-test('offline filtering makes no requests and empty reset clears all restrictions', async ({
+test('loaded-directory filtering makes no requests and empty reset clears all restrictions', async ({
   page,
-  context,
 }) => {
+  const refreshed = page.waitForResponse((response) =>
+    response.url().endsWith('/api/public/snapshot'),
+  );
   await page.goto('/directory');
-  await expect(page.getByText('Available offline', { exact: true })).toBeVisible({
-    timeout: 30000,
-  });
-  await context.setOffline(true);
+  await refreshed;
   let requests = 0;
   page.on('request', () => requests++);
   await page.getByRole('button', { name: 'Filters', exact: true }).click();

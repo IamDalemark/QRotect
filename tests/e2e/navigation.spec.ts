@@ -64,16 +64,9 @@ test('three page destinations retain direct links, active state and browser Back
   );
 });
 
-test('all three destinations work from the saved shell offline in Hiligaynon', async ({
-  page,
-  context,
-}) => {
+test('all three destinations work online in Hiligaynon', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Available offline', { exact: true })).toBeVisible({
-    timeout: 30000,
-  });
   await page.locator('.language-label select').selectOption('hil');
-  await context.setOffline(true);
   await page.locator('.public-nav').getByRole('link', { name: 'Giya', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Giya', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Paano magtawag sa kontak' })).toBeVisible();

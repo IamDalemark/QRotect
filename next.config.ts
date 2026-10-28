@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   experimental: { serverActions: { bodySizeLimit: '6mb' } },
+  async redirects() {
+    return [{ source: '/offline', destination: '/directory', permanent: true }];
+  },
   async headers() {
     return [
       {

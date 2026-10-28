@@ -15,8 +15,8 @@ A clear campus emergency notice with strong headings, readable phone numbers, co
 | Ink          | `#281E20` | Main text                    |
 | Muted        | `#66565A` | Supporting text              |
 | Divider      | `#E6DADD` | Boundaries                   |
-| Caution      | `#8A5200` | Offline/review messages      |
-| Success      | `#17665C` | Saved/verified statuses      |
+| Caution      | `#8A5200` | Connection/review messages   |
+| Success      | `#17665C` | Published/verified statuses  |
 
 The main maroon is sampled from the supplied poster. Validate actual color combinations for contrast; color alone never carries status.
 

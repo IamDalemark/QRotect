@@ -66,45 +66,22 @@ test('Guide has practical help while unapproved safety content and map stay hidd
   await expect(page).toHaveURL(/\/directory$/);
   await expect(page.getByRole('link', { name: 'Practice the phone dialer' })).toHaveCount(0);
 });
-test('saved directory survives offline direct links and language switching', async ({
-  page,
-  context,
-}) => {
-  await page.goto('/');
-  await expect(page.getByText('Available offline', { exact: true })).toBeVisible({
-    timeout: 30000,
-  });
-  await context.setOffline(true);
-  await page.goto('/directory?category=fire');
-  await expect(page.getByRole('heading', { name: 'Sample fire station' })).toBeVisible();
-  await page.getByRole('button', { name: 'Call', exact: true }).click();
-  await expect(page.getByRole('dialog')).toContainText('Check the number, then swipe');
-  await page.keyboard.press('Escape');
-  await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('hil');
-  await page.goto('/about');
-  await expect(page.getByRole('heading', { name: 'Parte sa QROTECT' })).toBeVisible();
-});
 test('invalid refreshed payload keeps the last complete directory', async ({ page }) => {
-  await page.goto('/directory');
-  await expect(page.getByText('Available offline', { exact: true })).toBeVisible({
-    timeout: 30000,
-  });
-  // WebKit routing cannot intercept fetches from a service-worker-controlled page.
-  // Fault-inject the next server payload while retaining the real cache and worker.
-  await page.evaluate(() => {
+  // Inject before startup so the test does not race an already-running refresh.
+  // Server-rendered valid contacts must survive invalid background validation.
+  await page.addInitScript(() => {
     const original = window.fetch;
     window.fetch = (input, init) =>
       String(input) === '/api/public/snapshot'
-        ? Promise.resolve(
-            new Response('{"schemaVersion":999}', {
-              headers: { 'Content-Type': 'application/json' },
-            }),
-          )
+        ? Promise.resolve(new Response(JSON.stringify({ invalid: true }), { status: 200 }))
         : original(input, init);
-    window.dispatchEvent(new Event('online'));
   });
+  await page.goto('/directory');
   await expect(
-    page.getByText('Could not refresh — showing saved information', { exact: true }),
+    page.getByText(
+      'Could not check for updates. Reconnect and try again. Displayed information may be out of date',
+      { exact: true },
+    ),
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Sample fire station' })).toBeVisible();
 });
@@ -126,22 +103,6 @@ test('unavailable storage preserves online directory and language controls', asy
   await expect(page.getByRole('heading', { name: 'Sample fire station' })).toBeVisible();
   await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('hil');
   await expect(page.getByRole('heading', { name: 'Sunog', exact: true })).toBeVisible();
-});
-test('public cache excludes administrator and authentication responses', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByText('Available offline', { exact: true })).toBeVisible({
-    timeout: 30000,
-  });
-  await page.goto('/admin');
-  await expect(page.getByRole('heading', { name: 'Administrator sign in' })).toBeVisible();
-  const paths = await page.evaluate(async () => {
-    const paths: string[] = [];
-    for (const name of await caches.keys())
-      for (const req of await (await caches.open(name)).keys())
-        paths.push(new URL(req.url).pathname);
-    return paths;
-  });
-  expect(paths.some((path) => /^\/(admin|auth|api\/admin)(\/|$)/.test(path))).toBe(false);
 });
 test('responsive screens have no overflow or automated accessibility violations', async ({
   page,
@@ -182,4 +143,15 @@ test('responsive screens have no overflow or automated accessibility violations'
     page.getByRole('link', { name: 'Mag-sign in ang administrador', exact: true }),
   ).toBeVisible();
   await page.screenshot({ path: '.impeccable/review/hiligaynon-mobile.png', fullPage: true });
+});
+
+test('Guide and About explain internet access without promising saved access', async ({ page }) => {
+  await page.goto('/guidance');
+  await expect(page.getByRole('heading', { name: 'Accessing the website' })).toBeVisible();
+  await expect(page.getByText(/Keep an internet connection/)).toBeVisible();
+  await expect(page.getByText(/Available offline|Using the directory offline/)).toHaveCount(0);
+  await page.goto('/about');
+  await expect(page.getByText(/An internet connection is needed/)).toBeVisible();
+  await page.locator('.language-label select').selectOption('hil');
+  await expect(page.getByText(/Kinahanglan internet para mabuksan/)).toBeVisible();
 });

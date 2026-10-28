@@ -39,7 +39,7 @@ export const copy = {
     campusEmergency: 'Campus emergency',
     viewContacts: 'View contacts',
     guide: 'Guide',
-    guideIntro: 'Help with calling, finding contacts, and using the saved directory.',
+    guideIntro: 'Help with calling, finding contacts, and accessing the website.',
     guideCalling: 'How to call a contact',
     guideChoose:
       'On Get help, choose Call for the help you need. Choose View contacts to browse other agencies, or use All contacts to search and filter.',
@@ -47,11 +47,9 @@ export const copy = {
       'Check the agency, branch, and number in the confirmation card. Swipe to call, or choose Open Phone instead. Cancel to return without opening Phone.',
     guidePhone:
       'Continue in your phone app and follow any device confirmation. QROTECT opens the selected number; it cannot tell whether the call connects.',
-    guideOffline: 'Using the directory offline',
-    guideSave:
-      'Visit while connected and wait for Available offline before relying on saved access. A first visit needs internet, and your browser may remove saved data.',
-    guideFreshness:
-      'Offline, you can browse saved contacts and open a saved number in Phone. Your device handles the call. Check the saved and verification dates, and reconnect to receive corrections.',
+    guideAccess: 'Accessing the website',
+    guideConnection:
+      'Keep an internet connection when opening pages or refreshing contacts. Check each contact’s verification date. Your phone app handles the call after you confirm the selected number.',
     viewMap: 'View campus map',
     directory: 'All contacts',
     guidance: 'Emergency guidance',
@@ -92,15 +90,9 @@ export const copy = {
     phoneHint: 'Your phone may ask you to confirm before dialing.',
     manual: 'Copy failed. Select the visible number to copy it manually.',
     extension: 'Extension',
-    saved: 'Saved on this device',
-    offline: 'Offline — showing saved information',
-    failed: 'Could not refresh — showing saved information',
-    saving: 'Preparing offline access',
-    notSaved: 'Offline saving is unavailable on this device',
-    ready: 'Available offline',
-    mapReady: 'Map saved offline',
-    mapMissing: 'Map image needs an internet connection',
-    outdated: 'Saved information is over seven days old. Reconnect to refresh.',
+    failed:
+      'Could not check for updates. Reconnect and try again. Displayed information may be out of date',
+    disconnected: 'Internet connection lost. Reconnect to load pages or refresh contacts',
     published: 'Directory published',
     never: 'No directory has been published yet.',
     download: 'Download map',
@@ -128,8 +120,7 @@ export const copy = {
     campusEmergency: 'Emerhensya sa kampus',
     viewContacts: 'Tan-awa ang mga kontak',
     guide: 'Giya',
-    guideIntro:
-      'Bulig sa pagtawag, pagpangita sang kontak, kag paggamit sang na-save nga listahan.',
+    guideIntro: 'Bulig sa pagtawag, pagpangita sang kontak, kag paggamit sang website.',
     guideCalling: 'Paano magtawag sa kontak',
     guideChoose:
       'Sa pahina nga Pangayo bulig, pilia ang Tawag para sa kinahanglan nga bulig. Pilia ang Tan-awa ang mga kontak para sa iban nga ahensya, ukon gamita ang Tanan nga kontak sa pagpangita kag pag-filter.',
@@ -137,11 +128,9 @@ export const copy = {
       'Tan-awa ang ahensya, sangay, kag numero sa kumpirmasyon. I-swipe para magtawag ukon pilia ang Buksan ang Telepono. Pilia ang Kanselahon para magbalik nga wala ginabuksan ang Telepono.',
     guidePhone:
       'Magpadayon sa app sang telepono kag sundon ang kumpirmasyon sang device. Ginabuksan sang QROTECT ang napilian nga numero; indi sini mahibaluan kon nakakonekta ang tawag.',
-    guideOffline: 'Paggamit sang listahan nga wala internet',
-    guideSave:
-      'Magbisita nga may internet kag hulata ang Magamit bisan wala internet antes magsalig sa na-save nga listahan. Kinahanglan internet sa una nga pagbisita, kag mahimo makuha sang browser ang na-save nga datos.',
-    guideFreshness:
-      'Bisan wala internet, mahimo makita ang na-save nga mga kontak kag mabuksan ang numero sa Telepono. Ang device ang nagahimo sang tawag. Tan-awa ang mga petsa sang pag-save kag pagkumpirma, kag magkonekta para mabaton ang mga pagtadlong.',
+    guideAccess: 'Pagbukas sang website',
+    guideConnection:
+      'Kinahanglan internet sa pagbukas sang mga pahina ukon pag-update sang mga kontak. Tan-awa ang petsa sang pagkumpirma sang kontak. Ang app sang telepono ang nagahimo sang tawag pagkatapos mo makumpirma ang numero.',
     viewMap: 'Tan-awa ang mapa sang kampus',
     directory: 'Tanan nga kontak',
     guidance: 'Giya sa emerhensya',
@@ -182,15 +171,10 @@ export const copy = {
     phoneHint: 'Mahimo mangayo sang kumpirmasyon ang telepono antes magtawag.',
     manual: 'Wala makopya. Pilia ang numero kag kopyaha ini.',
     extension: 'Extension',
-    saved: 'Na-save sa sini nga device',
-    offline: 'Wala internet — ginapakita ang na-save nga impormasyon',
-    failed: 'Wala ma-update — ginapakita ang na-save nga impormasyon',
-    saving: 'Ginahanda ang offline nga impormasyon',
-    notSaved: 'Indi ma-save ang offline nga impormasyon sa sini nga device',
-    ready: 'Magamit bisan wala internet',
-    mapReady: 'Na-save ang mapa',
-    mapMissing: 'Kinahanglan internet para sa mapa',
-    outdated: 'Sobra pito ka adlaw ang na-save nga impormasyon. Magkonekta para ma-update.',
+    failed:
+      'Wala masusi ang mga update. Magkonekta kag sulayi liwat. Mahimo daan na ang ginapakita nga impormasyon',
+    disconnected:
+      'Nadula ang internet. Magkonekta para mabuksan ang mga pahina ukon ma-update ang mga kontak',
     published: 'Ginpublikar ang listahan',
     never: 'Wala pa sang ginpublikar nga listahan.',
     download: 'I-download ang mapa',

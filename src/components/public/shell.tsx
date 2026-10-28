@@ -1,17 +1,16 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- full document navigation keeps offline routes independent of RSC requests */
+/* eslint-disable @next/next/no-html-link-for-pages -- public pages use native document navigation */
 'use client';
 import { QrCode, ArrowUpRight, House, List, BookOpen } from 'lucide-react';
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { usePublic } from './context';
-import { OfflineStatus } from './offline-status';
+import { ConnectionStatus } from './connection-status';
 function subscribePath(callback: () => void) {
   window.addEventListener('popstate', callback);
   return () => window.removeEventListener('popstate', callback);
 }
 export function PublicShell({ children }: { children: React.ReactNode }) {
   const { data, language, setLanguage, t, hydrated, preview } = usePublic();
-  // A deterministic empty server value also hydrates the shared saved shell correctly.
-  // Its real address can differ from the /offline route used to render that HTML.
+  // Resolve the browser address after hydration for consistent active navigation.
   const path = useSyncExternalStore(
     subscribePath,
     () => window.location.pathname,
@@ -33,7 +32,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
     return () => observer.disconnect();
   }, []);
   const items = [
-    { href: '/', label: t.home, Icon: House, active: path === '/' || path === '/offline' },
+    { href: '/', label: t.home, Icon: House, active: path === '/' },
     { href: '/directory', label: t.directory, Icon: List, active: path === '/directory' },
     {
       href: '/guidance',
@@ -89,7 +88,7 @@ export function PublicShell({ children }: { children: React.ReactNode }) {
           children
         )}
       </main>
-      {!preview && <OfflineStatus />}
+      {!preview && <ConnectionStatus />}
       <footer className="site-footer">
         <div className="container footer-inner">
           <p>

@@ -11,23 +11,15 @@ import {
 import { type Language, type Snapshot } from '@/lib/directory/schema';
 import { preferNewerPublication } from '@/lib/directory/publication-order';
 import { copy } from '@/lib/directory/labels';
-import {
-  fetchSnapshot,
-  readSaved,
-  saveSnapshot,
-  type SavedDirectory,
-} from '@/lib/directory/offline';
-type OfflineState = {
-  status: 'preparing' | 'ready' | 'offline' | 'failed' | 'unavailable';
-  saved: SavedDirectory | null;
-  update: ServiceWorkerRegistration | null;
-};
+import { fetchSnapshot } from '@/lib/directory/network';
+import { retireOfflineAccess } from '@/lib/directory/legacy-offline';
+export type ConnectionState = 'current' | 'failed' | 'disconnected';
 const Context = createContext<{
   data: Snapshot | null;
   language: Language;
   t: typeof copy.en;
   setLanguage: (value: Language) => void;
-  offline: OfflineState;
+  connection: ConnectionState;
   refresh: () => void;
   hydrated: boolean;
   preview: boolean;
@@ -65,19 +57,16 @@ export function PublicProvider({
   );
   const language = useSyncExternalStore<Language>(subscribe, getLanguage, () => 'en');
   const [data, setData] = useState(initial);
-  const [offline, setOffline] = useState<OfflineState>({
-    status: 'preparing',
-    saved: null,
-    update: null,
-  });
+  const [connection, setConnection] = useState<ConnectionState>('current');
   const queued = useRef<Snapshot | null>(null);
   const refreshRef = useRef(() => {});
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
   useEffect(() => {
-    // Private previews must neither read nor write the visitor publication cache.
+    // A private preview never refreshes or replaces the saved draft with public data.
     if (preview) return;
+    void retireOfflineAccess();
     let active = true;
     let refreshing = false;
     let lastRefresh = 0;
@@ -94,19 +83,6 @@ export function PublicProvider({
         queued.current = null;
       }
     };
-    async function readiness() {
-      try {
-        const shell = await caches.match('/offline', { ignoreSearch: true });
-        if (active && shell && navigator.serviceWorker.controller)
-          setOffline((old) =>
-            old.saved && old.status === 'preparing'
-              ? { ...old, status: navigator.onLine ? 'ready' : 'offline' }
-              : old,
-          );
-      } catch {
-        /* Optional offline storage. */
-      }
-    }
     async function refresh() {
       if (refreshing) return;
       refreshing = true;
@@ -115,99 +91,39 @@ export function PublicProvider({
         const next = preferNewerPublication(displayed, await fetchSnapshot(displayed));
         if (!active) return;
         apply(next);
-        try {
-          const saved = await saveSnapshot(next);
-          if (!active) return;
-          const shell = await caches.match('/offline', { ignoreSearch: true });
-          setOffline((old) => ({
-            ...old,
-            saved,
-            status: shell && navigator.serviceWorker.controller ? 'ready' : 'preparing',
-          }));
-        } catch {
-          if (active) setOffline((old) => ({ ...old, status: 'unavailable' }));
-        }
+        setConnection('current');
       } catch {
-        if (active)
-          setOffline((old) => ({ ...old, status: navigator.onLine ? 'failed' : 'offline' }));
+        if (active) setConnection(navigator.onLine ? 'failed' : 'disconnected');
       } finally {
         refreshing = false;
       }
     }
-    refreshRef.current = () => {
+    const refreshNow = () => {
       void refresh();
     };
-    async function start() {
-      let seed = initial;
-      try {
-        const saved = await readSaved();
-        if (!active) return;
-        if (saved) {
-          seed = preferNewerPublication(initial, saved.snapshot);
-          if (seed !== initial) apply(seed);
-          setOffline((old) => ({
-            ...old,
-            saved,
-            status: navigator.onLine ? 'preparing' : 'offline',
-          }));
-        }
-      } catch {
-        if (active) setOffline((old) => ({ ...old, status: 'unavailable' }));
-      }
-      // Persist the server-rendered publication before background validation.
-      // A fresh browser does not need a second database read to become usable.
-      if (seed && seed === initial) {
-        try {
-          const saved = await saveSnapshot(seed);
-          if (active) setOffline((old) => ({ ...old, saved }));
-        } catch {
-          if (active) setOffline((old) => ({ ...old, status: 'unavailable' }));
-        }
-      }
-      if (active && navigator.onLine) void refresh();
-      if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
-        try {
-          const registration = await navigator.serviceWorker.register('/sw.js');
-          if (registration.waiting && active)
-            setOffline((old) => ({ ...old, update: registration }));
-          registration.addEventListener('updatefound', () => {
-            const installing = registration.installing;
-            installing?.addEventListener('statechange', () => {
-              if (installing.state === 'installed' && navigator.serviceWorker.controller && active)
-                setOffline((old) => ({ ...old, update: registration }));
-            });
-          });
-          await navigator.serviceWorker.ready;
-        } catch {
-          if (active) setOffline((old) => ({ ...old, status: 'unavailable' }));
-        }
-      }
-      if (active) void readiness();
-    }
-    void start();
-    const disconnected = () => setOffline((old) => ({ ...old, status: 'offline' }));
+    refreshRef.current = refreshNow;
+    if (navigator.onLine) refreshNow();
+    const disconnected = () => setConnection('disconnected');
     const visibleRefresh = () => {
       if (
         document.visibilityState === 'visible' &&
         navigator.onLine &&
         Date.now() - lastRefresh >= 60_000
       )
-        void refresh();
+        refreshNow();
     };
     const interval = window.setInterval(visibleRefresh, 60_000);
     document.addEventListener('visibilitychange', visibleRefresh);
-    window.addEventListener('online', refreshRef.current);
+    window.addEventListener('online', refreshNow);
     window.addEventListener('offline', disconnected);
     window.addEventListener('qrotect-dialog-closed', closed);
-    navigator.serviceWorker?.addEventListener('controllerchange', readiness);
     return () => {
       active = false;
       window.clearInterval(interval);
       document.removeEventListener('visibilitychange', visibleRefresh);
-      window.removeEventListener('online', refreshRef.current);
+      window.removeEventListener('online', refreshNow);
       window.removeEventListener('offline', disconnected);
       window.removeEventListener('qrotect-dialog-closed', closed);
-      navigator.serviceWorker?.removeEventListener('controllerchange', readiness);
     };
   }, [initial, preview]);
   function setLanguage(value: Language) {
@@ -215,7 +131,7 @@ export function PublicProvider({
     try {
       localStorage.setItem('qrotect-language', value);
     } catch {
-      /* storage is optional */
+      /* preference storage is optional */
     }
     window.dispatchEvent(new Event('qrotect-language'));
   }
@@ -228,7 +144,7 @@ export function PublicProvider({
         language,
         t: copy[language],
         setLanguage,
-        offline,
+        connection,
         refresh: () => refreshRef.current(),
       }}
     >

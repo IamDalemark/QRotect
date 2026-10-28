@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- full document navigation keeps offline routes independent of RSC requests */
+/* eslint-disable @next/next/no-html-link-for-pages -- public pages use native document navigation */
 'use client';
 import { useId, useState, useSyncExternalStore } from 'react';
 import {
@@ -282,10 +282,9 @@ export function GuidanceScreen() {
           <ArrowRight size={16} aria-hidden="true" />
         </a>
       </section>
-      <section aria-labelledby="guide-offline">
-        <h2 id="guide-offline">{t.guideOffline}</h2>
-        <p>{t.guideSave}</p>
-        <p>{t.guideFreshness}</p>
+      <section aria-labelledby="guide-access">
+        <h2 id="guide-access">{t.guideAccess}</h2>
+        <p>{t.guideConnection}</p>
       </section>
       {Boolean(guides.length) && (
         <section aria-labelledby="guide-safety">
@@ -364,7 +363,7 @@ export function MapScreen() {
             </a>
           </div>
           <div className="map-viewport" tabIndex={0} aria-label={t.map}>
-            {/* eslint-disable-next-line @next/next/no-img-element -- versioned approved asset supports offline downloads */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- approved map is rendered at its selectable zoom level */}
             <img
               src={`/api/public/maps/${map.id}`}
               alt={localized(map.description, language)}
@@ -410,15 +409,11 @@ export function AboutScreen() {
           ? 'QROTECT helps learners, teachers, and staff find campus and public emergency contacts. Confirm a contact and swipe to open the selected number in your phone app. Your device handles the call.'
           : 'Ang QROTECT nagabulig sa mga estudyante, manunudlo, kag kawani sa pagpangita sang mga kontak sa emerhensya sa kampus kag publiko. Kumpirmaha ang kontak kag i-swipe para buksan ang napilian nga numero sa telepono.'}
       </p>
-      <h2>
-        {language === 'en'
-          ? 'Saved information and privacy'
-          : 'Na-save nga impormasyon kag pribasiya'}
-      </h2>
+      <h2>{language === 'en' ? 'Internet access and privacy' : 'Internet kag pribasiya'}</h2>
       <p>
         {language === 'en'
-          ? 'After a successful online visit, the public directory can be saved on this device. A first visit needs internet. Saved records can become out of date; check their dates and reconnect to refresh. No student accounts, location tracking, or call histories are collected.'
-          : 'Kinahanglan internet sa una nga pagbisita. Mahimo ma-save ang listahan para magamit bisan wala internet. Tan-awa ang petsa kag magkonekta para ma-update. Wala ginakolekta nga student account, lokasyon, ukon listahan sang mga tawag.'}
+          ? 'An internet connection is needed to open QROTECT and load current contacts. Check each contact’s verification date. No student accounts, location tracking, or call histories are collected.'
+          : 'Kinahanglan internet para mabuksan ang QROTECT kag makita ang mga kontak. Tan-awa ang petsa sang pagkumpirma sang kontak. Wala ginakolekta nga student account, lokasyon, ukon listahan sang mga tawag.'}
       </p>
       <a className="button secondary" href="/directory">
         {t.back}

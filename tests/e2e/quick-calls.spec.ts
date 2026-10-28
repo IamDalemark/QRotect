@@ -29,9 +29,6 @@ test('all six Home shortcuts open exact confirmation in one action without navig
   await page.goto('/');
   const group = page.getByRole('region', { name: 'Emergency contacts', exact: true });
   await expect(group.getByRole('button')).toHaveCount(6);
-  await expect(page.getByText('Available offline', { exact: true })).toBeVisible({
-    timeout: 30000,
-  });
   const requests: string[] = [];
   page.on('request', (request) => requests.push(request.url()));
   for (const category of categoryIds) {
@@ -60,15 +57,8 @@ test('all six Home shortcuts open exact confirmation in one action without navig
   );
 });
 
-test('saved Home shortcuts work offline in Hiligaynon with the tap alternative', async ({
-  page,
-  context,
-}) => {
+test('Home shortcuts work in Hiligaynon with the tap alternative', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText('Available offline', { exact: true })).toBeVisible({
-    timeout: 30000,
-  });
-  await context.setOffline(true);
   await page.goto('/');
   await page.getByRole('combobox', { name: 'Language', exact: true }).selectOption('hil');
   await page.getByRole('button', { name: /Tawag sa Pulis/ }).click();
