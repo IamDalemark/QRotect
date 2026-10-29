@@ -76,3 +76,7 @@ Credentials, build output, screenshots and local QR artwork are untracked. Impec
 ## Relational database redesign
 
 The private directory is stored in related contact, number, category, service-area, shortcut, guidance and map tables. Public delivery retains complete versioned snapshots. The migration is applied locally; hosted migration and frontend release are pending. See [database design and rollout](docs/RELATIONAL_DATABASE.md). Run `pnpm test:migration` for isolated conversion/rollback checks and `pnpm test:db` for privacy, foreign keys, publication and restore checks.
+
+## Performance tooling
+
+See [performance measurements and commands](docs/PERFORMANCE.md) for the mobile production baseline and opt-in Webpack bundle reports. Run `pnpm analyze` for local bundle reports and `pnpm perf:mobile <label>` against a local production server. Generated reports stay in ignored local folders.

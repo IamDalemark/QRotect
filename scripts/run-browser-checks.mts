@@ -107,6 +107,7 @@ try {
             'tests/e2e/public.spec.ts',
             'tests/e2e/calling.spec.ts',
             'tests/e2e/performance.spec.ts',
+            'tests/e2e/map-layout.spec.ts',
             'tests/e2e/filters.spec.ts',
             'tests/e2e/quick-calls.spec.ts',
             'tests/e2e/navigation.spec.ts',

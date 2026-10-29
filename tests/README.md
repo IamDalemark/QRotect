@@ -19,3 +19,9 @@ Normal server caching remains: `pnpm exec tsx scripts/check-public-cache.mts` ch
 `pnpm test:db` additionally checks private-table/helper denial, admin-only controlled writes, complete bilingual round-trip and ordering, foreign keys, save rollback, revision conflicts, publication provenance/immutability, restore and account deletion. Test records roll back. Browser checks use a clean local dataset and temporary account; privileged cleanup is restricted to that test account and its publications.
 
 For a focused administrator rerun, use `pnpm exec tsx scripts/run-browser-checks.mts --admin-only`. It uses the real local Supabase API (including safe-update protections), an isolated port and temporary account, and checks save, preview, publication, withdrawal and restore. Public checks use port 3120 and administrator checks use 3122; occupied test ports fail before setup. Logs remain in `.local/browser-checks`.
+
+## Performance and map regression checks
+
+`pnpm perf:mobile <label>` measures a local production server with a fixed mobile profile and writes ignored JSON reports. See [measurement methodology](../docs/PERFORMANCE.md) for reproducible commands and limitations. `pnpm analyze` generates local Webpack bundle reports.
+
+The public suite includes a delayed approved test image to verify stable map viewport/instruction geometry, zoom and download links. Administrator unit checks ensure unavailable history cannot block editing or private preview, Overview finds the actual current publication, and protected data remains inaccessible after authorization failure.

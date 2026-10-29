@@ -1,3 +1,18 @@
+# Next.js performance pass — 29 October 2026
+
+Implemented on `refactor/nextjs-performance`. Public screen modules are separated by route, administrator loading is section-specific, and approved maps reserve a stable scrollable viewport. Added opt-in Webpack bundle reports and a repeatable local mobile measurement script. No navigation, publication-cache, database-schema or hosted-content changes.
+
+- `pnpm test`: **48 passed** across eight files, including administrator loading, actual current-publication selection, history failures and authorization denial.
+- Public Playwright matrix: **96 passed, 15 intentional profile skips** across desktop Chromium, Android Chromium and iPhone WebKit. Includes delayed map-image geometry, zoom/download behavior, bilingual controls, accessibility, filters, navigation, publication refresh and immediate confirmation. Telephone links were intercepted.
+- Real local Supabase administrator browser flow: **1 passed, 2 intentional duplicate-profile skips**. Save, private preview, publication, withdrawal and restore passed with temporary local test records cleaned up.
+- Analyzer-enabled `pnpm check` passed; local reports were generated for Webpack. An empty edge compiler report is expected when no bundle exists. The final ordinary `pnpm check` also passed with analysis disabled (formatting, lint, strict types and production build). `git diff --check` passed.
+- Three cold-cache synthetic mobile runs per route before/after: JavaScript transfer fell **1.5–1.9%** on Home/Directory and **9.7–10.6%** on informational routes. Text LCP was effectively unchanged; no broader speed claim is made. See [measurement method and results](PERFORMANCE.md).
+- Editor/preview content reads decrease from three queries to one; Overview uses two; History retains all three. Authentication queries are excluded from these counts. No hosted latency benchmark was performed.
+
+No merge, remote push, hosted migration or deployment was performed in this pass.
+
+---
+
 # Relational database redesign — 29 October 2026
 
 Implemented on `feature/relational-directory`, retaining the earlier offline-removal work. Migrations `202610290001_relational_directory.sql` and `202610290002_scoped_relational_save.sql` are applied to local Supabase only. Hosted schema/content and frontend deployment are unchanged.

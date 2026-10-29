@@ -600,6 +600,8 @@ textarea::placeholder {
   margin-block: 20px;
 }
 .map-viewport {
+  /* Reserve the same viewing area before the approved image arrives and at every zoom. */
+  height: min(70svh, 40rem);
   overflow: auto;
   max-height: 70vh;
   border: 1px solid var(--color-divider);

@@ -24,7 +24,9 @@
     "review:admin": "tsx scripts/preview-admin.mts",
     "supabase:check": "tsx scripts/check-supabase.mts",
     "supabase:prepare": "tsx scripts/prepare-supabase.mts",
-    "seed:demo": "tsx scripts/seed-demo-contacts.mts"
+    "seed:demo": "tsx scripts/seed-demo-contacts.mts",
+    "analyze": "ANALYZE=true pnpm build",
+    "perf:mobile": "tsx scripts/measure-performance.mts"
   },
   "dependencies": {
     "@fontsource-variable/public-sans": "5.3.0",
@@ -42,6 +44,7 @@
     "@axe-core/playwright": "4.14.0",
     "@commitlint/cli": "21.2.4",
     "@commitlint/config-conventional": "21.2.4",
+    "@next/bundle-analyzer": "16.4.3",
     "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "22.19.21",
