@@ -8,7 +8,7 @@ Guidance needs an English/Hiligaynon title and steps, source link, reviewer name
 
 Each item publication is atomic and preserves unrelated public items and private working edits. Revision conflicts require reloading; edits are never silently overwritten. History restore replaces the entire selected version, not one item. Public cache invalidation and visible-page refreshes remain unchanged.
 
-Deployment prerequisite (hosted approval pending): apply `202610290003_publish_directory_item.sql` before deploying this frontend. It adds two functions and execute grants only; it does not backfill, change existing records, publish a version, alter tables or remove the previous APIs. The first six migrations were applied to the hosted project during the administrator repair on 29 October 2026; older pending-migration statements below are historical.
+Deployment prerequisite completed: `202610290003_publish_directory_item.sql` was applied hosted with explicit owner approval on 29 October 2026. The matching frontend still needs release. It adds two functions and execute grants only; it does not backfill, change existing records, publish a version, alter tables or remove the previous APIs. The first six migrations were applied to the hosted project during the administrator repair on 29 October 2026; older pending-migration statements below are historical.
 
 ---
 

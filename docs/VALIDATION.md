@@ -13,7 +13,7 @@ Implemented on `feat/admin-item-publishing` for integration through `develop` in
 - Contact desktop and map mobile captures were visually inspected; the contact form passed automated accessibility checks. Public responsive/accessibility/calling checks passed.
 - Final `pnpm check` passed formatting, lint, strict types and production build; `git diff --check` passed.
 
-Hosted rollout is still pending: automatic approval review rejected the new remote migration because this request explicitly authorized implementation/local merges rather than a hosted schema change. Apply the single additive migration with separate owner approval before deploying this frontend. No hosted content was changed, no new backup was created, and no frontend deployment or remote Git push was performed. The readiness script now checks the protected draft-reader and item-publisher RPCs so a missing-function mismatch is caught before release.
+Hosted migration completed with explicit owner approval on 29 October 2026, after the initial automatic approval review required separate authorization. Only `202610290003_publish_directory_item.sql` was applied. Hosted readiness checks confirm the draft reader and item publisher are available and deny anonymous execution. The deployed health, public snapshot and administrator login endpoints returned HTTP 200. The public snapshot remains version `3925ceaa-c5d7-4d81-b56a-9b3fa72f96e6` with six contacts, matching the pre-update publication. No content was published or changed, no new backup was created, and no frontend deployment or remote Git push was performed. Implementation commit `245946e` is merged locally through `develop` into `main`; frontend release remains pending. Older rollout statements below are historical.
 
 ---
 

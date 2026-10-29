@@ -6,7 +6,7 @@ A QR-accessible emergency contact directory covering campus, Iloilo City, and na
 
 Implemented locally: English/Hiligaynon browsing, category/area/search filters, six Home category groups with separate call/browse actions and explicit administrator-selected destinations, a practical Guide, three-item top/phone-bottom navigation, copy controls, confirmation and swipe-to-call, invited administrator authentication, private drafts, bilingual previews, atomic publication, history/restore, private map uploads, and online background publication refresh.
 
-Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, physical phone checks, and the participant pilot remain content/release gates. The hosted Supabase project includes the first six migrations, through the relational redesign. The new item-publishing function migration is verified locally and requires separate hosted approval before deploying this frontend. No Vercel deployment was performed by this implementation.
+Sample mode contains clearly marked demonstration records. Real contacts, translation review, approved guidance/map, physical phone checks, and the participant pilot remain content/release gates. The hosted Supabase project includes all seven migrations, through the item-publishing extension, applied with owner approval. No Vercel deployment was performed by this implementation.
 
 Initial setup and the earlier feature branches are integrated into `develop`. `main` receives the same locally verified implementation at the user’s request; approved content and hosted release gates remain separate. Work is in **/Users/daniel/Documents/QRotect**, with the Next.js source in `src/app`.
 
@@ -75,7 +75,7 @@ Credentials, build output, screenshots and local QR artwork are untracked. Impec
 
 ## Relational database redesign
 
-The private directory is stored in related contact, number, category, service-area, shortcut, guidance and map tables. Public delivery retains complete versioned snapshots. The relational redesign is applied locally and hosted. The additive item-publishing extension and corresponding frontend release remain pending hosted rollout. See [database design and rollout](docs/RELATIONAL_DATABASE.md). Run `pnpm test:migration` for isolated conversion/rollback checks and `pnpm test:db` for privacy, foreign keys, publication and restore checks.
+The private directory is stored in related contact, number, category, service-area, shortcut, guidance and map tables. Public delivery retains complete versioned snapshots. The relational redesign is applied locally and hosted. The additive item-publishing extension is also applied hosted; the corresponding frontend release remains pending. See [database design and rollout](docs/RELATIONAL_DATABASE.md). Run `pnpm test:migration` for isolated conversion/rollback checks and `pnpm test:db` for privacy, foreign keys, publication and restore checks.
 
 ## Performance tooling
 
@@ -83,4 +83,4 @@ See [performance measurements and commands](docs/PERFORMANCE.md) for the mobile 
 
 ## Administrator item publishing
 
-Administrators publish one contact, Home assignment, guidance topic or map directly. Forms provide concrete examples and inline errors; maps accept drag-and-drop or a file picker. No draft-save or publish-all step is required. Complete versions remain available in History. See [operating instructions](docs/OPERATIONS.md). Apply the additive `202610290003_publish_directory_item.sql` before releasing this frontend; earlier hosted migrations were completed during the 29 October administrator repair.
+Administrators publish one contact, Home assignment, guidance topic or map directly. Forms provide concrete examples and inline errors; maps accept drag-and-drop or a file picker. No draft-save or publish-all step is required. Complete versions remain available in History. See [operating instructions](docs/OPERATIONS.md). The additive `202610290003_publish_directory_item.sql` is applied hosted; the frontend can now be released against it. Earlier hosted migrations were completed during the 29 October administrator repair.
