@@ -24,6 +24,17 @@ async function fails(sql: string, values: unknown[], code: string) {
 const rpc = 'select public.publish_directory_item($1,$2,$3,$4) revision';
 try {
   await db.query('begin');
+  const settings = await db.query(
+    "select proconfig from pg_proc where oid in ('public.publish_directory_item(text,text,jsonb,bigint)'::regprocedure, 'public.publish_directory(bigint)'::regprocedure)",
+  );
+  assert.equal(settings.rows.length, 2);
+  for (const row of settings.rows) assert.ok(row.proconfig.includes('TimeZone=Asia/Manila'));
+  checks++;
+  const today = (
+    await db.query("select (now() at time zone 'Asia/Manila')::date::text as review_date")
+  ).rows[0].review_date;
+  // Publishers must use Manila even when a caller's session uses another timezone.
+  await db.query("set local timezone = 'Pacific/Honolulu'");
   const admin = randomUUID(),
     visitor = randomUUID();
   await db.query('insert into auth.users(id) values($1),($2)', [admin, visitor]);
@@ -41,7 +52,7 @@ try {
   for (const c of document.contacts) {
     c.approved = true;
     c.source = 'https://example.test/contact';
-    c.verifiedAt = '2026-01-01';
+    c.verifiedAt = today;
   }
   let revision = Number(
     (await db.query('select revision from public.directory_drafts')).rows[0].revision,
@@ -122,7 +133,7 @@ try {
     title: { en: 'Test topic', hil: 'Test title' },
     steps: [{ en: 'Supplied test text', hil: 'Test text hil' }],
     source: 'https://example.test/guide',
-    reviewedAt: '2026-01-01',
+    reviewedAt: today,
     reviewer: 'Test reviewer',
     approved: true,
   };
@@ -137,7 +148,7 @@ try {
     description: { en: 'Test map', hil: 'Test map text' },
     instructions: [{ en: 'Test text', hil: 'Test text hil' }],
     source: 'https://example.test/map',
-    reviewedAt: '2026-01-01',
+    reviewedAt: today,
     reviewer: 'Test reviewer',
     approved: true,
   };

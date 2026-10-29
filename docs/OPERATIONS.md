@@ -1,3 +1,5 @@
+Review dates follow Philippine time (`Asia/Manila`). Deploy the frontend date fix with `202610300001_philippine_review_dates.sql`, which sets the same timezone on both publishing functions. The timezone migration is verified locally and pending hosted approval. Publish feedback appears beside the editor controls; admin navigation shows section-shaped loading placeholders.
+
 # Item publishing — current administrator workflow
 
 Edit one item and use **Publish contact**, **Publish assignment**, **Publish guidance** or **Publish map**. Validation messages appear under the fields. Unpublished browser changes are not autosaved; leaving or changing items asks before discarding them. There is no publish-all page; old `/admin/publish` links redirect to Overview.

@@ -101,7 +101,7 @@ export async function uploadMap(form: FormData) {
     ? { ok: false, message: 'Upload failed. Reconnect and try again.' }
     : {
         ok: true,
-        message: 'Image uploaded privately. Complete its reviewed text before saving.',
+        message: 'Image uploaded privately. Complete its reviewed text before publishing.',
         id,
         assetPath,
       };
@@ -116,7 +116,7 @@ async function refreshPublication(action: string) {
     await currentSnapshot();
     return {
       ok: true,
-      message: `${action}. Public data refreshed. Open pages check for updates every minute while visible.`,
+      message: `${action}.`,
     };
   } catch {
     // The transaction already committed. Reporting a failed publication here

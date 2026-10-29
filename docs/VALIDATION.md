@@ -1,3 +1,14 @@
+# Administrator dates, loading and feedback — 30 October 2026
+
+- Review and verification dates use the Philippine calendar (`Asia/Manila`) in browser and server validation. Regression coverage accepts 30 October immediately after Philippine midnight on 29 October UTC, and rejects the following day.
+- Additive migration `202610300001_philippine_review_dates.sql` sets the same timezone on the two publishing functions. It preserves function authorization/search paths and does not mutate content, tables or permissions. Applied locally; hosted application requires separate owner approval.
+- Administrator route loading boundaries retain the shared navigation and show placeholders shaped for the contact/guidance/assignment editor, map uploader, overview, history and password form. Skeletons provide an accessible loading status without animation. This improves loading feedback; no server latency improvement is claimed.
+- Publish results appear in a dismissible card after the editor controls, with focus on confirmed publication. The success message is simply “Contact published.” / “Guidance published.” / “Map published.” / “Assignment published.” Cache-refresh uncertainty still receives an explicit warning.
+- Browser checks: 96 public passes and one complete administrator flow passed, with 17 intentional profile skips. Delayed admin navigation showed the skeleton, then the editor; publication cards received focus, contained the shortened message, and publishing/review/map/restore behavior passed. Desktop loading and publication captures were visually inspected.
+- Unit checks: 57 passed. Local database checks passed, including 20 item-publication checks with Manila-dated content under a Honolulu caller session. Four migration compatibility/rollback scenarios passed. Production formatting, lint, strict types and build passed.
+
+---
+
 # Direct item publishing and administrator forms — 29 October 2026
 
 Implemented on `feat/admin-item-publishing` for integration through `develop` into `main`, as requested by the owner.

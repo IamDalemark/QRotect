@@ -1,3 +1,4 @@
+import { philippineDate } from '@/lib/directory/date';
 import { contactSchema, guideSchema, mapSchema, quickCallSchema } from '@/lib/directory/schema';
 export type ItemKind = 'contact' | 'guidance' | 'map' | 'quick-call';
 export type FieldErrors = Record<string, string>;
@@ -41,7 +42,7 @@ export function itemErrors(kind: ItemKind, value: unknown): FieldErrors {
     const value = read(path);
     return typeof value === 'string' ? value.trim() : '';
   };
-  const today = new Date().toISOString().slice(0, 10);
+  const today = philippineDate();
   if (kind === 'contact' && read('active') === true) {
     if (!text('source'))
       errors.source = 'Add the official webpage where this contact was verified.';

@@ -1,3 +1,4 @@
+import { philippineDate } from '../../src/lib/directory/date';
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 const adminOrigin = process.env.QROTECT_E2E_ADMIN_ORIGIN || 'http://127.0.0.1:3102';
@@ -13,7 +14,15 @@ test('administrator publishes individual items with inline validation, reviewed 
   await page.getByLabel('Password', { exact: true }).fill(process.env.QROTECT_E2E_ADMIN_PASSWORD!);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Directory overview' })).toBeVisible();
+  await page.route('**/admin/contacts?*', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    await route.continue();
+  });
   await page.getByRole('link', { name: 'Contacts', exact: true }).click();
+  await expect(page.getByRole('status', { name: 'Loading administrator content' })).toBeVisible();
+  await page.screenshot({ path: '.local/browser-checks/admin-loading.png' });
+  await expect(page.getByRole('heading', { name: 'Manage contacts', exact: true })).toBeVisible();
+  await page.unroute('**/admin/contacts?*');
   await page.getByRole('button', { name: 'Add contact', exact: true }).click();
   await page.getByLabel('Agency', { exact: true }).fill('QROTECT browser test');
   await page
@@ -48,7 +57,7 @@ test('administrator publishes individual items with inline validation, reviewed 
   await page
     .getByLabel('Official verification source URL', { exact: true })
     .fill('https://example.test/verified');
-  await page.getByLabel('Last verified date', { exact: true }).fill('2026-01-01');
+  await page.getByLabel('Last verified date', { exact: true }).fill(philippineDate());
   await page
     .getByLabel('I checked this contact and both language versions', { exact: true })
     .check();
@@ -59,6 +68,9 @@ test('administrator publishes individual items with inline validation, reviewed 
   await page.screenshot({ path: '.impeccable/review/admin-item-contact.png', fullPage: true });
   await page.getByRole('button', { name: 'Publish contact', exact: true }).click();
   await expect(page.locator('.admin-status')).toContainText('Contact published');
+  await expect(page.locator('.admin-feedback')).toBeFocused();
+  await expect(page.locator('.admin-feedback')).not.toContainText('Open pages');
+  await page.screenshot({ path: '.local/browser-checks/admin-published.png' });
   const original = await (await page.request.get(`${adminOrigin}/api/public/snapshot`)).json();
   expect(original.contacts).toHaveLength(1);
   await page.getByRole('link', { name: 'Home quick calls', exact: true }).click();
@@ -114,7 +126,7 @@ test('administrator publishes individual items with inline validation, reviewed 
   ).toHaveValue('Test text, not emergency advice');
   await page.getByLabel('Source URL', { exact: true }).fill('https://example.test/guide');
   await page.getByLabel('Reviewer', { exact: true }).fill('Browser test reviewer');
-  await page.getByLabel('Review date', { exact: true }).fill('2026-01-01');
+  await page.getByLabel('Review date', { exact: true }).fill(philippineDate());
   await page
     .getByLabel('The reviewer approved this topic and both language versions', { exact: true })
     .check();
@@ -161,7 +173,7 @@ test('administrator publishes individual items with inline validation, reviewed 
     .fill('Test nga teksto');
   await page.getByLabel('Source URL', { exact: true }).fill('https://example.test/map');
   await page.getByLabel('Reviewer', { exact: true }).fill('Test reviewer');
-  await page.getByLabel('Review date', { exact: true }).fill('2026-01-01');
+  await page.getByLabel('Review date', { exact: true }).fill(philippineDate());
   await page
     .getByLabel('The reviewer approved this map and both text versions', { exact: true })
     .check();

@@ -1,3 +1,4 @@
+import { philippineDate } from '@/lib/directory/date';
 import { z } from 'zod';
 
 export const categoryIds = ['police', 'fire', 'medical', 'hospital', 'disaster', 'school'] as const;
@@ -120,7 +121,7 @@ export function publicationIssues(data: Snapshot): string[] {
       issues.push(`${c.agency}: approval, verification date, and source are required.`);
     if (!c.description.hil || c.numbers.some((n) => !n.label.hil))
       issues.push(`${c.agency}: reviewed Hiligaynon wording is required.`);
-    if (c.verifiedAt > new Date().toISOString().slice(0, 10))
+    if (c.verifiedAt > philippineDate())
       issues.push(`${c.agency}: verification cannot be in the future.`);
   }
   issues.push(...quickCallIssues(data));

@@ -211,6 +211,11 @@ export function Workbench({
   );
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState('');
+  const [successful, setSuccessful] = useState(false);
+  const feedback = useRef<HTMLElement>(null);
+  useEffect(() => {
+    if (successful && message) feedback.current?.focus();
+  }, [successful, message]);
   const [search, setSearch] = useState('');
   const [aliasText, setAliasText] = useState<Record<string, string>>({});
   const [pending, start] = useTransition();
@@ -258,7 +263,8 @@ export function Workbench({
     });
     setDirty(true);
     setServerErrors({});
-    setMessage('Unpublished changes.');
+    setMessage('');
+    setSuccessful(false);
   }
   function select(id: string) {
     if (dirty && !window.confirm('Discard unpublished changes to this item?')) return;
@@ -311,6 +317,7 @@ export function Workbench({
     e?.preventDefault();
     const value = remove ? null : item;
     const fields = itemErrors(kind, value);
+    setSuccessful(false);
     setSubmitted(true);
     setServerErrors({});
     if (Object.keys(fields).length) {
@@ -325,6 +332,7 @@ export function Workbench({
       )
     )
       return;
+    setMessage('');
     start(async () => {
       try {
         const result = await publishItem(
@@ -333,6 +341,7 @@ export function Workbench({
           value,
           revision,
         );
+        setSuccessful(result.ok);
         setMessage(result.message);
         if (result.ok && result.revision != null) {
           setRevision(result.revision);
@@ -458,14 +467,17 @@ export function Workbench({
       <div className="admin-title">
         <div>
           <h1>{titles[section] || 'Administration'}</h1>
+          {section === 'history' && message && (
+            <section className="admin-status admin-feedback" role="status" aria-live="polite">
+              <h2>{successful ? 'Version restored' : 'Check this update'}</h2>
+              <p>{message}</p>
+            </section>
+          )}
           {!['overview', 'history'].includes(section) && (
             <p>Publish one item at a time. Other items stay unchanged.</p>
           )}
         </div>
       </div>
-      <p className="admin-status" role="status" aria-live="polite">
-        {message}
-      </p>
       {section === 'overview' && (
         <>
           <p>
@@ -507,6 +519,7 @@ export function Workbench({
                   start(async () => {
                     try {
                       const r = await restorePublication(p.id, revision);
+                      setSuccessful(r.ok);
                       setMessage(r.message);
                     } catch {
                       setMessage(
@@ -1211,6 +1224,28 @@ export function Workbench({
                   </div>
                 )}
               </fieldset>
+              {message && (
+                <section
+                  ref={feedback}
+                  tabIndex={-1}
+                  className={`admin-status admin-feedback ${successful ? 'success' : ''}`}
+                  role="status"
+                  aria-live="polite"
+                >
+                  <h2>{successful ? 'Update published' : 'Check this item'}</h2>
+                  <p>{message}</p>
+                  <button
+                    type="button"
+                    className="button secondary"
+                    onClick={() => {
+                      setMessage('');
+                      setSuccessful(false);
+                    }}
+                  >
+                    Dismiss
+                  </button>
+                </section>
+              )}
             </form>
           </div>
         </Fields.Provider>
