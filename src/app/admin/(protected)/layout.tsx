@@ -22,7 +22,6 @@ export default async function Layout({ children }: { children: React.ReactNode }
             ['quick-calls', 'Home quick calls'],
             ['guidance', 'Guidance'],
             ['map', 'Campus map'],
-            ['publish', 'Preview & publish'],
             ['history', 'History'],
             ['password', 'Password'],
           ].map(([url, label]) => (

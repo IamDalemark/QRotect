@@ -27,17 +27,21 @@ export async function dashboard(section = 'overview') {
           .order('created_at', { ascending: false })
           .limit(30)
       : Promise.resolve({ data: [] as AuditEvent[], error: null });
-  const [draft, history, events] = await Promise.all([
+  const [draft, history, events, published] = await Promise.all([
     client.rpc('get_directory_draft').single(),
     historyRequest,
     eventsRequest,
+    section === 'quick-calls'
+      ? client.from('publications').select('snapshot').eq('current', true).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
   ]);
-  if (draft.error || !draft.data || history.error || events.error)
+  if (draft.error || !draft.data || history.error || events.error || published.error)
     throw new Error('Administrator data could not be loaded. Reconnect and reload.');
   return {
     initial: snapshotSchema.parse(draft.data.payload),
     initialRevision: draft.data.revision,
     history: history.data ?? [],
     events: events.data ?? [],
+    publishedContacts: published.data ? snapshotSchema.parse(published.data.snapshot).contacts : [],
   };
 }

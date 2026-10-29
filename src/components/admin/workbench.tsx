@@ -1,92 +1,246 @@
+/* eslint-disable @next/next/no-img-element -- authenticated original map preview */
 'use client';
 import Link from 'next/link';
-import { useEffect, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import {
-  saveDraft,
-  publishDraft,
-  restorePublication,
-  uploadMap,
-} from '@/app/admin/content-actions';
-import { categoryIds, publicationIssues, type Snapshot } from '@/lib/directory/schema';
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+} from 'react';
+import { publishItem, restorePublication, uploadMap } from '@/app/admin/content-actions';
+import { categoryIds, type Snapshot, type Contact } from '@/lib/directory/schema';
+import { itemErrors, type ItemKind, type FieldErrors } from '@/lib/admin/item-validation';
 import { categories, areas } from '@/lib/directory/labels';
 import { telephoneHref } from '@/lib/directory/calling';
-import { quickCallTarget } from '@/lib/directory/quick-calls';
+
 type Props = {
   initial: Snapshot;
   initialRevision: number;
   section: string;
+  publishedContacts: Contact[];
   history: { id: string; created_at: string; current: boolean }[];
   events: { id: number; action: string; revision: number | null; created_at: string }[];
 };
+const Fields = createContext<{ errors: FieldErrors; touch: (name: string) => void }>({
+  errors: {},
+  touch: () => {},
+});
 function Field({
+  name,
   label,
   value,
   onChange,
+  hint,
+  placeholder,
   type = 'text',
+  options,
 }: {
+  name: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
+  hint?: string;
+  placeholder?: string;
   type?: string;
+  options?: { value: string; label: string }[];
 }) {
+  const id = useId();
+  const { errors, touch } = useContext(Fields);
+  const error = errors[name];
+  const common = {
+    id,
+    name,
+    value,
+    'aria-invalid': Boolean(error),
+    'aria-describedby':
+      [hint ? `${id}-hint` : '', error ? `${id}-error` : ''].filter(Boolean).join(' ') || undefined,
+    onBlur: (event: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+      if (!(event.relatedTarget instanceof HTMLButtonElement)) touch(name);
+    },
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+      onChange(e.target.value),
+  };
   return (
-    <label>
-      {label}
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} />
-    </label>
+    <div className="admin-field">
+      <label htmlFor={id}>{label}</label>
+      {hint && (
+        <p className="field-hint" id={`${id}-hint`}>
+          {hint}
+        </p>
+      )}
+      {options ? (
+        <select {...common}>
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <input
+          {...common}
+          type={type}
+          placeholder={placeholder}
+          inputMode={type === 'tel' ? 'tel' : undefined}
+        />
+      )}
+      {error && (
+        <p className="field-error" id={`${id}-error`}>
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+function Check({
+  name,
+  label,
+  checked,
+  onChange,
+  hint,
+}: {
+  name: string;
+  label: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+  hint?: string;
+}) {
+  const id = useId();
+  const { errors, touch } = useContext(Fields);
+  const error = errors[name];
+  return (
+    <div className="admin-field">
+      <label className="checkbox-label" htmlFor={id}>
+        <input
+          id={id}
+          name={name}
+          type="checkbox"
+          checked={checked}
+          onBlur={(event) => {
+            if (!(event.relatedTarget instanceof HTMLButtonElement)) touch(name);
+          }}
+          aria-invalid={Boolean(error)}
+          aria-describedby={
+            [hint ? `${id}-hint` : '', error ? `${id}-error` : ''].filter(Boolean).join(' ') ||
+            undefined
+          }
+          onChange={(e) => onChange(e.target.checked)}
+        />
+        {label}
+      </label>
+      {hint && (
+        <p id={`${id}-hint`} className="field-hint">
+          {hint}
+        </p>
+      )}
+      {error && (
+        <p id={`${id}-error`} className="field-error">
+          {error}
+        </p>
+      )}
+    </div>
   );
 }
 function Bilingual({
+  name,
   label,
   value,
   onChange,
+  hint,
 }: {
+  name: string;
   label: string;
   value: { en: string; hil: string };
-  onChange: (value: { en: string; hil: string }) => void;
+  onChange: (language: 'en' | 'hil', text: string) => void;
+  hint?: string;
 }) {
   return (
     <fieldset className="bilingual-fields">
       <legend>{label}</legend>
-      <Field label="English" value={value.en} onChange={(en) => onChange({ ...value, en })} />
-      <Field label="Hiligaynon" value={value.hil} onChange={(hil) => onChange({ ...value, hil })} />
+      {hint && <p className="field-hint">{hint}</p>}
+      <Field
+        name={`${name}.en`}
+        label="English"
+        value={value.en}
+        onChange={(text) => onChange('en', text)}
+        placeholder="Enter the English text"
+      />
+      <Field
+        name={`${name}.hil`}
+        label="Hiligaynon"
+        value={value.hil}
+        onChange={(text) => onChange('hil', text)}
+        placeholder="Enter the reviewed Hiligaynon text"
+      />
     </fieldset>
   );
 }
-export function Workbench({ initial, initialRevision, section, history, events }: Props) {
-  const [draft, setDraft] = useState(initial);
+const titles: Record<string, string> = {
+  overview: 'Directory overview',
+  contacts: 'Manage contacts',
+  'quick-calls': 'Home quick calls',
+  guidance: 'Guidance',
+  map: 'Campus evacuation map',
+  history: 'Publication history',
+};
+const blank = { en: '', hil: '' };
+export function Workbench({
+  initial,
+  initialRevision,
+  section,
+  history,
+  events,
+  publishedContacts = [],
+}: Props) {
+  const router = useRouter();
+  const [working, setWorking] = useState(initial);
+  const [baseline, setBaseline] = useState(initial);
   const [revision, setRevision] = useState(initialRevision);
+  const [received, setReceived] = useState(initialRevision);
+  const [selected, setSelected] = useState(
+    section === 'guidance'
+      ? initial.guidance[0]?.id || ''
+      : section === 'quick-calls'
+        ? 'police'
+        : initial.contacts[0]?.id || '',
+  );
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState('');
-  const [pending, start] = useTransition();
-  const [selected, setSelected] = useState(initial.contacts[0]?.id || '');
   const [search, setSearch] = useState('');
-  const [receivedRevision, setReceivedRevision] = useState(initialRevision);
-  // Adopt a server-confirmed save/restore without remounting the action status.
-  // A section change still remounts the workbench through its section key.
-  if (receivedRevision !== initialRevision) {
-    setReceivedRevision(initialRevision);
-    setDraft(initial);
+  const [aliasText, setAliasText] = useState<Record<string, string>>({});
+  const [pending, start] = useTransition();
+  const [touched, setTouched] = useState<string[]>([]);
+  const [submitted, setSubmitted] = useState(false);
+  const [serverErrors, setServerErrors] = useState<FieldErrors>({});
+  const [dragging, setDragging] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [uploadMessage, setUploadMessage] = useState('');
+  const form = useRef<HTMLFormElement>(null);
+  const input = useRef<HTMLInputElement>(null);
+  if (received !== initialRevision) {
+    setReceived(initialRevision);
     setRevision(initialRevision);
+    setWorking(initial);
+    setBaseline(initial);
+    setAliasText({});
     setDirty(false);
-    setSelected(initial.contacts[0]?.id || '');
   }
-
   useEffect(() => {
     if (!dirty) return;
-    const unload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = '';
+    const unload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = '';
     };
-    const navigate = (event: MouseEvent) => {
-      const anchor = (event.target as Element).closest('a');
-      if (
-        anchor &&
-        anchor.target !== '_blank' &&
-        !window.confirm('Leave without saving draft changes?')
-      ) {
-        event.preventDefault();
-        event.stopPropagation();
+    const navigate = (e: MouseEvent) => {
+      const a = (e.target as Element).closest('a');
+      if (a && a.target !== '_blank' && !window.confirm('Leave without publishing your changes?')) {
+        e.preventDefault();
+        e.stopPropagation();
       }
     };
     window.addEventListener('beforeunload', unload);
@@ -96,770 +250,970 @@ export function Workbench({ initial, initialRevision, section, history, events }
       document.removeEventListener('click', navigate, true);
     };
   }, [dirty]);
-  function edit(change: (value: Snapshot) => void) {
-    setDraft((previous) => {
-      const next = structuredClone(previous);
-      change(next);
-      return next;
+  function edit(change: (d: Snapshot) => void) {
+    setWorking((previous) => {
+      const d = structuredClone(previous);
+      change(d);
+      return d;
     });
     setDirty(true);
-    setMessage('Unsaved draft changes.');
+    setServerErrors({});
+    setMessage('Unpublished changes.');
   }
-  function run(action: () => Promise<{ ok: boolean; message: string; revision?: number | null }>) {
+  function select(id: string) {
+    if (dirty && !window.confirm('Discard unpublished changes to this item?')) return;
+    setWorking(baseline);
+    setAliasText({});
+    setSelected(id);
+    setDirty(false);
+    setTouched([]);
+    setSubmitted(false);
+    setServerErrors({});
+    setMessage('');
+  }
+  const contact = working.contacts.find((c) => c.id === selected);
+  const ci = working.contacts.findIndex((c) => c.id === selected);
+  const guide = working.guidance.find((g) => g.id === selected);
+  const gi = working.guidance.findIndex((g) => g.id === selected);
+  const assignment = working.quickCalls?.find((q) => q.category === selected) ?? null;
+  const kind: ItemKind =
+    section === 'contacts'
+      ? 'contact'
+      : section === 'guidance'
+        ? 'guidance'
+        : section === 'quick-calls'
+          ? 'quick-call'
+          : 'map';
+  const item =
+    kind === 'contact'
+      ? (contact ?? null)
+      : kind === 'guidance'
+        ? (guide ?? null)
+        : kind === 'quick-call'
+          ? assignment
+          : working.map;
+  const validation = itemErrors(kind, item);
+  const errors = {
+    ...Object.fromEntries(
+      Object.entries(validation).filter(([key]) => submitted || touched.includes(key)),
+    ),
+    ...serverErrors,
+  };
+  const categoryOptions = categoryIds.map((id) => ({ value: id, label: categories[id].en }));
+  function focusError(fields: FieldErrors) {
+    const key = Object.keys(fields).find((k) => k !== '_form');
+    if (key)
+      requestAnimationFrame(() =>
+        form.current?.querySelector<HTMLElement>(`[name="${CSS.escape(key)}"]`)?.focus(),
+      );
+  }
+  function publish(e?: FormEvent, remove = false) {
+    e?.preventDefault();
+    const value = remove ? null : item;
+    const fields = itemErrors(kind, value);
+    setSubmitted(true);
+    setServerErrors({});
+    if (Object.keys(fields).length) {
+      setMessage('Check the highlighted fields. Nothing has been published.');
+      focusError(fields);
+      return;
+    }
+    if (
+      remove &&
+      !window.confirm(
+        'Remove this item from the public directory? You can restore a previous publication from History.',
+      )
+    )
+      return;
     start(async () => {
       try {
-        const result = await action();
+        const result = await publishItem(
+          kind,
+          kind === 'map' ? 'campus-map' : selected,
+          value,
+          revision,
+        );
         setMessage(result.message);
         if (result.ok && result.revision != null) {
           setRevision(result.revision);
           setDirty(false);
+          setSubmitted(false);
+          setTouched([]);
+          router.refresh();
+        } else {
+          setServerErrors(result.errors ?? {});
+          focusError(result.errors ?? {});
         }
       } catch {
-        setMessage('The action could not be completed. Reconnect or sign in again, then retry.');
+        setMessage(
+          'Publishing could not be confirmed. Reload and check the public directory before retrying.',
+        );
       }
     });
   }
-  const contact = draft.contacts.find((c) => c.id === selected);
-  const ci = draft.contacts.findIndex((c) => c.id === selected);
-  const issues = publicationIssues(draft);
-  function addContact() {
+  function add(type: 'contact' | 'guidance') {
+    if (dirty && !window.confirm('Discard unpublished changes to this item?')) return;
     const id = crypto.randomUUID();
-    edit((d) =>
-      d.contacts.push({
-        id,
-        agency: '',
-        branch: '',
-        category: 'school',
-        area: 'cpu',
-        description: { en: '', hil: '' },
-        aliases: [],
-        hours: '',
-        numbers: [
-          {
-            id: crypto.randomUUID(),
-            label: { en: 'Main line', hil: '' },
-            display: '',
-            dial: '',
-            extension: '',
-            channel: 'voice',
-          },
-        ],
-        verifiedAt: '',
-        source: '',
-        approved: false,
-        active: true,
-        priority: false,
-      }),
-    );
+    setWorking(() => {
+      const d = structuredClone(baseline);
+      if (type === 'contact')
+        d.contacts.push({
+          id,
+          agency: '',
+          branch: '',
+          category: 'school',
+          area: 'cpu',
+          description: { ...blank },
+          aliases: [],
+          hours: '',
+          numbers: [
+            {
+              id: crypto.randomUUID(),
+              label: { en: 'Main line', hil: '' },
+              display: '',
+              dial: '',
+              extension: '',
+              channel: 'voice',
+            },
+          ],
+          verifiedAt: '',
+          source: '',
+          approved: false,
+          active: true,
+          priority: false,
+        });
+      else
+        d.guidance.push({
+          id,
+          title: { ...blank },
+          category: 'school',
+          steps: [{ ...blank }],
+          source: '',
+          reviewer: '',
+          reviewedAt: '',
+          approved: false,
+        });
+      return d;
+    });
     setSelected(id);
+    setDirty(true);
+    setSubmitted(false);
+    setTouched([]);
+    setServerErrors({});
+    setMessage('Complete this item, then publish it.');
   }
-  const blank = { en: '', hil: '' };
+  function chooseFiles(files: FileList | null) {
+    if (pending || !files?.length) return;
+    setDragging(false);
+    setUploadError('');
+    if (files.length !== 1) {
+      setUploadError('Choose one map image at a time.');
+      return;
+    }
+    const file = files[0];
+    if (
+      !['image/png', 'image/jpeg', 'image/webp'].includes(file.type) ||
+      file.size > 5 * 1024 * 1024 ||
+      !file.size
+    ) {
+      setUploadError('Choose a PNG, JPEG or WebP image up to 5 MB.');
+      return;
+    }
+    const data = new FormData();
+    data.set('file', file);
+    setUploadMessage('Uploading image…');
+    start(async () => {
+      try {
+        const result = await uploadMap(data);
+        if (!result.ok || !result.id || !result.assetPath) {
+          setUploadError(result.message);
+          setUploadMessage('');
+          return;
+        }
+        edit((d) => {
+          d.map = {
+            id: result.id!,
+            assetPath: result.assetPath!,
+            description: d.map?.description ?? { ...blank },
+            instructions: d.map?.instructions ?? [{ ...blank }],
+            source: d.map?.source ?? '',
+            reviewer: '',
+            reviewedAt: '',
+            approved: false,
+          };
+        });
+        setUploadMessage(
+          `${file.name} uploaded. Review the description and text below, then publish the map.`,
+        );
+      } catch {
+        setUploadError('Upload failed. Your published map has not changed. Try again.');
+        setUploadMessage('');
+      } finally {
+        if (input.current) input.current.value = '';
+      }
+    });
+  }
   return (
     <>
       <div className="admin-title">
         <div>
-          <h1>
-            {
-              (
-                {
-                  overview: 'Directory overview',
-                  contacts: 'Manage contacts',
-                  'quick-calls': 'Home quick calls',
-                  guidance: 'Approved guidance',
-                  map: 'Campus evacuation map',
-                  publish: 'Preview & publish',
-                  history: 'Publication history',
-                } as Record<string, string>
-              )[section]
-            }
-          </h1>
-          <p>
-            Working draft revision {revision} · {dirty ? 'Unsaved changes' : 'Saved draft'}
-          </p>
+          <h1>{titles[section] || 'Administration'}</h1>
+          {!['overview', 'history'].includes(section) && (
+            <p>Publish one item at a time. Other items stay unchanged.</p>
+          )}
         </div>
-        <button
-          className="button primary"
-          disabled={pending || !dirty}
-          onClick={() => run(() => saveDraft(draft, revision))}
-        >
-          {pending ? 'Working…' : 'Save draft'}
-        </button>
       </div>
-      <p className="admin-status" role="status">
+      <p className="admin-status" role="status" aria-live="polite">
         {message}
       </p>
       {section === 'overview' && (
         <>
           <p>
-            Maintain the working draft, review it in both languages, then publish a complete
-            directory. Saving a draft does not change the public website.
+            Choose a section, make your changes, then publish that item. There is no separate save
+            or publish-all step.
           </p>
           <dl className="overview-list">
-            <dt>Active draft contacts</dt>
-            <dd>{draft.contacts.filter((c) => c.active).length}</dd>
+            <dt>Stored contacts</dt>
+            <dd>{initial.contacts.length}</dd>
             <dt>Last publication</dt>
             <dd>{history.find((p) => p.current)?.created_at || 'Not published'}</dd>
-            <dt>Verification due</dt>
-            <dd>
-              {
-                draft.contacts.filter(
-                  (c) =>
-                    !c.verifiedAt ||
-                    c.verifiedAt <
-                      new Date(new Date().setDate(new Date().getDate() - 30))
-                        .toISOString()
-                        .slice(0, 10),
-                ).length
-              }{' '}
-              contacts
-            </dd>
           </dl>
-          <Link className="button secondary" href="/admin/contacts">
-            Maintain contacts
+          <Link href="/admin/contacts" className="button primary">
+            Manage contacts
           </Link>
-        </>
-      )}
-      {section === 'contacts' && (
-        <div className="contact-editor-layout">
-          <aside className="draft-list">
-            <label>
-              Search draft contacts
-              <input value={search} onChange={(e) => setSearch(e.target.value)} />
-            </label>
-            <button className="button secondary" onClick={addContact}>
-              Add contact
-            </button>
-            {draft.contacts
-              .filter((c) => c.agency.toLowerCase().includes(search.toLowerCase()))
-              .map((c) => (
-                <button
-                  key={c.id}
-                  className="draft-select"
-                  aria-pressed={selected === c.id}
-                  onClick={() => setSelected(c.id)}
-                >
-                  {c.agency || 'New contact'}
-                  {!c.active ? ' · Inactive' : ''}
-                </button>
-              ))}
-          </aside>
-          {contact && (
-            <div className="editor-fields">
-              <Field
-                label="Agency"
-                value={contact.agency}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.contacts[ci].agency = v;
-                  })
-                }
-              />
-              <Field
-                label="Branch"
-                value={contact.branch}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.contacts[ci].branch = v;
-                  })
-                }
-              />
-              <label>
-                Category
-                <select
-                  value={contact.category}
-                  onChange={(e) =>
-                    edit((d) => {
-                      d.contacts[ci].category = e.target.value as typeof contact.category;
-                    })
-                  }
-                >
-                  {categoryIds.map((id) => (
-                    <option key={id} value={id}>
-                      {categories[id].en}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Area
-                <select
-                  value={contact.area}
-                  onChange={(e) =>
-                    edit((d) => {
-                      d.contacts[ci].area = e.target.value as typeof contact.area;
-                    })
-                  }
-                >
-                  {Object.entries(areas).map(([id, a]) => (
-                    <option key={id} value={id}>
-                      {a.en}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <Bilingual
-                label="Description"
-                value={contact.description}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.contacts[ci].description = v;
-                  })
-                }
-              />
-              <Field
-                label="Search aliases (comma separated)"
-                value={contact.aliases.join(', ')}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.contacts[ci].aliases = v
-                      .split(',')
-                      .map((a) => a.trim())
-                      .filter(Boolean);
-                  })
-                }
-              />
-              <Field
-                label="Verified service hours (leave blank if unknown)"
-                value={contact.hours}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.contacts[ci].hours = v;
-                  })
-                }
-              />
-              {contact.numbers.map((n, ni) => (
-                <fieldset key={n.id} className="number-editor">
-                  <legend>Number {ni + 1}</legend>
-                  <Bilingual
-                    label="Line label"
-                    value={n.label}
-                    onChange={(v) =>
-                      edit((d) => {
-                        d.contacts[ci].numbers[ni].label = v;
-                      })
-                    }
-                  />
-                  <Field
-                    label="Display number"
-                    value={n.display}
-                    onChange={(v) =>
-                      edit((d) => {
-                        d.contacts[ci].numbers[ni].display = v;
-                      })
-                    }
-                  />
-                  <Field
-                    label="Dial value (one number, digits and optional +)"
-                    value={n.dial}
-                    onChange={(v) =>
-                      edit((d) => {
-                        d.contacts[ci].numbers[ni].dial = v;
-                      })
-                    }
-                  />
-                  <Field
-                    label="Extension (separate)"
-                    value={n.extension}
-                    onChange={(v) =>
-                      edit((d) => {
-                        d.contacts[ci].numbers[ni].extension = v;
-                      })
-                    }
-                  />
-                  <label>
-                    Channel
-                    <select
-                      value={n.channel}
-                      onChange={(e) =>
-                        edit((d) => {
-                          d.contacts[ci].numbers[ni].channel = e.target.value as 'voice' | 'text';
-                        })
-                      }
-                    >
-                      <option value="voice">Voice</option>
-                      <option value="text">Text only</option>
-                    </select>
-                  </label>
-                  <button
-                    className="button secondary"
-                    disabled={contact.numbers.length === 1}
-                    onClick={() =>
-                      edit((d) => {
-                        d.contacts[ci].numbers.splice(ni, 1);
-                      })
-                    }
-                  >
-                    Remove number
-                  </button>
-                </fieldset>
-              ))}
-              <button
-                className="button secondary"
-                onClick={() =>
-                  edit((d) =>
-                    d.contacts[ci].numbers.push({
-                      id: crypto.randomUUID(),
-                      label: { en: 'Alternate line', hil: '' },
-                      display: '',
-                      dial: '',
-                      extension: '',
-                      channel: 'voice',
-                    }),
-                  )
-                }
-              >
-                Add alternate number
-              </button>
-              <Field
-                label="Official verification source URL"
-                type="url"
-                value={contact.source}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.contacts[ci].source = v;
-                  })
-                }
-              />
-              <Field
-                label="Last verified date"
-                type="date"
-                value={contact.verifiedAt}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.contacts[ci].verifiedAt = v;
-                  })
-                }
-              />
-              {(['active', 'approved'] as const).map((key) => (
-                <label className="checkbox-label" key={key}>
-                  <input
-                    type="checkbox"
-                    checked={contact[key]}
-                    onChange={(e) =>
-                      edit((d) => {
-                        d.contacts[ci][key] = e.target.checked;
-                      })
-                    }
-                  />
-                  {key === 'approved'
-                    ? 'Reviewed contact and both languages are approved'
-                    : 'Active contact'}
-                </label>
-              ))}
-            </div>
-          )}
-          {!contact && (
-            <p className="empty-state">
-              Add a contact to begin. Unreviewed entries cannot be published.
-            </p>
-          )}
-        </div>
-      )}
-      {section === 'quick-calls' && (
-        <div className="editor-fields">
-          <p>
-            Choose the exact contact and voice line for each Home action. Save the draft, preview,
-            then publish to update visitors. Clear an assignment to offer category browsing instead.
-          </p>
-          {categoryIds.map((category) => {
-            const assignment = draft.quickCalls?.find((q) => q.category === category);
-            const value = assignment ? `${assignment.contactId}:${assignment.numberId}` : '';
-            const target = quickCallTarget(draft, category);
-            return (
-              <fieldset className="number-editor" key={category}>
-                <legend>{categories[category].en}</legend>
-                <label>
-                  {categories[category].en} destination
-                  <select
-                    value={value}
-                    onChange={(e) =>
-                      edit((d) => {
-                        d.quickCalls = (d.quickCalls ?? []).filter((q) => q.category !== category);
-                        if (e.target.value) {
-                          const [contactId, numberId] = e.target.value.split(':');
-                          d.quickCalls.push({ category, contactId, numberId });
-                        }
-                      })
-                    }
-                  >
-                    <option value="">No quick call — browse contacts</option>
-                    {assignment && !target && (
-                      <option value={value}>Unavailable destination — reassign or clear</option>
-                    )}
-                    {draft.contacts
-                      .filter((c) => c.active && c.category === category)
-                      .flatMap((c) =>
-                        c.numbers
-                          .filter((n) => telephoneHref(n))
-                          .map((n) => (
-                            <option key={`${c.id}:${n.id}`} value={`${c.id}:${n.id}`}>
-                              {c.agency}
-                              {c.branch ? ` / ${c.branch}` : ''} — {n.label.en} — {n.display}
-                              {n.extension ? ` ext. ${n.extension}` : ''}
-                            </option>
-                          )),
-                      )}
-                  </select>
-                </label>
-                {target && (
-                  <p>
-                    {target.agency}
-                    {target.branch ? ` / ${target.branch}` : ''} · {target.number.label.en} ·{' '}
-                    {target.number.display}
-                    {target.number.extension ? ` · Extension ${target.number.extension}` : ''}
-                  </p>
-                )}
-                {assignment && !target && (
-                  <p className="warning-text">
-                    This destination is unavailable. Reassign or clear it before publishing.
-                  </p>
-                )}
-              </fieldset>
-            );
-          })}
-        </div>
-      )}
-      {section === 'guidance' && (
-        <>
-          <p>
-            Only school-reviewed guidance with approved English and Hiligaynon content can be
-            published.
-          </p>
-          {draft.guidance.map((g, gi) => (
-            <section className="editor-fields guide-editor" key={g.id}>
-              <Bilingual
-                label="Topic title"
-                value={g.title}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.guidance[gi].title = v;
-                  })
-                }
-              />
-              <label>
-                Related category
-                <select
-                  value={g.category}
-                  onChange={(e) =>
-                    edit((d) => {
-                      d.guidance[gi].category = e.target.value as typeof g.category;
-                    })
-                  }
-                >
-                  {categoryIds.map((id) => (
-                    <option key={id} value={id}>
-                      {categories[id].en}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {g.steps.map((step, si) => (
-                <div key={si}>
-                  <Bilingual
-                    label={`Step ${si + 1}`}
-                    value={step}
-                    onChange={(v) =>
-                      edit((d) => {
-                        d.guidance[gi].steps[si] = v;
-                      })
-                    }
-                  />
-                  <button
-                    className="button secondary"
-                    disabled={g.steps.length === 1}
-                    onClick={() =>
-                      edit((d) => {
-                        d.guidance[gi].steps.splice(si, 1);
-                      })
-                    }
-                  >
-                    Remove step
-                  </button>
-                </div>
-              ))}
-              <button
-                className="button secondary"
-                onClick={() => edit((d) => d.guidance[gi].steps.push({ ...blank }))}
-              >
-                Add step
-              </button>
-              <Field
-                label="Source URL"
-                value={g.source}
-                type="url"
-                onChange={(v) =>
-                  edit((d) => {
-                    d.guidance[gi].source = v;
-                  })
-                }
-              />
-              <Field
-                label="Reviewer"
-                value={g.reviewer}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.guidance[gi].reviewer = v;
-                  })
-                }
-              />
-              <Field
-                label="Review date"
-                value={g.reviewedAt}
-                type="date"
-                onChange={(v) =>
-                  edit((d) => {
-                    d.guidance[gi].reviewedAt = v;
-                  })
-                }
-              />
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={g.approved}
-                  onChange={(e) =>
-                    edit((d) => {
-                      d.guidance[gi].approved = e.target.checked;
-                    })
-                  }
-                />
-                Content and both translations approved
-              </label>
-              <button
-                className="button secondary"
-                onClick={() =>
-                  edit((d) => {
-                    d.guidance.splice(gi, 1);
-                  })
-                }
-              >
-                Remove topic from draft
-              </button>
-            </section>
-          ))}
-          <button
-            className="button secondary"
-            onClick={() =>
-              edit((d) =>
-                d.guidance.push({
-                  id: crypto.randomUUID(),
-                  title: { ...blank },
-                  category: 'school',
-                  steps: [{ ...blank }],
-                  source: '',
-                  reviewer: '',
-                  reviewedAt: '',
-                  approved: false,
-                }),
-              )
-            }
-          >
-            Add guidance topic
-          </button>
-        </>
-      )}
-      {section === 'map' && (
-        <div className="editor-fields">
-          <p>
-            Upload the supplied campus map. Add a textual equivalent, sources, and reviewed
-            translations.
-          </p>
-          <label>
-            PNG, JPEG or WebP · maximum 5 MB
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              disabled={pending}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                const form = new FormData();
-                form.set('file', file);
-                start(async () => {
-                  try {
-                    const result = await uploadMap(form);
-                    setMessage(result.message);
-                    if (result.ok && result.id && result.assetPath)
-                      edit((d) => {
-                        d.map = {
-                          id: result.id!,
-                          assetPath: result.assetPath!,
-                          description: { ...blank },
-                          instructions: [{ ...blank }],
-                          source: '',
-                          reviewer: '',
-                          reviewedAt: '',
-                          approved: false,
-                        };
-                      });
-                  } catch {
-                    setMessage('Upload failed. Reconnect and try again.');
-                  }
-                });
-              }}
-            />
-          </label>
-          {draft.map && (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element -- authenticated private image preview */}
-              <img
-                className="admin-map-preview"
-                alt="Private uploaded campus map preview"
-                src={`/api/admin/map?path=${encodeURIComponent(draft.map.assetPath)}`}
-              />
-              <Bilingual
-                label="Map description / alternative text"
-                value={draft.map.description}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.map!.description = v;
-                  })
-                }
-              />
-              {draft.map.instructions.map((s, i) => (
-                <Bilingual
-                  key={i}
-                  label={`Text instruction ${i + 1}`}
-                  value={s}
-                  onChange={(v) =>
-                    edit((d) => {
-                      d.map!.instructions[i] = v;
-                    })
-                  }
-                />
-              ))}
-              <button
-                className="button secondary"
-                onClick={() => edit((d) => d.map!.instructions.push({ ...blank }))}
-              >
-                Add text instruction
-              </button>
-              <Field
-                label="Source URL"
-                value={draft.map.source}
-                type="url"
-                onChange={(v) =>
-                  edit((d) => {
-                    d.map!.source = v;
-                  })
-                }
-              />
-              <Field
-                label="Reviewer"
-                value={draft.map.reviewer}
-                onChange={(v) =>
-                  edit((d) => {
-                    d.map!.reviewer = v;
-                  })
-                }
-              />
-              <Field
-                label="Review date"
-                value={draft.map.reviewedAt}
-                type="date"
-                onChange={(v) =>
-                  edit((d) => {
-                    d.map!.reviewedAt = v;
-                  })
-                }
-              />
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={draft.map.approved}
-                  onChange={(e) =>
-                    edit((d) => {
-                      d.map!.approved = e.target.checked;
-                    })
-                  }
-                />
-                Map and both textual versions are approved
-              </label>
-              <button
-                className="button secondary"
-                onClick={() =>
-                  edit((d) => {
-                    d.map = null;
-                  })
-                }
-              >
-                Remove map from draft
-              </button>
-            </>
-          )}
-        </div>
-      )}
-      {section === 'publish' && (
-        <>
-          <p>
-            Save all changes, preview the saved draft using both language options, then publish.
-            Publication is atomic; failed publication keeps the current public version.
-          </p>
-          <Link className="button secondary" href="/admin/preview" target="_blank">
-            Preview saved draft ↗
-          </Link>
-          <h2 className="admin-section-title">Publication checks</h2>
-          {issues.length ? (
-            <ul className="validation-list">
-              {issues.map((i, index) => (
-                <li key={index}>{i}</li>
-              ))}
-            </ul>
-          ) : (
-            <p>
-              Content validation passed. Confirm the supplied records and translations are approved
-              before publishing.
-            </p>
-          )}
-          <button
-            className="button primary"
-            disabled={pending || dirty || issues.length > 0}
-            onClick={() => run(() => publishDraft(revision))}
-          >
-            Publish updates
-          </button>
         </>
       )}
       {section === 'history' && (
         <>
-          <h2>Publications</h2>
-          {history.length === 0 && <p>No publication exists yet.</p>}
+          <p>
+            Each item update creates a complete version. Restoring a version replaces the whole
+            public directory.
+          </p>
           {history.map((p) => (
-            <article className="history-row" key={p.id}>
-              <p>
-                <strong>{p.current ? 'Current publication' : 'Previous publication'}</strong>
-                <br />
-                {p.created_at}
-                <br />
-                <small>{p.id}</small>
-              </p>
-              {!p.current && (
-                <button
-                  className="button secondary"
-                  disabled={pending || dirty}
-                  onClick={() => {
-                    if (
-                      window.confirm(
-                        'Restore this version as a new publication? This replaces the saved working draft.',
-                      )
+            <article key={p.id} className="history-row">
+              <h2>{p.current ? 'Current publication' : 'Previous publication'}</h2>
+              <p>{p.created_at}</p>
+              <p>{p.id}</p>
+              <button
+                className="button secondary"
+                disabled={pending || p.current}
+                onClick={() => {
+                  if (
+                    !window.confirm(
+                      'Restore this entire directory version, including contacts, assignments, guidance and map?',
                     )
-                      run(() => restorePublication(p.id, revision));
-                  }}
-                >
-                  Restore as new publication
-                </button>
-              )}
+                  )
+                    return;
+                  start(async () => {
+                    try {
+                      const r = await restorePublication(p.id, revision);
+                      setMessage(r.message);
+                    } catch {
+                      setMessage(
+                        'Restore could not be confirmed. Reload and check the public directory.',
+                      );
+                    }
+                  });
+                }}
+              >
+                Restore as new publication
+              </button>
             </article>
           ))}
-          <h2 className="admin-section-title">Recent changes</h2>
+          <h2>Activity</h2>
           {events.map((e) => (
             <p key={e.id}>
-              {e.created_at} · {e.action} · revision {e.revision}
+              {e.created_at} · {e.action}
             </p>
           ))}
-          <Link className="button secondary" href="/admin/history">
-            Reload history
-          </Link>
         </>
+      )}
+      {!['overview', 'history'].includes(section) && (
+        <Fields.Provider
+          value={{
+            errors,
+            touch: (name) =>
+              setTouched((previous) => (previous.includes(name) ? previous : [...previous, name])),
+          }}
+        >
+          <div
+            className={
+              ['contacts', 'guidance', 'quick-calls'].includes(section)
+                ? 'contact-editor-layout'
+                : ''
+            }
+          >
+            {section === 'contacts' && (
+              <aside className="draft-list">
+                <label>
+                  Search contacts
+                  <input value={search} onChange={(e) => setSearch(e.target.value)} />
+                </label>
+                <button
+                  className="button secondary"
+                  disabled={pending}
+                  onClick={() => add('contact')}
+                >
+                  Add contact
+                </button>
+                {working.contacts
+                  .filter((c) => c.agency.toLowerCase().includes(search.toLowerCase()))
+                  .map((c) => (
+                    <button
+                      key={c.id}
+                      className="draft-select"
+                      disabled={pending}
+                      aria-pressed={selected === c.id}
+                      onClick={() => select(c.id)}
+                    >
+                      {c.agency || 'New contact'}
+                      {!c.active ? ' · Hidden' : ''}
+                    </button>
+                  ))}
+              </aside>
+            )}
+            {section === 'guidance' && (
+              <aside className="draft-list">
+                <button
+                  className="button secondary"
+                  disabled={pending}
+                  onClick={() => add('guidance')}
+                >
+                  Add guidance topic
+                </button>
+                {working.guidance.map((g) => (
+                  <button
+                    key={g.id}
+                    className="draft-select"
+                    disabled={pending}
+                    aria-pressed={selected === g.id}
+                    onClick={() => select(g.id)}
+                  >
+                    {g.title.en || 'New topic'}
+                  </button>
+                ))}
+              </aside>
+            )}
+            {section === 'quick-calls' && (
+              <aside className="draft-list">
+                {categoryIds.map((id) => (
+                  <button
+                    key={id}
+                    className="draft-select"
+                    disabled={pending}
+                    aria-pressed={selected === id}
+                    onClick={() => select(id)}
+                  >
+                    {categories[id].en}
+                  </button>
+                ))}
+              </aside>
+            )}
+            <form ref={form} noValidate onSubmit={(e) => publish(e)}>
+              <fieldset className="admin-editor-body" disabled={pending}>
+                {errors._form && (
+                  <div className="field-error" role="alert">
+                    {errors._form}
+                    {errors._form.includes('Home quick call') && (
+                      <p>
+                        <Link href="/admin/quick-calls">Open Home quick calls</Link>
+                      </p>
+                    )}
+                  </div>
+                )}
+                {section === 'contacts' && contact && (
+                  <div className="editor-fields">
+                    <Field
+                      name="agency"
+                      label="Agency"
+                      value={contact.agency}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.contacts[ci].agency = v;
+                        })
+                      }
+                      hint="Official name of the office or service."
+                      placeholder="Example: Campus Security Office"
+                    />
+                    <Field
+                      name="branch"
+                      label="Branch"
+                      value={contact.branch}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.contacts[ci].branch = v;
+                        })
+                      }
+                      hint="Location or branch name. Leave blank if there is only one."
+                      placeholder="Example: Main campus"
+                    />
+                    <Field
+                      name="category"
+                      label="Category"
+                      value={contact.category}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.contacts[ci].category = v as Contact['category'];
+                        })
+                      }
+                      options={categoryOptions}
+                    />
+                    <Field
+                      name="area"
+                      label="Area"
+                      value={contact.area}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.contacts[ci].area = v as Contact['area'];
+                        })
+                      }
+                      options={Object.entries(areas).map(([value, a]) => ({ value, label: a.en }))}
+                    />
+                    <Bilingual
+                      name="description"
+                      label="Description"
+                      value={contact.description}
+                      onChange={(language, text) =>
+                        edit((d) => {
+                          d.contacts[ci].description[language] = text;
+                        })
+                      }
+                      hint="Describe what this service handles. Add the same meaning in both languages."
+                    />
+                    <Field
+                      name="aliases"
+                      label="Search aliases"
+                      value={aliasText[contact.id] ?? contact.aliases.join(', ')}
+                      onChange={(v) => {
+                        setAliasText((previous) => ({ ...previous, [contact.id]: v }));
+                        return;
+                        edit((d) => {
+                          d.contacts[ci].aliases = v
+                            .split(',')
+                            .map((a) => a.trim())
+                            .filter(Boolean);
+                        });
+                      }}
+                      hint="Optional alternative names, separated by commas."
+                      placeholder="Example: security, guard, campus help"
+                    />
+                    <Field
+                      name="hours"
+                      label="Service hours"
+                      value={contact.hours}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.contacts[ci].hours = v;
+                        })
+                      }
+                      hint="Enter only verified hours. Leave blank if unknown."
+                      placeholder="Example: Monday–Friday, 8 AM–5 PM"
+                    />
+                    {contact.numbers.map((n, i) => (
+                      <fieldset key={n.id} className="number-editor">
+                        <legend>Number {i + 1}</legend>
+                        <Bilingual
+                          name={`numbers.${i}.label`}
+                          label="Line label"
+                          value={n.label}
+                          onChange={(language, text) =>
+                            edit((d) => {
+                              d.contacts[ci].numbers[i].label[language] = text;
+                            })
+                          }
+                          hint="Name this line, for example Main line or After-hours line, in both languages."
+                        />
+                        <Field
+                          name={`numbers.${i}.display`}
+                          label="Display number"
+                          value={n.display}
+                          onChange={(v) =>
+                            edit((d) => {
+                              d.contacts[ci].numbers[i].display = v;
+                            })
+                          }
+                          hint="Readable version shown to visitors. Spaces and parentheses are allowed."
+                          placeholder="Example: 0912 345 6789 or (033) 320 1234"
+                          type="tel"
+                        />
+                        <Field
+                          name={`numbers.${i}.dial`}
+                          label="Phone number to dial"
+                          value={n.dial}
+                          onChange={(v) =>
+                            edit((d) => {
+                              d.contacts[ci].numbers[i].dial = v;
+                            })
+                          }
+                          hint="Examples: 09123456789 or +63333201234. Use one number with no spaces, hyphens or extension. Use Add alternate number for another line."
+                          placeholder="09123456789 or +63333201234"
+                          type="tel"
+                        />
+                        <Field
+                          name={`numbers.${i}.extension`}
+                          label="Extension"
+                          value={n.extension}
+                          onChange={(v) =>
+                            edit((d) => {
+                              d.contacts[ci].numbers[i].extension = v;
+                            })
+                          }
+                          hint="Optional, up to 8 digits. Leave blank if this line has no extension."
+                          placeholder="Example: 123"
+                        />
+                        <Field
+                          name={`numbers.${i}.channel`}
+                          label="Channel"
+                          value={n.channel}
+                          onChange={(v) =>
+                            edit((d) => {
+                              d.contacts[ci].numbers[i].channel = v as 'voice' | 'text';
+                            })
+                          }
+                          hint="Text-only numbers do not show a voice-call button."
+                          options={[
+                            { value: 'voice', label: 'Voice' },
+                            { value: 'text', label: 'Text only' },
+                          ]}
+                        />
+                        <button
+                          type="button"
+                          className="button secondary"
+                          disabled={contact.numbers.length === 1}
+                          onClick={() =>
+                            edit((d) => {
+                              d.contacts[ci].numbers.splice(i, 1);
+                            })
+                          }
+                        >
+                          Remove number {i + 1}
+                        </button>
+                      </fieldset>
+                    ))}
+                    <button
+                      type="button"
+                      className="button secondary"
+                      disabled={contact.numbers.length >= 10}
+                      onClick={() =>
+                        edit((d) => {
+                          d.contacts[ci].numbers.push({
+                            id: crypto.randomUUID(),
+                            label: { en: 'Alternate line', hil: '' },
+                            display: '',
+                            dial: '',
+                            extension: '',
+                            channel: 'voice',
+                          });
+                        })
+                      }
+                    >
+                      Add alternate number
+                    </button>
+                    <Field
+                      name="source"
+                      label="Official verification source URL"
+                      value={contact.source}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.contacts[ci].source = v;
+                        })
+                      }
+                      type="url"
+                      hint="Link to the official page where you checked this phone number."
+                      placeholder="https://example.edu/contact"
+                    />
+                    <Field
+                      name="verifiedAt"
+                      label="Last verified date"
+                      value={contact.verifiedAt}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.contacts[ci].verifiedAt = v;
+                        })
+                      }
+                      type="date"
+                      hint="Date you confirmed the number against its official source."
+                    />
+                    <Check
+                      name="active"
+                      label="Show this contact publicly"
+                      checked={contact.active}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.contacts[ci].active = v;
+                        })
+                      }
+                      hint="Uncheck and publish to hide it. Clear any Home quick-call assignment first."
+                    />
+                    <Check
+                      name="approved"
+                      label="I checked this contact and both language versions"
+                      checked={contact.approved}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.contacts[ci].approved = v;
+                        })
+                      }
+                    />
+                  </div>
+                )}
+                {section === 'contacts' && !contact && <p>Add a contact to begin.</p>}
+                {section === 'guidance' && guide && (
+                  <div className="editor-fields">
+                    <p>
+                      Enter one guidance topic in English and Hiligaynon. Include its source and the
+                      person who checked it. Publishing updates this topic only.
+                    </p>
+                    <Bilingual
+                      name="title"
+                      label="Topic title"
+                      value={guide.title}
+                      onChange={(language, text) =>
+                        edit((d) => {
+                          d.guidance[gi].title[language] = text;
+                        })
+                      }
+                      hint="A short title that describes the supplied guidance."
+                    />
+                    <Field
+                      name="category"
+                      label="Category"
+                      value={guide.category}
+                      options={categoryOptions}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.guidance[gi].category = v as Contact['category'];
+                        })
+                      }
+                    />
+                    {guide.steps.map((s, i) => (
+                      <div key={i}>
+                        <Bilingual
+                          name={`steps.${i}`}
+                          label={`Step ${i + 1}`}
+                          value={s}
+                          onChange={(language, text) =>
+                            edit((d) => {
+                              d.guidance[gi].steps[i][language] = text;
+                            })
+                          }
+                          hint="Use the reviewed instructions supplied by the school or official source."
+                        />
+                        <button
+                          type="button"
+                          className="button secondary"
+                          disabled={guide.steps.length === 1}
+                          onClick={() =>
+                            edit((d) => {
+                              d.guidance[gi].steps.splice(i, 1);
+                            })
+                          }
+                        >
+                          Remove step {i + 1}
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      className="button secondary"
+                      disabled={guide.steps.length >= 12}
+                      onClick={() =>
+                        edit((d) => {
+                          d.guidance[gi].steps.push({ ...blank });
+                        })
+                      }
+                    >
+                      Add step
+                    </button>
+                    <Field
+                      name="source"
+                      label="Source URL"
+                      value={guide.source}
+                      type="url"
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.guidance[gi].source = v;
+                        })
+                      }
+                      hint="Official webpage or school document link supporting these instructions."
+                      placeholder="https://example.edu/safety"
+                    />
+                    <Field
+                      name="reviewer"
+                      label="Reviewer"
+                      value={guide.reviewer}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.guidance[gi].reviewer = v;
+                        })
+                      }
+                      hint="Name of the person who checked the instructions and both translations."
+                      placeholder="Reviewer’s full name"
+                    />
+                    <Field
+                      name="reviewedAt"
+                      label="Review date"
+                      value={guide.reviewedAt}
+                      type="date"
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.guidance[gi].reviewedAt = v;
+                        })
+                      }
+                      hint="Date the reviewer approved this topic."
+                    />
+                    <Check
+                      name="approved"
+                      label="The reviewer approved this topic and both language versions"
+                      checked={guide.approved}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.guidance[gi].approved = v;
+                        })
+                      }
+                    />
+                    <button
+                      type="button"
+                      className="button secondary"
+                      onClick={() => publish(undefined, true)}
+                    >
+                      Remove guidance
+                    </button>
+                  </div>
+                )}
+                {section === 'guidance' && !guide && <p>Add a guidance topic to begin.</p>}
+                {section === 'quick-calls' && (
+                  <div className="editor-fields">
+                    <h2>{categories[selected as Contact['category']]?.en}</h2>
+                    <p>
+                      Choose a published contact and its exact voice line. Publishing changes this
+                      category’s Home call button only. Clear the selection to offer contact
+                      browsing instead.
+                    </p>
+                    <Field
+                      name="assignment"
+                      label="Call destination"
+                      value={assignment ? `${assignment.contactId}:${assignment.numberId}` : ''}
+                      onChange={(v) =>
+                        edit((d) => {
+                          d.quickCalls = (d.quickCalls ?? []).filter(
+                            (q) => q.category !== selected,
+                          );
+                          if (v) {
+                            const [contactId, numberId] = v.split(':');
+                            d.quickCalls.push({
+                              category: selected as Contact['category'],
+                              contactId,
+                              numberId,
+                            });
+                          }
+                        })
+                      }
+                      options={[
+                        { value: '', label: 'No quick call — browse contacts' },
+                        ...publishedContacts
+                          .filter((c) => c.active && c.category === selected)
+                          .flatMap((c) =>
+                            c.numbers
+                              .filter((n) => telephoneHref(n))
+                              .map((n) => ({
+                                value: `${c.id}:${n.id}`,
+                                label: `${c.agency}${c.branch ? ' / ' + c.branch : ''} — ${n.label.en} — ${n.display}${n.extension ? ' ext. ' + n.extension : ''}`,
+                              })),
+                          ),
+                      ]}
+                    />
+                  </div>
+                )}
+                {section === 'map' && (
+                  <div className="editor-fields">
+                    <p>
+                      Upload one campus map, then describe it and provide its text instructions in
+                      both languages. Uploading alone does not replace the public map.
+                    </p>
+                    <div
+                      className={`map-dropzone${dragging ? ' is-dragging' : ''}`}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        if (!pending) setDragging(true);
+                      }}
+                      onDragLeave={(e) => {
+                        if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false);
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        chooseFiles(e.dataTransfer.files);
+                      }}
+                    >
+                      <input
+                        ref={input}
+                        hidden
+                        type="file"
+                        aria-label="Choose map image"
+                        accept="image/png,image/jpeg,image/webp"
+                        onChange={(e) => chooseFiles(e.target.files)}
+                      />
+                      <p>Drag and drop a map image here</p>
+                      <p className="field-hint">PNG, JPEG or WebP · one image · maximum 5 MB</p>
+                      <button
+                        type="button"
+                        className="button secondary"
+                        onClick={() => input.current?.click()}
+                      >
+                        Choose image
+                      </button>
+                    </div>
+                    {uploadMessage && <p>{uploadMessage}</p>}
+                    {uploadError && (
+                      <p className="field-error" role="alert">
+                        {uploadError}
+                      </p>
+                    )}
+                    {working.map && (
+                      <>
+                        <img
+                          className="admin-map-preview"
+                          alt="Private uploaded campus map preview"
+                          src={`/api/admin/map?path=${encodeURIComponent(working.map.assetPath)}`}
+                        />
+                        <Bilingual
+                          name="description"
+                          label="Map description / alternative text"
+                          value={working.map.description}
+                          onChange={(language, text) =>
+                            edit((d) => {
+                              d.map!.description[language] = text;
+                            })
+                          }
+                          hint="Describe the map so someone who cannot see it understands what it shows."
+                        />
+                        {working.map.instructions.map((s, i) => (
+                          <div key={i}>
+                            <Bilingual
+                              name={`instructions.${i}`}
+                              label={`Text instruction ${i + 1}`}
+                              value={s}
+                              onChange={(language, text) =>
+                                edit((d) => {
+                                  d.map!.instructions[i][language] = text;
+                                })
+                              }
+                              hint="Provide the school-supplied map directions in both languages."
+                            />
+                            <button
+                              type="button"
+                              className="button secondary"
+                              disabled={working.map!.instructions.length === 1}
+                              onClick={() =>
+                                edit((d) => {
+                                  d.map!.instructions.splice(i, 1);
+                                })
+                              }
+                            >
+                              Remove instruction {i + 1}
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          className="button secondary"
+                          disabled={working.map.instructions.length >= 20}
+                          onClick={() =>
+                            edit((d) => {
+                              d.map!.instructions.push({ ...blank });
+                            })
+                          }
+                        >
+                          Add text instruction
+                        </button>
+                        <Field
+                          name="source"
+                          label="Source URL"
+                          value={working.map.source}
+                          type="url"
+                          onChange={(v) =>
+                            edit((d) => {
+                              d.map!.source = v;
+                            })
+                          }
+                          hint="School webpage or document link that supplies this map."
+                          placeholder="https://example.edu/campus-map"
+                        />
+                        <Field
+                          name="reviewer"
+                          label="Reviewer"
+                          value={working.map.reviewer}
+                          onChange={(v) =>
+                            edit((d) => {
+                              d.map!.reviewer = v;
+                            })
+                          }
+                          hint="Name of the person who checked this map and its text in both languages."
+                          placeholder="Reviewer’s full name"
+                        />
+                        <Field
+                          name="reviewedAt"
+                          label="Review date"
+                          value={working.map.reviewedAt}
+                          type="date"
+                          onChange={(v) =>
+                            edit((d) => {
+                              d.map!.reviewedAt = v;
+                            })
+                          }
+                          hint="Date this map and its text were approved."
+                        />
+                        <Check
+                          name="approved"
+                          label="The reviewer approved this map and both text versions"
+                          checked={working.map.approved}
+                          onChange={(v) =>
+                            edit((d) => {
+                              d.map!.approved = v;
+                            })
+                          }
+                        />
+                        <button
+                          type="button"
+                          className="button secondary"
+                          onClick={() => publish(undefined, true)}
+                        >
+                          Remove map
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+                {(item !== null || section === 'quick-calls') && (
+                  <div className="editor-actions">
+                    {dirty && (
+                      <button
+                        type="button"
+                        className="button secondary"
+                        onClick={() => select(selected)}
+                      >
+                        Discard changes
+                      </button>
+                    )}
+                    <button className="button primary" type="submit">
+                      {pending
+                        ? 'Working…'
+                        : {
+                            contact: 'Publish contact',
+                            guidance: 'Publish guidance',
+                            map: 'Publish map',
+                            'quick-call': 'Publish assignment',
+                          }[kind]}
+                    </button>
+                    <p className="field-hint">
+                      Only this {kind === 'quick-call' ? 'assignment' : kind} will change publicly.
+                    </p>
+                  </div>
+                )}
+              </fieldset>
+            </form>
+          </div>
+        </Fields.Provider>
       )}
     </>
   );

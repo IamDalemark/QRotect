@@ -456,6 +456,10 @@ export type Database = {
     };
     Functions: {
       _directory_document: { Args: Record<PropertyKey, never>; Returns: Json };
+      _patch_directory_item: {
+        Args: { document: Json; item: Json; item_key: string; item_kind: string };
+        Returns: Json;
+      };
       _replace_directory_content: { Args: { document: Json }; Returns: undefined };
       get_directory_draft: {
         Args: Record<PropertyKey, never>;
@@ -466,6 +470,10 @@ export type Database = {
       };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       publish_directory: { Args: { expected_revision: number }; Returns: string };
+      publish_directory_item: {
+        Args: { expected_revision: number; item: Json; item_key: string; item_kind: string };
+        Returns: number;
+      };
       restore_directory: {
         Args: { expected_revision: number; source_id: string };
         Returns: string;

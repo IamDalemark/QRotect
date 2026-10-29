@@ -60,3 +60,7 @@ The opt-in Webpack analyzer writes `.next/analyze/client.html`, `nodejs.html` an
 - `pnpm test:browser`: public/browser and isolated local administrator flows. Includes a deliberately delayed test image to verify stable map geometry, zoom and download links. It requires clean local Supabase.
 
 Public client navigation, streaming, additional caching and delayed call-dialog loading remain separate decisions requiring measured justification.
+
+## Administrator item-publishing follow-up
+
+The quick-call editor now additionally reads the current public contacts, so it makes two content requests rather than one. This keeps unpublished phone lines out of its choices. Contacts/guidance/map editors still request only their working document. The public route splitting and recorded public benchmark above are unaffected.

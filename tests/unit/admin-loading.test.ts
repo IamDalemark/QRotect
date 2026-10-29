@@ -14,7 +14,7 @@ beforeEach(() => {
   });
 });
 
-it.each(['contacts', 'quick-calls', 'guidance', 'map', 'publish', 'preview'])(
+it.each(['contacts', 'guidance', 'map', 'preview'])(
   '%s remains usable without querying publication history or audit events',
   async (section) => {
     mocks.from.mockImplementation(() => {
@@ -84,4 +84,16 @@ it('fails closed before reading data when administrator authorization fails', as
   await expect(dashboard('contacts')).rejects.toThrow('Access denied');
   expect(mocks.from).not.toHaveBeenCalled();
   expect(mocks.draft).not.toHaveBeenCalled();
+});
+
+it('quick-call choices come from the current publication, not unfinished contacts', async () => {
+  mocks.from.mockReturnValue({
+    select: () => ({
+      eq: () => ({ maybeSingle: async () => ({ data: { snapshot: emptySnapshot }, error: null }) }),
+    }),
+  });
+  const data = await dashboard('quick-calls');
+  expect(data.publishedContacts).toEqual([]);
+  expect(data.history).toEqual([]);
+  expect(data.events).toEqual([]);
 });

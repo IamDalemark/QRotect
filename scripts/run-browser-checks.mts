@@ -133,6 +133,16 @@ try {
   const current = (
     await db.query('select public._directory_document() payload from public.directory_drafts')
   ).rows[0].payload;
+  const uploaded = (
+    await db.query(
+      "select name from storage.objects where bucket_id='campus-maps' and owner_id=$1",
+      [userId],
+    )
+  ).rows.map((r: { name: string }) => r.name);
+  if (uploaded.length) {
+    const { error } = await admin.storage.from('campus-maps').remove(uploaded);
+    if (error) throw new Error('Test-map cleanup failed');
+  }
   await db.query('begin');
   try {
     if (current.contacts.length === 1 && current.contacts[0].agency === 'QROTECT browser test') {

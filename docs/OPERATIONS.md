@@ -1,3 +1,17 @@
+# Item publishing — current administrator workflow
+
+Edit one item and use **Publish contact**, **Publish assignment**, **Publish guidance** or **Publish map**. Validation messages appear under the fields. Unpublished browser changes are not autosaved; leaving or changing items asks before discarding them. There is no publish-all page; old `/admin/publish` links redirect to Overview.
+
+Contacts need a verified source/date and reviewed text in both languages. Enter the readable display number separately from its dialable number: `09123456789` or `+63333201234`; put an extension in its own field. Use Add alternate number for additional lines. Clear or reassign Home quick calls before removing/hiding their contact, changing category, deleting their line or making it text-only. Assignments can only use published contacts.
+
+Guidance needs an English/Hiligaynon title and steps, source link, reviewer name, date and confirmation of review. Map upload accepts drag-and-drop or Choose image (one PNG/JPEG/WebP, up to 5 MB); upload alone stays private. Complete its bilingual description/instructions and review details, then publish. Replacing an image resets the review confirmation/date/name. Historical map image files are retained for restoration.
+
+Each item publication is atomic and preserves unrelated public items and private working edits. Revision conflicts require reloading; edits are never silently overwritten. History restore replaces the entire selected version, not one item. Public cache invalidation and visible-page refreshes remain unchanged.
+
+Deployment prerequisite (hosted approval pending): apply `202610290003_publish_directory_item.sql` before deploying this frontend. It adds two functions and execute grants only; it does not backfill, change existing records, publish a version, alter tables or remove the previous APIs. The first six migrations were applied to the hosted project during the administrator repair on 29 October 2026; older pending-migration statements below are historical.
+
+---
+
 # Operating QROTECT
 
 ## Local administrator review

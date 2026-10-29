@@ -11,7 +11,7 @@ export default async function Page() {
     <PublicProvider initial={initial} preview>
       <PublicShell>
         <p className="sample-notice">
-          Private draft preview. Use the language switch to review both versions.
+          Private content preview. This page does not publish changes.
         </p>
         <HomeScreen />
         <DirectoryScreen initialSearch="" />

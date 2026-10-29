@@ -1086,3 +1086,56 @@ textarea::placeholder {
     transition: none;
   }
 }
+
+.admin-editor-body {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.admin-field {
+  display: grid;
+  gap: 6px;
+}
+.admin-field > label {
+  font-weight: 600;
+}
+.field-hint {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+.field-error {
+  color: #890b1a;
+  font-weight: 600;
+  margin: 0;
+}
+.admin-field [aria-invalid='true'] {
+  border: 2px solid #890b1a;
+}
+.editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding-block: 16px;
+  border-top: 1px solid var(--color-divider);
+}
+.map-dropzone {
+  border: 2px dashed var(--color-divider);
+  padding: 28px 20px;
+  border-radius: 8px;
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+.map-dropzone.is-dragging {
+  border-color: #890b1a;
+  background: #faf3f4;
+}
+.bilingual-fields {
+  min-width: 0;
+}

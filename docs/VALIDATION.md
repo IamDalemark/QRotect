@@ -1,3 +1,22 @@
+# Direct item publishing and administrator forms — 29 October 2026
+
+Implemented on `feat/admin-item-publishing` for integration through `develop` into `main`, as requested by the owner.
+
+- Contacts, one Home assignment, one guidance topic and the campus map publish directly from their editors. The separate save-draft/publish-all interface is removed; legacy `/admin/publish` redirects to Overview. Complete immutable publication history and explicit whole-version restore remain.
+- Field-level messages, accessible error associations/focus and concrete examples replace internal error paths. Bilingual inputs update one language against the latest state, and comma-separated aliases preserve typed separators. Unpublished browser changes have discard/leave confirmation and are not autosaved.
+- Map upload supports file selection and actual drag-and-drop, with image type/size/content checks, preview and upload errors. Replacement images reset review evidence. Upload alone does not publish. Guidance/map instructions identify the required source, reviewer, date and translations.
+- Additive migration `202610290003_publish_directory_item.sql` is installed and tested locally. It adds a private patch helper and authorized item-publishing RPC without table changes. One locked transaction preserves unrelated public/private items, checks the expected revision and Home references, and commits working content plus a complete snapshot/audit event. Unchanged legacy records are not silently approved.
+- `pnpm test`: **56 passed** across ten files.
+- `pnpm test:db`: all existing checks passed, plus **19 item-publication checks**. Coverage includes authorization, untouched private edits, first-publication isolation, rollback, stale/null revisions, mismatched IDs, validation, Home dependencies, guidance/map updates/removals and snapshot preservation.
+- `pnpm test:migration`: **four scenarios passed**, preserving publications and rolling back invalid identifiers/references.
+- Final `pnpm test:browser`: **96 public passes / 15 intentional profile skips**, plus **1 complete administrator pass / 2 intentional duplicate-profile skips**. Includes focus/inline errors, comma typing, scoped publishing, Home dependency failure/clear, bilingual guidance, rejected image bytes, real drop upload, mobile map geometry, withdrawal and restoration. Temporary local accounts, content and test-owned images were removed. No phone handoffs were made.
+- Contact desktop and map mobile captures were visually inspected; the contact form passed automated accessibility checks. Public responsive/accessibility/calling checks passed.
+- Final `pnpm check` passed formatting, lint, strict types and production build; `git diff --check` passed.
+
+Hosted rollout is still pending: automatic approval review rejected the new remote migration because this request explicitly authorized implementation/local merges rather than a hosted schema change. Apply the single additive migration with separate owner approval before deploying this frontend. No hosted content was changed, no new backup was created, and no frontend deployment or remote Git push was performed. The readiness script now checks the protected draft-reader and item-publisher RPCs so a missing-function mismatch is caught before release.
+
+---
+
 # Next.js performance pass — 29 October 2026
 
 Implemented on `refactor/nextjs-performance`. Public screen modules are separated by route, administrator loading is section-specific, and approved maps reserve a stable scrollable viewport. Added opt-in Webpack bundle reports and a repeatable local mobile measurement script. No navigation, publication-cache, database-schema or hosted-content changes.

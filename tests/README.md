@@ -25,3 +25,7 @@ For a focused administrator rerun, use `pnpm exec tsx scripts/run-browser-checks
 `pnpm perf:mobile <label>` measures a local production server with a fixed mobile profile and writes ignored JSON reports. See [measurement methodology](../docs/PERFORMANCE.md) for reproducible commands and limitations. `pnpm analyze` generates local Webpack bundle reports.
 
 The public suite includes a delayed approved test image to verify stable map viewport/instruction geometry, zoom and download links. Administrator unit checks ensure unavailable history cannot block editing or private preview, Overview finds the actual current publication, and protected data remains inaccessible after authorization failure.
+
+## Item publishing
+
+`pnpm test:db` includes 19 item-publication checks: scoped public changes, untouched private records, first-publication isolation, rollback, stale/null revisions, permissions, Home references, guidance and maps. Unit checks exercise human-readable field errors, hostile input and server action invalidation. The local administrator browser flow checks inline focus/errors, direct contact/assignment publishing, dependency blocking, guidance review, invalid map bytes, actual drag-and-drop upload, mobile map geometry, withdrawal and whole-version restoration. Test-owned uploaded images are removed before deleting the temporary account.

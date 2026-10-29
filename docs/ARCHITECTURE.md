@@ -1,3 +1,5 @@
+> Current administrator flow: per-item publication replaces the save/preview/publish-all interface. `publish_directory_item` atomically changes one contact, assignment, topic or map while retaining complete public snapshots and private unrelated records. The existing working-document assembler and low-level APIs remain for compatibility and full-version restore. See [item-level transaction](RELATIONAL_DATABASE.md) and [administrator instructions](OPERATIONS.md).
+
 # Architecture
 
 ## Request paths

@@ -4,6 +4,8 @@ import { currentSnapshot, PUBLIC_SNAPSHOT_TAG } from '@/lib/directory/server';
 import { requireAdmin } from '@/lib/admin/auth';
 import { snapshotSchema, publicationIssues, workingDirectoryIssues } from '@/lib/directory/schema';
 import { z } from 'zod';
+import { itemErrors, itemSchemas, type FieldErrors } from '@/lib/admin/item-validation';
+import type { Json } from '@/lib/supabase/database.types';
 export async function saveDraft(input: unknown, revision: number) {
   const { client } = await requireAdmin();
   const parsed = snapshotSchema.safeParse(input);
@@ -124,4 +126,54 @@ async function refreshPublication(action: string) {
       message: `${action} in the database. Public refresh could not be confirmed. Check the public directory before retrying.`,
     };
   }
+}
+
+export async function publishItem(
+  kind: string,
+  key: string,
+  input: unknown,
+  revision: number,
+): Promise<{ ok: boolean; message: string; errors?: FieldErrors; revision?: number }> {
+  const { client } = await requireAdmin();
+  const validKind = z.enum(['contact', 'guidance', 'map', 'quick-call']).safeParse(kind);
+  if (!validKind.success || !Number.isSafeInteger(revision) || revision < 0)
+    return { ok: false, message: 'Reload this page before publishing.' };
+  const type = validKind.data;
+  if (
+    type === 'map'
+      ? key !== 'campus-map'
+      : type === 'quick-call'
+        ? !z.enum(['police', 'fire', 'medical', 'hospital', 'disaster', 'school']).safeParse(key)
+            .success
+        : !z.uuid().safeParse(key).success
+  )
+    return { ok: false, message: 'Choose a valid item before publishing.' };
+  const errors = itemErrors(type, input);
+  if (Object.keys(errors).length)
+    return { ok: false, message: 'Check the highlighted fields.', errors };
+  const item = input === null ? null : itemSchemas[type].parse(input);
+  const { data, error } = await client.rpc('publish_directory_item', {
+    item_kind: type,
+    item_key: key,
+    item: item as Json,
+    expected_revision: revision,
+  });
+  if (error) {
+    const message =
+      error.code === '40001'
+        ? 'Another administrator changed the directory. Reload this page before publishing; your changes have not been published.'
+        : error.code === '23503'
+          ? 'This change affects a Home quick call. Clear or reassign it in Home quick calls first. Assignments must use an already published contact.'
+          : ['PGRST202', '42883'].includes(error.code)
+            ? 'Publishing is temporarily unavailable. Ask the system administrator to finish the update, then reload this page.'
+            : 'This item could not be published. Check its details and try again. The public version is unchanged.';
+    return { ok: false, message, errors: { _form: message } };
+  }
+  const label = {
+    contact: 'Contact published',
+    guidance: 'Guidance published',
+    map: input === null ? 'Map removed' : 'Map published',
+    'quick-call': 'Assignment published',
+  }[type];
+  return { ...(await refreshPublication(label)), revision: data };
 }

@@ -1,3 +1,15 @@
+# Item-level publication extension
+
+`202610290003_publish_directory_item.sql` adds authenticated `publish_directory_item(item_kind, item_key, item, expected_revision) → bigint` and a private JSON patch helper. Kind is `contact`, `guidance`, `map` or `quick-call`; keys are record UUIDs, `campus-map`, or a fixed category ID. JSON null removes a topic/map/contact or clears an assignment. Hiding a contact keeps the inactive record privately while removing it publicly.
+
+The function locks and checks the working revision, merges the one validated item independently into the current working document and current public snapshot, enforces Home references, rebuilds private relations, increments the revision and records one immutable publication/audit event in a single transaction. First publication starts with empty public collections, so other private records cannot leak. Changed items must satisfy their review/language requirements; unchanged legacy/demo records are preserved without inventing approval. A current full snapshot remains the public API; no ERD/table changes are needed.
+
+Legacy save/publish/restore APIs remain compatible. Administrators use per-item publishing; restoring a historical version still replaces the whole directory after confirmation. Test with `pnpm test:db`; `check-item-publishing.mts` specifically covers private/public isolation, conflicts, denial, dependency blocking, guidance/map operations and first-publication behavior.
+
+Apply the additive extension before the frontend release. Hosted migrations through `202610290002` were applied on 29 October 2026; the original locally-only rollout notes below describe their earlier state.
+
+---
+
 # Relational directory database
 
 Implemented locally by `202610290001_relational_directory.sql` and `202610290002_scoped_relational_save.sql` on 29 October 2026. Hosted application of this migration and frontend deployment remain separate release steps. Public visitors continue to receive the existing v1 JSON publication format.

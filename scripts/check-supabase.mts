@@ -35,6 +35,27 @@ for (const [name, result] of [
     );
   } else console.log(`${name}: ready`);
 }
+// Probe required administrator RPCs anonymously: presence must be confirmed by
+// an access-denied response, never by exporting a draft or making a write.
+for (const [name, result] of await Promise.all([
+  client.rpc('get_directory_draft').then((result) => ['Draft reader', result] as const),
+  client
+    .rpc('publish_directory_item', {
+      item_kind: 'map',
+      item_key: 'campus-map',
+      item: null,
+      expected_revision: -1,
+    })
+    .then((result) => ['Item publisher', result] as const),
+])) {
+  if (result.error?.code === '42501') console.log(`${name}: ready and protected`);
+  else {
+    failed = true;
+    console.log(
+      `${name}: ${['PGRST202', '42883'].includes(result.error?.code ?? '') ? 'MISSING — apply the required migration before deploying' : 'FAILED — verify database permissions and availability'}`,
+    );
+  }
+}
 if (!publication.error) {
   if (!publication.data)
     console.log(
