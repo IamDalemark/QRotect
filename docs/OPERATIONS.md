@@ -1,4 +1,4 @@
-Review dates follow Philippine time (`Asia/Manila`). Deploy the frontend date fix with `202610300001_philippine_review_dates.sql`, which sets the same timezone on both publishing functions. The timezone migration is verified locally and pending hosted approval. Publish feedback appears beside the editor controls; admin navigation shows section-shaped loading placeholders.
+Review dates follow Philippine time (`Asia/Manila`). Deploy the frontend date fix with `202610300001_philippine_review_dates.sql`, which sets the same timezone on both publishing functions. The timezone migration is verified locally and was applied hosted with owner approval on 30 October 2026. The matching frontend changes still require deployment. Publish feedback appears beside the editor controls; admin navigation shows section-shaped loading placeholders.
 
 # Item publishing — current administrator workflow
 
