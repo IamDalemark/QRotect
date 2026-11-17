@@ -16,12 +16,7 @@ export function quickCallTarget(snapshot: Snapshot, category: Category) {
   if (contacts.length !== 1) return null;
   const contact = contacts[0];
   const numbers = contact.numbers.filter((n) => n.id === assignment.numberId);
-  if (
-    !contact.active ||
-    contact.category !== category ||
-    numbers.length !== 1 ||
-    !telephoneHref(numbers[0])
-  )
+  if (contact.category !== category || numbers.length !== 1 || !telephoneHref(numbers[0]))
     return null;
   return { agency: contact.agency, branch: contact.branch, number: numbers[0] };
 }

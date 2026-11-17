@@ -38,6 +38,10 @@ test('administrator publishes individual items with inline validation, reviewed 
   await expect(page.getByRole('heading', { name: 'Manage contacts', exact: true })).toBeVisible();
   await page.unroute('**/admin/contacts?*');
   await page.getByRole('button', { name: 'Add contact', exact: true }).click();
+  await expect(page.getByLabel('Last verified date (optional)', { exact: true })).toHaveValue(
+    philippineDate(),
+  );
+  await expect(page.getByLabel('Show this contact publicly', { exact: true })).toHaveCount(0);
   await page.getByLabel('Agency', { exact: true }).fill('QROTECT browser test');
   await page
     .getByRole('group', { name: 'Description', exact: true })
@@ -68,10 +72,7 @@ test('administrator publishes individual items with inline validation, reviewed 
     (await (await page.request.get(`${adminOrigin}/api/public/snapshot`)).json()).contacts,
   ).toEqual([]);
   await dial.fill('09123456789');
-  await page
-    .getByLabel('Official verification source URL', { exact: true })
-    .fill('https://example.test/verified');
-  await page.getByLabel('Last verified date', { exact: true }).fill(philippineDate());
+  await page.getByLabel('Last verified date (optional)', { exact: true }).fill('');
   await page
     .getByLabel('I checked this contact and both language versions', { exact: true })
     .check();
@@ -87,6 +88,9 @@ test('administrator publishes individual items with inline validation, reviewed 
   await page.screenshot({ path: '.local/browser-checks/admin-published.png' });
   const original = await (await page.request.get(`${adminOrigin}/api/public/snapshot`)).json();
   expect(original.contacts).toHaveLength(1);
+  expect(original.contacts[0]).toMatchObject({ source: '', verifiedAt: '', active: true });
+  await page.reload();
+  await expect(page.getByLabel('Last verified date (optional)', { exact: true })).toHaveValue('');
   await page.getByRole('link', { name: 'Home quick calls', exact: true }).click();
   await page.getByRole('button', { name: 'School emergency', exact: true }).click();
   await page
@@ -95,7 +99,7 @@ test('administrator publishes individual items with inline validation, reviewed 
   await page.getByRole('button', { name: 'Publish assignment', exact: true }).click();
   await expect(page.locator('.admin-status')).toContainText('Assignment published');
   await page.getByRole('link', { name: 'Contacts', exact: true }).click();
-  await page.getByLabel('Show this contact publicly', { exact: true }).uncheck();
+  await page.getByLabel('Category', { exact: true }).selectOption('police');
   await page.getByRole('button', { name: 'Publish contact', exact: true }).click();
   await expect(page.locator('.admin-status')).toContainText('Home quick call');
   expect(
@@ -205,12 +209,12 @@ test('administrator publishes individual items with inline validation, reviewed 
   await page.getByRole('button', { name: 'Remove map', exact: true }).click();
   await expect(page.locator('.admin-status')).toContainText('Map removed');
   await page.getByRole('link', { name: 'Contacts', exact: true }).click();
-  await page.getByLabel('Show this contact publicly', { exact: true }).uncheck();
+  await page.getByLabel('Branch', { exact: true }).fill('Published correction');
   await page.getByRole('button', { name: 'Publish contact', exact: true }).click();
   await expect(page.locator('.admin-status')).toContainText('Contact published');
   expect(
     (await (await page.request.get(`${adminOrigin}/api/public/snapshot`)).json()).contacts,
-  ).toEqual([]);
+  ).toMatchObject([{ branch: 'Published correction', active: true }]);
   await page.getByRole('link', { name: 'History', exact: true }).click();
   const row = page.locator('article').filter({ hasText: original.version });
   page.once('dialog', (d) => d.accept());

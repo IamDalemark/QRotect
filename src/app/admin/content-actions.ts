@@ -151,7 +151,9 @@ export async function publishItem(
   const errors = itemErrors(type, input);
   if (Object.keys(errors).length)
     return { ok: false, message: 'Check the highlighted fields.', errors };
-  const item = input === null ? null : itemSchemas[type].parse(input);
+  const parsed = input === null ? null : itemSchemas[type].parse(input);
+  // Retain the legacy field on the wire; visibility is no longer configurable.
+  const item = type === 'contact' && parsed ? { ...parsed, active: true } : parsed;
   const { data, error } = await client.rpc('publish_directory_item', {
     item_kind: type,
     item_key: key,

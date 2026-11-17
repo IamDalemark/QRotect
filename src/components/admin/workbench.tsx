@@ -18,6 +18,7 @@ import { categoryIds, type Snapshot, type Contact } from '@/lib/directory/schema
 import { itemErrors, type ItemKind, type FieldErrors } from '@/lib/admin/item-validation';
 import { categories, areas } from '@/lib/directory/labels';
 import { telephoneHref } from '@/lib/directory/calling';
+import { formatPhilippineDate, philippineDate } from '@/lib/directory/date';
 
 type Props = {
   initial: Snapshot;
@@ -300,6 +301,7 @@ export function Workbench({
         : kind === 'quick-call'
           ? assignment
           : working.map;
+  const currentPublication = history.find((p) => p.current);
   const validation = itemErrors(kind, item);
   const errors = {
     ...Object.fromEntries(
@@ -387,7 +389,7 @@ export function Workbench({
               channel: 'voice',
             },
           ],
-          verifiedAt: '',
+          verifiedAt: philippineDate(),
           source: '',
           approved: false,
           active: true,
@@ -483,14 +485,18 @@ export function Workbench({
       {section === 'overview' && (
         <>
           <p>
-            Choose a section, make your changes, then publish that item. There is no separate save
-            or publish-all step.
+            View your contact totals and latest publication, and access tools for managing contacts,
+            Home quick calls, guidance, and the campus map.
           </p>
           <dl className="overview-list">
             <dt>Stored contacts</dt>
             <dd>{initial.contacts.length}</dd>
             <dt>Last publication</dt>
-            <dd>{history.find((p) => p.current)?.created_at || 'Not published'}</dd>
+            <dd>
+              {currentPublication
+                ? formatPhilippineDate(currentPublication.created_at)
+                : 'Not published'}
+            </dd>
           </dl>
           <Link href="/admin/contacts" className="button primary">
             Manage contacts
@@ -506,7 +512,7 @@ export function Workbench({
           {history.map((p) => (
             <article key={p.id} className="history-row">
               <h2>{p.current ? 'Current publication' : 'Previous publication'}</h2>
-              <p>{p.created_at}</p>
+              <p>{formatPhilippineDate(p.created_at)}</p>
               <p>{p.id}</p>
               <button
                 className="button secondary"
@@ -538,7 +544,7 @@ export function Workbench({
           <h2>Activity</h2>
           {events.map((e) => (
             <p key={e.id}>
-              {e.created_at} · {e.action}
+              {formatPhilippineDate(e.created_at)} · {e.action}
             </p>
           ))}
         </>
@@ -582,7 +588,6 @@ export function Workbench({
                       onClick={() => select(c.id)}
                     >
                       {c.agency || 'New contact'}
-                      {!c.active ? ' · Hidden' : ''}
                     </button>
                   ))}
               </aside>
@@ -826,7 +831,7 @@ export function Workbench({
                     </button>
                     <Field
                       name="source"
-                      label="Official verification source URL"
+                      label="Official verification source URL (optional)"
                       value={contact.source}
                       onChange={(v) =>
                         edit((d) => {
@@ -839,7 +844,7 @@ export function Workbench({
                     />
                     <Field
                       name="verifiedAt"
-                      label="Last verified date"
+                      label="Last verified date (optional)"
                       value={contact.verifiedAt}
                       onChange={(v) =>
                         edit((d) => {
@@ -847,18 +852,7 @@ export function Workbench({
                         })
                       }
                       type="date"
-                      hint="Date you confirmed the number against its official source."
-                    />
-                    <Check
-                      name="active"
-                      label="Show this contact publicly"
-                      checked={contact.active}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.contacts[ci].active = v;
-                        })
-                      }
-                      hint="Uncheck and publish to hide it. Clear any Home quick-call assignment first."
+                      hint="Defaults to today in Philippine time. Change or clear it as needed."
                     />
                     <Check
                       name="approved"
@@ -1027,7 +1021,7 @@ export function Workbench({
                       options={[
                         { value: '', label: 'No quick call — browse contacts' },
                         ...publishedContacts
-                          .filter((c) => c.active && c.category === selected)
+                          .filter((c) => c.category === selected)
                           .flatMap((c) =>
                             c.numbers
                               .filter((n) => telephoneHref(n))

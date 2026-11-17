@@ -72,3 +72,12 @@ it('does not attempt writes when authorization fails', async () => {
   await expect(publishItem('map', 'campus-map', null, 8)).rejects.toThrow('Access denied');
   expect(mocks.rpc).not.toHaveBeenCalled();
 });
+
+it('publishes optional metadata and normalizes legacy hidden submissions to public', async () => {
+  const c = { ...reviewed(), source: '', verifiedAt: '', active: false };
+  expect((await publishItem('contact', c.id, c, 8)).ok).toBe(true);
+  expect(mocks.rpc).toHaveBeenCalledWith(
+    'publish_directory_item',
+    expect.objectContaining({ item: { ...c, active: true } }),
+  );
+});

@@ -116,9 +116,8 @@ export function publicationIssues(data: Snapshot): string[] {
   if (data.fixture) issues.push('Sample records cannot be published.');
   const ids = data.contacts.map((c) => c.id);
   if (new Set(ids).size !== ids.length) issues.push('Contact identifiers must be unique.');
-  for (const c of data.contacts.filter((c) => c.active)) {
-    if (!c.approved || !c.verifiedAt || !c.source)
-      issues.push(`${c.agency}: approval, verification date, and source are required.`);
+  for (const c of data.contacts) {
+    if (!c.approved) issues.push(`${c.agency}: approval is required.`);
     if (!c.description.hil || c.numbers.some((n) => !n.label.hil))
       issues.push(`${c.agency}: reviewed Hiligaynon wording is required.`);
     if (c.verifiedAt > philippineDate())
@@ -146,14 +145,14 @@ export function quickCallIssues(data: Snapshot): string[] {
     const contact = matches.length === 1 ? matches[0] : undefined;
     const numbers = contact?.numbers.filter((n) => n.id === assignment.numberId) ?? [];
     if (
-      !contact?.active ||
+      !contact ||
       contact.category !== assignment.category ||
       numbers.length !== 1 ||
       numbers[0].channel !== 'voice' ||
       /^\+?0+$/.test(numbers[0].dial)
     )
       issues.push(
-        `${assignment.category}: quick call requires an active contact in this category and its exact callable voice line. Reassign or clear it.`,
+        `${assignment.category}: quick call requires a contact in this category and its exact callable voice line. Reassign or clear it.`,
       );
   }
   return issues;
@@ -165,7 +164,6 @@ export function searchContacts(contacts: Contact[], query: string, category = ''
   const terms = query.toLocaleLowerCase().trim().split(/\s+/).filter(Boolean);
   return contacts.filter(
     (c) =>
-      c.active &&
       (!category || c.category === category) &&
       (!area || c.area === area) &&
       terms.every((term) =>

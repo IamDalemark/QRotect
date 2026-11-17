@@ -39,7 +39,6 @@ describe('explicit quick-call destinations', () => {
   });
   for (const failure of [
     'missing-contact',
-    'inactive',
     'category',
     'missing-line',
     'text',
@@ -51,7 +50,6 @@ describe('explicit quick-call destinations', () => {
       const snapshot = structuredClone(fixtureSnapshot);
       const contact = snapshot.contacts[0];
       if (failure === 'missing-contact') snapshot.contacts.shift();
-      if (failure === 'inactive') contact.active = false;
       if (failure === 'category') contact.category = 'fire';
       if (failure === 'missing-line')
         contact.numbers[0].id = '20000000-0000-4000-8000-000000000099';
@@ -86,4 +84,11 @@ describe('explicit quick-call destinations', () => {
       }).success,
     ).toBe(false);
   });
+});
+
+it('ignores the legacy hidden flag for existing published contacts and quick calls', () => {
+  const data = structuredClone(fixtureSnapshot);
+  data.contacts[0].active = false;
+  expect(quickCallTarget(data, 'police')?.agency).toBe('Sample police station');
+  expect(quickCallIssues(data)).toEqual([]);
 });

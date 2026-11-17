@@ -43,10 +43,7 @@ export function itemErrors(kind: ItemKind, value: unknown): FieldErrors {
     return typeof value === 'string' ? value.trim() : '';
   };
   const today = philippineDate();
-  if (kind === 'contact' && read('active') === true) {
-    if (!text('source'))
-      errors.source = 'Add the official webpage where this contact was verified.';
-    if (!text('verifiedAt')) errors.verifiedAt = 'Choose the date you checked this contact.';
+  if (kind === 'contact') {
     if (text('verifiedAt') > today)
       errors.verifiedAt = 'The verification date cannot be in the future.';
     if (!text('description.hil')) errors['description.hil'] = 'Add the Hiligaynon description.';

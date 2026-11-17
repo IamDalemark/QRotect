@@ -8,8 +8,8 @@ it('returns field errors and practical phone examples without internal paths in 
   c.numbers[0].dial = '0912 345 6789 ext123';
   const errors = itemErrors('contact', c);
   expect(errors['numbers.0.dial']).toContain('09123456789');
-  expect(errors.source).toBeTruthy();
-  expect(errors.verifiedAt).toBeTruthy();
+  expect(errors.source).toBeUndefined();
+  expect(errors.verifiedAt).toBeUndefined();
   expect(errors.approved).toBeTruthy();
   expect(Object.values(errors).join(' ')).not.toContain('numbers.0');
 });
@@ -58,4 +58,26 @@ it('uses the Philippine calendar across UTC midnight for contact, guidance and m
   }
   c.verifiedAt = '2026-10-31';
   expect(itemErrors('contact', c).verifiedAt).toContain('future');
+});
+
+it('allows either or both contact verification fields to be blank without skipping approval', () => {
+  for (const [source, verifiedAt] of [
+    ['', ''],
+    ['https://example.test', ''],
+    ['', '2026-01-01'],
+  ]) {
+    const c = {
+      ...structuredClone(fixtureSnapshot.contacts[0]),
+      approved: true,
+      source,
+      verifiedAt,
+    };
+    expect(itemErrors('contact', c)).toEqual({});
+    expect(itemErrors('contact', { ...c, active: false, approved: false }).approved).toBeTruthy();
+  }
+});
+it('still validates supplied URLs and dates', () => {
+  const c = { ...structuredClone(fixtureSnapshot.contacts[0]), approved: true };
+  expect(itemErrors('contact', { ...c, source: 'javascript:alert(1)' }).source).toBeTruthy();
+  expect(itemErrors('contact', { ...c, verifiedAt: '2026-02-30' }).verifiedAt).toBeTruthy();
 });

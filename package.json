@@ -16,7 +16,7 @@
     "test:watch": "vitest",
     "test:e2e": "pnpm test:browser",
     "test:db": "tsx scripts/check-database.mts && tsx scripts/check-quick-calls.mts && tsx scripts/check-relational-directory.mts && tsx scripts/check-item-publishing.mts",
-    "test:migration": "tsx scripts/check-relational-migration.mts",
+    "test:migration": "tsx scripts/check-relational-migration.mts && tsx scripts/check-contact-update.mts",
     "test:browser": "tsx scripts/run-browser-checks.mts",
     "setup:local": "tsx scripts/setup-local.mts",
     "review:sample": "tsx scripts/preview-sample.mts",

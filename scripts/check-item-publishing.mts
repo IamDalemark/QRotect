@@ -97,12 +97,51 @@ try {
   invalid.numbers[0].dial = '09123456789';
   invalid.approved = false;
   await fails(rpc, ['contact', contact.id, invalid, revision], '22023');
+  for (const [source, verifiedAt] of [
+    ['', ''],
+    ['', today],
+    ['https://example.test/contact', ''],
+  ]) {
+    revision = Number(
+      (await db.query(rpc, ['contact', contact.id, { ...contact, source, verifiedAt }, revision]))
+        .rows[0].revision,
+    );
+    const current = (await db.query('select snapshot from public.publications where current'))
+      .rows[0].snapshot.contacts[0];
+    assert.equal(current.source, source);
+    assert.equal(current.verifiedAt, verifiedAt);
+    checks++;
+  }
+  await fails(
+    rpc,
+    ['contact', contact.id, { ...contact, source: 'javascript:alert(1)' }, revision],
+    '22023',
+  );
+  await fails(
+    rpc,
+    ['contact', contact.id, { ...contact, verifiedAt: '2999-01-01' }, revision],
+    '22023',
+  );
+  await fails(
+    rpc,
+    ['contact', contact.id, { ...contact, verifiedAt: '2026-02-30' }, revision],
+    '22023',
+  );
   const q = { category: contact.category, contactId: contact.id, numberId: contact.numbers[0].id };
   revision = Number(
     (await db.query(rpc, ['quick-call', q.category, q, revision])).rows[0].revision,
   );
   const hidden = { ...contact, active: false };
-  await fails(rpc, ['contact', contact.id, hidden, revision], '23503');
+  revision = Number(
+    (await db.query(rpc, ['contact', contact.id, hidden, revision])).rows[0].revision,
+  );
+  assert.equal(
+    (await db.query('select snapshot from public.publications where current')).rows[0].snapshot
+      .contacts[0].active,
+    true,
+  );
+  checks++;
+  await fails(rpc, ['contact', contact.id, null, revision], '23503');
   const missingLine = structuredClone(contact);
   missingLine.numbers[0].id = randomUUID();
   await fails(rpc, ['contact', contact.id, missingLine, revision], '23503');
@@ -113,18 +152,16 @@ try {
     (await db.query(rpc, ['quick-call', q.category, null, revision])).rows[0].revision,
   );
   revision = Number(
-    (await db.query(rpc, ['contact', contact.id, hidden, revision])).rows[0].revision,
+    (await db.query(rpc, ['contact', contact.id, null, revision])).rows[0].revision,
   );
   published = (await db.query('select snapshot from public.publications where current')).rows[0]
     .snapshot;
   assert.ok(!published.contacts.some((c: { id: string }) => c.id === contact.id));
   checks++;
   assert.ok(
-    (
+    !(
       await db.query('select payload from public.get_directory_draft()')
-    ).rows[0].payload.contacts.some(
-      (c: { id: string; active: boolean }) => c.id === contact.id && !c.active,
-    ),
+    ).rows[0].payload.contacts.some((c: { id: string }) => c.id === contact.id),
   );
   checks++;
   const guide = {

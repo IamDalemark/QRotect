@@ -42,7 +42,6 @@ try {
   );
   for (const failure of [
     'missing',
-    'inactive',
     'category',
     'text',
     'zero',
@@ -53,7 +52,6 @@ try {
     await db.query('savepoint invalid_assignment');
     const bad = structuredClone(snapshot);
     if (failure === 'missing') bad.quickCalls![0].contactId = randomUUID();
-    if (failure === 'inactive') bad.contacts[0].active = false;
     if (failure === 'category') bad.contacts[0].category = 'fire';
     if (failure === 'text') bad.contacts[0].numbers[0].channel = 'text';
     if (failure === 'zero') bad.contacts[0].numbers[0].dial = '000';
@@ -81,7 +79,7 @@ try {
   const legacyRevision = await save(legacy);
   await db.query('select public.publish_directory($1)', [legacyRevision]);
   console.log(
-    'Quick-call database checks passed: atomic assignments, legacy compatibility, eight invalid-target rejections and publication rollback. All test data rolled back.',
+    'Quick-call database checks passed: atomic assignments, legacy compatibility, seven invalid-target rejections and publication rollback. All test data rolled back.',
   );
 } finally {
   await db.query('rollback');

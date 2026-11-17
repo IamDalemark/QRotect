@@ -28,7 +28,7 @@ describe('public directory boundaries', () => {
       numberSchema.safeParse({ ...number, dial: '+63333200000', extension: '100' }).success,
     ).toBe(true);
   });
-  it('combines category, area and bilingual search without inactive records', () => {
+  it('combines category, area and bilingual search with all contacts public', () => {
     expect(searchContacts(fixtureSnapshot.contacts, 'bulig', 'medical', 'iloilo')).toHaveLength(1);
     expect(searchContacts(fixtureSnapshot.contacts, 'bulig', 'medical', 'cpu')).toHaveLength(0);
     expect(
@@ -36,7 +36,7 @@ describe('public directory boundaries', () => {
         fixtureSnapshot.contacts.map((c) => ({ ...c, active: false })),
         '',
       ),
-    ).toHaveLength(0);
+    ).toHaveLength(fixtureSnapshot.contacts.length);
   });
   it('labels a missing translated description instead of silently inventing it', () => {
     expect(localized({ en: 'Campus', hil: '' }, 'hil')).toBe('Campus (English)');
@@ -55,4 +55,14 @@ describe('public directory boundaries', () => {
   it('allows an empty publication without manufacturing hotline records', () => {
     expect(publicationIssues(emptySnapshot)).toEqual([]);
   });
+});
+
+it('requires approval for every contact but allows missing verification metadata', () => {
+  const data = structuredClone(fixtureSnapshot);
+  data.fixture = false;
+  for (const c of data.contacts) c.approved = true;
+  expect(publicationIssues(data)).toEqual([]);
+  data.contacts[0].active = false;
+  data.contacts[0].approved = false;
+  expect(publicationIssues(data)).toContain(`${data.contacts[0].agency}: approval is required.`);
 });
