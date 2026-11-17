@@ -1,4 +1,5 @@
 'use client';
+import { formatPhilippineDate } from '@/lib/directory/date';
 import { ArrowRight } from 'lucide-react';
 import { localized } from '@/lib/directory/schema';
 import { usePublic } from './context';
@@ -39,7 +40,7 @@ export function GuidanceScreen() {
                 ))}
               </ol>
               <p>
-                {g.reviewedAt} · {g.reviewer}
+                {formatPhilippineDate(g.reviewedAt)} · {g.reviewer}
               </p>
               <a href={g.source} target="_blank" rel="noreferrer">
                 {t.source}

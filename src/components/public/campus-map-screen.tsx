@@ -1,4 +1,5 @@
 'use client';
+import { formatPhilippineDate } from '@/lib/directory/date';
 import { useState } from 'react';
 import { Map, ZoomIn, ZoomOut, Download } from 'lucide-react';
 import { localized } from '@/lib/directory/schema';
@@ -57,7 +58,7 @@ export function MapScreen() {
             ))}
           </ol>
           <p>
-            {t.updated}: {map.reviewedAt} · {map.reviewer}
+            {t.updated}: {formatPhilippineDate(map.reviewedAt)} · {map.reviewer}
           </p>
         </>
       )}

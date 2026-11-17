@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { formatPhilippineDate } from '@/lib/directory/date';
 import { Copy, Check, ExternalLink } from 'lucide-react';
 import { localized, type Contact } from '@/lib/directory/schema';
 import { usePublic } from './context';
@@ -56,7 +57,9 @@ export function ContactRow({ contact }: { contact: Contact }) {
         ))}
       </div>
       <div className="verification">
-        {contact.verifiedAt ? `${t.verified}: ${contact.verifiedAt}` : t.unverified}
+        {contact.verifiedAt
+          ? `${t.verified}: ${formatPhilippineDate(contact.verifiedAt)}`
+          : t.unverified}
         {due && <span className="warning-text"> · {t.review}</span>}
         {contact.source && (
           <a href={contact.source} target="_blank" rel="noreferrer">
