@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element -- authenticated original map preview */
 'use client';
 import Link from 'next/link';
+import { useUnpublishedEdits } from './unpublished-edits';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
@@ -210,6 +211,7 @@ export function Workbench({
         : initial.contacts[0]?.id || '',
   );
   const [dirty, setDirty] = useState(false);
+  useUnpublishedEdits(dirty);
   const [message, setMessage] = useState('');
   const [successful, setSuccessful] = useState(false);
   const feedback = useRef<HTMLElement>(null);
