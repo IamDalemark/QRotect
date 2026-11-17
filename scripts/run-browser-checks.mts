@@ -112,16 +112,20 @@ try {
             'tests/e2e/quick-calls.spec.ts',
             'tests/e2e/navigation.spec.ts',
           ];
-      const child = spawn('pnpm', ['exec', 'playwright', 'test', ...files, '--workers=2'], {
-        stdio: 'inherit',
-        env: {
-          ...process.env,
-          QROTECT_E2E_ADMIN_EMAIL: email,
-          QROTECT_E2E_PUBLIC_ORIGIN: `http://127.0.0.1:${publicPort}`,
-          QROTECT_E2E_ADMIN_ORIGIN: `http://127.0.0.1:${adminPort}`,
-          QROTECT_E2E_ADMIN_PASSWORD: password,
+      const child = spawn(
+        'pnpm',
+        ['exec', 'playwright', 'test', ...files, connected ? '--workers=1' : '--workers=2'],
+        {
+          stdio: 'inherit',
+          env: {
+            ...process.env,
+            QROTECT_E2E_ADMIN_EMAIL: email,
+            QROTECT_E2E_PUBLIC_ORIGIN: `http://127.0.0.1:${publicPort}`,
+            QROTECT_E2E_ADMIN_ORIGIN: `http://127.0.0.1:${adminPort}`,
+            QROTECT_E2E_ADMIN_PASSWORD: password,
+          },
         },
-      });
+      );
       child.on('exit', (code) => resolve(code ?? 1));
     });
     const server = servers.pop()!;

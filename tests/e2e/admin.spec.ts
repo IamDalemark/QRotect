@@ -9,18 +9,32 @@ test('administrator publishes individual items with inline validation, reviewed 
     info.project.name !== 'desktop-chromium' || !process.env.QROTECT_E2E_ADMIN_EMAIL,
     'Uses one isolated local test account.',
   );
+  let observeNavigation = () => {};
+  const navigationRequested = new Promise<void>((resolve) => {
+    observeNavigation = resolve;
+  });
+  let releaseNavigation = () => {};
+  const navigationGate = new Promise<void>((resolve) => {
+    releaseNavigation = resolve;
+  });
+  await page.route('**/admin/contacts?*', async (route) => {
+    observeNavigation();
+    await navigationGate;
+    await route.continue();
+  });
   await page.goto(`${adminOrigin}/admin`);
   await page.getByLabel('Email', { exact: true }).fill(process.env.QROTECT_E2E_ADMIN_EMAIL!);
   await page.getByLabel('Password', { exact: true }).fill(process.env.QROTECT_E2E_ADMIN_PASSWORD!);
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Directory overview' })).toBeVisible();
-  await page.route('**/admin/contacts?*', async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    await route.continue();
-  });
   await page.getByRole('link', { name: 'Contacts', exact: true }).click();
-  await expect(page.getByRole('status', { name: 'Loading administrator content' })).toBeVisible();
-  await page.screenshot({ path: '.local/browser-checks/admin-loading.png' });
+  await navigationRequested;
+  // An RSC request may be prefetched or committed atomically; a delayed
+  // response does not guarantee the route's loading boundary will render.
+  await expect(page.getByRole('navigation', { name: 'Administrator navigation' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Expand navigation', exact: true })).toBeEnabled();
+  await expect(page.getByRole('heading', { name: 'Manage contacts', exact: true })).toHaveCount(0);
+  releaseNavigation();
   await expect(page.getByRole('heading', { name: 'Manage contacts', exact: true })).toBeVisible();
   await page.unroute('**/admin/contacts?*');
   await page.getByRole('button', { name: 'Add contact', exact: true }).click();
@@ -208,4 +222,149 @@ test('administrator publishes individual items with inline validation, reviewed 
   expect(restored.map).toBeNull();
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Administrator sign in' })).toBeVisible();
+});
+
+test('administrator sidebar preserves navigation state and guards unpublished edits', async ({
+  page,
+}, info) => {
+  test.skip(!process.env.QROTECT_E2E_ADMIN_EMAIL, 'Uses an isolated local administrator.');
+  const consoleErrors: string[] = [];
+  page.on('pageerror', (error) => consoleErrors.push(error.message));
+  page.on('console', (message) => {
+    // WebKit reports cancelled background RSC prefetches during sign-out as
+    // access-control failures. Keep actual application/render errors visible.
+    if (
+      message.type() === 'error' &&
+      !/\?_rsc=.*due to access control checks\.$/.test(message.text())
+    )
+      consoleErrors.push(message.text());
+  });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto(`${adminOrigin}/admin`);
+  await page.getByLabel('Email', { exact: true }).fill(process.env.QROTECT_E2E_ADMIN_EMAIL!);
+  await page.getByLabel('Password', { exact: true }).fill(process.env.QROTECT_E2E_ADMIN_PASSWORD!);
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Directory overview' })).toBeVisible();
+  const rail = page.locator('.admin-sidebar-desktop');
+  const menu = page.getByRole('button', { name: 'Menu', exact: true });
+  await expect(rail).toHaveAttribute('data-state', 'collapsed');
+  expect((await rail.boundingBox())?.width).toBe(72);
+  await expect(page.getByRole('link', { name: 'Overview', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await page.getByRole('link', { name: 'Contacts', exact: true }).focus();
+  await expect(page.getByRole('tooltip')).toContainText('Contacts');
+  await page.keyboard.press('Escape');
+  if (info.project.name === 'desktop-chromium')
+    await page.screenshot({
+      path: '.impeccable/review/admin-sidebar-desktop-collapsed.png',
+      fullPage: true,
+    });
+  await page.getByRole('button', { name: 'Expand navigation', exact: true }).click();
+  expect((await rail.boundingBox())?.width).toBe(256);
+  await page.getByRole('link', { name: 'Password', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Password', exact: true })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await expect(rail).toHaveAttribute('data-state', 'expanded');
+  await expect(page.getByRole('heading', { name: 'Update password' })).toBeVisible();
+  if (info.project.name === 'desktop-chromium')
+    await page.screenshot({
+      path: '.impeccable/review/admin-sidebar-desktop-expanded.png',
+      fullPage: true,
+    });
+  await page.reload();
+  await expect(rail).toHaveAttribute('data-state', 'collapsed');
+  expect((await page.context().cookies()).some((cookie) => cookie.name === 'sidebar_state')).toBe(
+    false,
+  );
+  await page.getByRole('link', { name: 'Contacts', exact: true }).click();
+  await page.getByRole('button', { name: 'Add contact', exact: true }).click();
+  await page.getByLabel('Agency', { exact: true }).fill('Unpublished sidebar check');
+  await page.getByRole('button', { name: 'Expand navigation', exact: true }).click();
+  await expect(page.getByLabel('Agency', { exact: true })).toHaveValue('Unpublished sidebar check');
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.getByLabel('Agency', { exact: true })).toHaveValue('Unpublished sidebar check');
+  await page.setViewportSize({ width: 1023, height: 900 });
+  await expect(menu).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await menu.click();
+  const drawer = page.getByRole('dialog', { name: 'Administrator menu' });
+  await expect(drawer).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Close menu', exact: true })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(drawer).toHaveCount(0);
+  await expect(menu).toBeFocused();
+  await menu.click();
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await drawer.getByRole('link', { name: 'Guidance', exact: true }).click();
+  await expect(drawer).toBeVisible();
+  await expect(page).toHaveURL(/\/admin\/contacts$/);
+  page.once('dialog', (dialog) => dialog.dismiss());
+  await drawer.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(drawer).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 740 });
+  expect((await drawer.boundingBox())!.width).toBeLessThanOrEqual(288);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  if (info.project.name === 'desktop-chromium')
+    await page.screenshot({
+      path: '.impeccable/review/admin-sidebar-mobile-320.png',
+      fullPage: true,
+    });
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = '200%';
+  });
+  expect(await drawer.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+  if (info.project.name === 'desktop-chromium')
+    await page.screenshot({
+      path: '.impeccable/review/admin-sidebar-mobile-320-text-200.png',
+      fullPage: true,
+    });
+  expect(
+    (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze())
+      .violations,
+  ).toEqual([]);
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = '';
+  });
+  await page.mouse.click(319, 400);
+  await expect(drawer).toHaveCount(0);
+  await expect(menu).toBeFocused();
+  await expect(page.getByLabel('Agency', { exact: true })).toHaveValue('Unpublished sidebar check');
+  if (info.project.name === 'desktop-chromium')
+    await page.screenshot({
+      path: '.impeccable/review/admin-sidebar-mobile-closed.png',
+      fullPage: true,
+    });
+  await menu.click();
+  page.once('dialog', (dialog) => dialog.accept());
+  await drawer.getByRole('link', { name: 'Guidance', exact: true }).click();
+  await expect(page).toHaveURL(/\/admin\/guidance$/);
+  await expect(drawer).toHaveCount(0);
+  await menu.click();
+  await drawer.getByRole('link', { name: 'Guidance', exact: true }).click();
+  await expect(drawer).toBeVisible(); // Same-route activation does not discard or close.
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await expect(rail).toHaveAttribute('data-state', 'expanded');
+  await expect(menu).toBeHidden();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(drawer).toHaveCount(0);
+  await menu.click();
+  if (info.project.name === 'desktop-chromium')
+    await page.screenshot({
+      path: '.impeccable/review/admin-sidebar-mobile-390.png',
+      fullPage: true,
+    });
+  await drawer.getByRole('link', { name: 'Contacts', exact: true }).click();
+  await page.getByRole('button', { name: 'Add contact', exact: true }).click();
+  await page.getByLabel('Agency', { exact: true }).fill('Discard on sign out');
+  await menu.click();
+  page.once('dialog', (dialog) => dialog.accept());
+  await drawer.getByRole('button', { name: 'Sign out', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Administrator sign in' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Menu', exact: true })).toHaveCount(0);
+  expect(consoleErrors).toEqual([]);
 });
