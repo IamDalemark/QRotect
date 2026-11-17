@@ -37,12 +37,12 @@ export const copy = {
     home: 'Get help',
     emergencyContacts: 'Emergency contacts',
     campusEmergency: 'Campus emergency',
-    viewContacts: 'View contacts',
+    viewContacts: 'View other contacts',
     guide: 'Guide',
     guideIntro: 'Help with calling, finding contacts, and accessing the website.',
     guideCalling: 'How to call a contact',
     guideChoose:
-      'On Get help, choose Call for the help you need. Choose View contacts to browse other agencies, or use All contacts to search and filter.',
+      'On Get help, choose Call for the help you need. Choose View other contacts to browse other agencies, or use All contacts to search and filter.',
     guideConfirm:
       'Check the agency, branch, and number in the confirmation card. Swipe to call, or choose Open Phone instead. Cancel to return without opening Phone.',
     guidePhone:

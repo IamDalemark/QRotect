@@ -15,6 +15,7 @@ import { categories, quickCallLabels } from '@/lib/directory/labels';
 import { quickCallTarget } from '@/lib/directory/quick-calls';
 import { CallConfirmation } from './call-confirmation';
 import { usePublic } from './context';
+import { CopyNumber } from './copy-number';
 const icons = {
   police: Shield,
   fire: Flame,
@@ -33,7 +34,10 @@ export function HomeScreen() {
         <p>{t.intro}</p>
       </div>
       <section className="emergency-line" aria-label={t.nationalEmergency}>
-        <div className="emergency-number">911</div>
+        <div className="number-with-copy emergency-number-group">
+          <div className="emergency-number">911</div>
+          <CopyNumber value="911" name={t.nationalEmergency} />
+        </div>
         <div className="emergency-copy">
           <h2>
             {language === 'en' ? 'National emergency line' : 'Nasyonal nga linya sa emerhensya'}
@@ -76,6 +80,12 @@ export function HomeScreen() {
                     <p>{t.quickCallUnavailable}</p>
                   )}
                 </div>
+                {target && (
+                  <div className="number-with-copy home-category-number">
+                    <p className="phone-number">{target.number.display}</p>
+                    <CopyNumber value={target.number.display} name={target.agency} />
+                  </div>
+                )}
                 <div className="home-category-actions">
                   {target && (
                     <CallConfirmation

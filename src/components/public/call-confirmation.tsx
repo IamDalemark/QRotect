@@ -6,6 +6,7 @@ import { ArrowRight, Phone, X } from 'lucide-react';
 import { telephoneHref } from '@/lib/directory/calling';
 import { localized, type Contact } from '@/lib/directory/schema';
 import { usePublic } from './context';
+import { CopyNumber } from './copy-number';
 
 type CallTarget = { agency: string; branch?: string; number: Contact['numbers'][number] };
 type Drag = { id: number; x: number; y: number; distance: number };
@@ -77,7 +78,10 @@ function CallDetails({ target }: { target: CallTarget }) {
         <h3>{selected.agency}</h3>
         {selected.branch && <p>{selected.branch}</p>}
         <p className="number-label">{localized(selected.number.label, language)}</p>
-        <p className="phone-number">{selected.number.display}</p>
+        <div className="number-with-copy">
+          <p className="phone-number">{selected.number.display}</p>
+          <CopyNumber value={selected.number.display} name={selected.agency} compact />
+        </div>
         {selected.number.extension && (
           <p>
             {t.extension} {selected.number.extension}

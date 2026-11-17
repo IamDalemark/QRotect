@@ -66,7 +66,7 @@ test('completed swipe hands the selected number off once and can be retried afte
   await openFire(page);
   await swipe(page, 1);
   expect(await attempts(page)).toEqual(['tel:09123456789']);
-  await expect(page.getByRole('dialog').getByRole('status')).toContainText(
+  await expect(page.getByRole('dialog').locator('.call-handoff[role="status"]')).toContainText(
     'Continue in your phone app',
   );
   await expect(page.locator('.swipe-track')).toHaveCount(0);

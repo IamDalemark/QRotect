@@ -28,7 +28,7 @@ test('all six Home shortcuts open exact confirmation in one action without navig
 }) => {
   await page.goto('/');
   const group = page.getByRole('region', { name: 'Emergency contacts', exact: true });
-  await expect(group.getByRole('button')).toHaveCount(6);
+  await expect(group.locator('.quick-call-button')).toHaveCount(6);
   const requests: string[] = [];
   page.on('request', (request) => requests.push(request.url()));
   for (const category of categoryIds) {
@@ -81,7 +81,7 @@ test('withdrawn assignments offer category browsing without selecting another co
   await expect(group.getByRole('button')).toHaveCount(0);
   await expect(group.getByText('Quick call unavailable', { exact: true })).toHaveCount(6);
   await group
-    .getByRole('link', { name: /View contacts/ })
+    .getByRole('link', { name: /View other contacts/ })
     .first()
     .click();
   await expect(page).toHaveURL(/directory\?category=police$/);

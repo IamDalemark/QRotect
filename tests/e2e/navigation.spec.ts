@@ -14,12 +14,13 @@ test('Home offers browsing and calling for all six categories without priority r
     const article = page
       .locator('.home-category')
       .filter({ has: page.locator(`#home-category-${category}`) });
-    await expect(article.getByRole('button')).toHaveCount(1);
-    await expect(article.getByRole('link', { name: /View contacts/ })).toHaveAttribute(
+    await expect(article.getByRole('button')).toHaveCount(2);
+    await expect(article.getByRole('button', { name: /^Copy number:/ })).toHaveText('Copy number');
+    await expect(article.getByRole('link', { name: /View other contacts/ })).toHaveAttribute(
       'href',
       `/directory?category=${category}`,
     );
-    await article.getByRole('link', { name: /View contacts/ }).click();
+    await article.getByRole('link', { name: /View other contacts/ }).click();
     await expect(page).toHaveURL(`/directory?category=${category}`);
     await expect(page.locator('.contact-row')).toHaveCount(1);
     await expect(page.locator('.public-nav a[aria-current="page"]')).toHaveAttribute(

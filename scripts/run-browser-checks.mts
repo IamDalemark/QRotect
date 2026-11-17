@@ -105,6 +105,7 @@ try {
         ? ['tests/e2e/admin.spec.ts']
         : [
             'tests/e2e/public.spec.ts',
+            'tests/e2e/copy-number.spec.ts',
             'tests/e2e/calling.spec.ts',
             'tests/e2e/performance.spec.ts',
             'tests/e2e/map-layout.spec.ts',

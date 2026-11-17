@@ -1,23 +1,15 @@
 'use client';
 import { useState } from 'react';
+import { ExternalLink } from 'lucide-react';
 import { formatPhilippineDate } from '@/lib/directory/date';
-import { Copy, Check, ExternalLink } from 'lucide-react';
+import { CopyNumber } from './copy-number';
 import { localized, type Contact } from '@/lib/directory/schema';
 import { usePublic } from './context';
 import { CallConfirmation } from './call-confirmation';
 export function ContactRow({ contact }: { contact: Contact }) {
   const { t, language } = usePublic();
-  const [feedback, setFeedback] = useState('');
   const [now] = useState(() => Date.now());
   const due = contact.verifiedAt && now - Date.parse(contact.verifiedAt) > 30 * 86400000;
-  async function copyNumber(value: string) {
-    try {
-      await navigator.clipboard.writeText(value);
-      setFeedback(t.copied);
-    } catch {
-      setFeedback(t.manual);
-    }
-  }
   return (
     <article className="contact-row">
       <div className="contact-identity">
@@ -44,14 +36,7 @@ export function ContactRow({ contact }: { contact: Contact }) {
               {n.channel === 'voice' && (
                 <CallConfirmation agency={contact.agency} branch={contact.branch} number={n} />
               )}
-              <button
-                className="button secondary"
-                onClick={() => copyNumber(n.display)}
-                aria-label={`${t.copy}: ${contact.agency}`}
-              >
-                <Copy size={16} aria-hidden="true" />
-                {t.copy}
-              </button>
+              <CopyNumber value={n.display} name={contact.agency} />
             </div>
           </div>
         ))}
@@ -68,14 +53,6 @@ export function ContactRow({ contact }: { contact: Contact }) {
           </a>
         )}
       </div>
-      <p className="feedback" role="status">
-        {feedback && (
-          <>
-            <Check size={15} aria-hidden="true" />
-            {feedback}
-          </>
-        )}
-      </p>
     </article>
   );
 }
