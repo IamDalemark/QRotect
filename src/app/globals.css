@@ -1418,3 +1418,9 @@ textarea::placeholder {
 .home-category-number .copy-feedback {
   max-width: 100%;
 }
+
+.emergency-number-group .copy-control .button,
+.home-category-number .copy-control .button {
+  padding-inline: 8px;
+  gap: 6px;
+}

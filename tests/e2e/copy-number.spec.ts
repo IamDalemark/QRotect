@@ -93,7 +93,9 @@ test('copy feedback uses the selected interface language', async ({ page }) => {
   await page.locator('.language-label select').selectOption('hil');
   const fire = page.locator('.home-category').filter({ hasText: 'Sample fire station' });
   const copy = fire.getByRole('button', { name: 'Kopyaha ang numero: Sample fire station' });
-  await expect(copy).toHaveText('Kopyaha ang numero');
+  await expect(copy).toHaveText('Kopyaha');
+  await expect(copy).toHaveAttribute('title', 'Kopyaha ang numero');
+  await expect(page.locator('.emergency-number-group button')).toHaveText('Kopyaha');
   await copy.click();
   await expect(fire.getByRole('status')).toHaveText('Nakopya');
   await expect(copy).toHaveText('Nakopya');
@@ -123,3 +125,23 @@ for (const route of ['/', '/directory']) {
     await expect(control.getByRole('status')).toBeEmpty();
   });
 }
+
+test('short Hiligaynon Home copy labels stay beside numbers at mobile and desktop widths', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.locator('.language-label select').selectOption('hil');
+  for (const width of [320, 390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const row of await page.locator('.emergency-number-group, .home-category-number').all()) {
+      const number = await row.locator('.emergency-number, .phone-number').boundingBox();
+      const button = await row.getByRole('button').boundingBox();
+      expect(number).not.toBeNull();
+      expect(button).not.toBeNull();
+      expect(
+        Math.abs(number!.y + number!.height / 2 - button!.y - button!.height / 2),
+      ).toBeLessThan(2);
+      expect(button!.height).toBeGreaterThanOrEqual(48);
+    }
+  }
+});
