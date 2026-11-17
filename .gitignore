@@ -31,3 +31,5 @@ next-env.d.ts
 .impeccable/live/
 
 .local/
+
+.pnpm-store/
