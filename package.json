@@ -26,7 +26,10 @@
     "supabase:prepare": "tsx scripts/prepare-supabase.mts",
     "seed:demo": "tsx scripts/seed-demo-contacts.mts",
     "analyze": "ANALYZE=true pnpm build",
-    "perf:mobile": "tsx scripts/measure-performance.mts"
+    "perf:mobile": "tsx scripts/measure-performance.mts",
+    "db:reset": "tsx scripts/run-database-content.mts reset",
+    "db:populate": "tsx scripts/run-database-content.mts populate",
+    "test:db:content": "tsx scripts/check-database-content.mts"
   },
   "dependencies": {
     "@fontsource-variable/public-sans": "5.3.0",

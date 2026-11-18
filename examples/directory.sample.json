@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "version": "unpublished",
+  "publishedAt": null,
+  "mode": "research",
+  "fixture": true,
+  "contacts": [
+    {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "agency": "Sample campus security",
+      "branch": "Demonstration record",
+      "category": "school",
+      "area": "cpu",
+      "description": {
+        "en": "Sample campus security contact.",
+        "hil": "Halimbawa nga kontak sang seguridad sang kampus."
+      },
+      "aliases": ["security"],
+      "hours": "",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000001",
+          "label": {
+            "en": "Sample line",
+            "hil": "Halimbawa nga linya"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        }
+      ],
+      "verifiedAt": "",
+      "source": "",
+      "approved": false,
+      "active": true,
+      "priority": false
+    }
+  ],
+  "quickCalls": [
+    {
+      "category": "school",
+      "contactId": "10000000-0000-4000-8000-000000000001",
+      "numberId": "20000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "guidance": [],
+  "map": null,
+  "testContact": null
+}

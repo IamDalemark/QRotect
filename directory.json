@@ -1,0 +1,730 @@
+{
+  "schemaVersion": 1,
+  "version": "unpublished",
+  "publishedAt": null,
+  "mode": "research",
+  "fixture": false,
+  "contacts": [
+    {
+      "id": "10000000-0000-4000-8000-000000000001",
+      "agency": "Iloilo Community Police Desk (Demo)",
+      "branch": "City assistance desk",
+      "category": "police",
+      "area": "iloilo",
+      "description": {
+        "en": "Assistance desk for reporting concerns and asking about police services.",
+        "hil": "Desko para sa pagreport sang mga kabalak-an kag pagpamangkot parte sa serbisyo sang pulis."
+      },
+      "aliases": ["police", "pulis", "report"],
+      "hours": "Demo schedule: 24 hours",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000011",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000012",
+          "label": {
+            "en": "Text inquiries",
+            "hil": "Mga pamangkot paagi sa text"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "text"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/police-1",
+      "approved": true,
+      "active": true,
+      "priority": false
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000002",
+      "agency": "National Police Information Desk (Demo)",
+      "branch": "Public information",
+      "category": "police",
+      "area": "national",
+      "description": {
+        "en": "Information desk for general police-service inquiries and referrals.",
+        "hil": "Desko para sa pangkabilugan nga pamangkot kag pagpatuhoy sa serbisyo sang pulis."
+      },
+      "aliases": ["police information", "referral"],
+      "hours": "Demo schedule: Monday–Friday, 8 AM–5 PM",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000021",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000022",
+          "label": {
+            "en": "Office information",
+            "hil": "Impormasyon sang opisina"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "102",
+          "channel": "voice"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/police-2",
+      "approved": true,
+      "active": true,
+      "priority": false
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000003",
+      "agency": "Iloilo Fire Response Desk (Demo)",
+      "branch": "City response coordination",
+      "category": "fire",
+      "area": "iloilo",
+      "description": {
+        "en": "Contact desk for fire-related reports and response coordination.",
+        "hil": "Desko para sa mga report parte sa sunog kag koordinasyon sang pagbulig."
+      },
+      "aliases": ["fire", "sunog", "bumbero"],
+      "hours": "Demo schedule: 24 hours",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000031",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000032",
+          "label": {
+            "en": "Text inquiries",
+            "hil": "Mga pamangkot paagi sa text"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "text"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/fire-3",
+      "approved": true,
+      "active": true,
+      "priority": false
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000004",
+      "agency": "Jaro Fire Prevention Office (Demo)",
+      "branch": "Community fire safety",
+      "category": "fire",
+      "area": "iloilo",
+      "description": {
+        "en": "Office for fire-safety inquiries and community program information.",
+        "hil": "Opisina para sa pamangkot parte sa kaluwasan batok sa sunog kag mga programa sa komunidad."
+      },
+      "aliases": ["fire prevention", "inspection"],
+      "hours": "Demo schedule: Monday–Friday, 8 AM–5 PM",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000041",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000042",
+          "label": {
+            "en": "Office information",
+            "hil": "Impormasyon sang opisina"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "104",
+          "channel": "voice"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/fire-4",
+      "approved": true,
+      "active": true,
+      "priority": false
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000005",
+      "agency": "Iloilo Medical Transport Desk (Demo)",
+      "branch": "Dispatch coordination",
+      "category": "medical",
+      "area": "iloilo",
+      "description": {
+        "en": "Contact desk for medical transport inquiries and coordination.",
+        "hil": "Desko para sa pamangkot kag koordinasyon sang transportasyon medikal."
+      },
+      "aliases": ["ambulance", "medical transport", "ambulansya"],
+      "hours": "Demo schedule: 24 hours",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000051",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000052",
+          "label": {
+            "en": "Text inquiries",
+            "hil": "Mga pamangkot paagi sa text"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "text"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/medical-5",
+      "approved": true,
+      "active": true,
+      "priority": true
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000006",
+      "agency": "Campus Health Services (Demo)",
+      "branch": "Health assistance desk",
+      "category": "medical",
+      "area": "cpu",
+      "description": {
+        "en": "Campus desk for health-service information and medical referrals.",
+        "hil": "Desko sa kampus para sa impormasyon sa serbisyo panglawas kag pagpatuhoy medikal."
+      },
+      "aliases": ["clinic", "health", "klinika"],
+      "hours": "Demo schedule: Monday–Saturday, 8 AM–5 PM",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000061",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000062",
+          "label": {
+            "en": "Office information",
+            "hil": "Impormasyon sang opisina"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "106",
+          "channel": "voice"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/medical-6",
+      "approved": true,
+      "active": true,
+      "priority": true
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000007",
+      "agency": "Iloilo Riverside Medical Center (Demo)",
+      "branch": "Patient assistance",
+      "category": "hospital",
+      "area": "iloilo",
+      "description": {
+        "en": "Hospital information desk for department contacts and service inquiries.",
+        "hil": "Desko sang ospital para sa mga kontak sang departamento kag pamangkot parte sa serbisyo."
+      },
+      "aliases": ["hospital", "ospital", "patient services"],
+      "hours": "Demo schedule: 24 hours",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000071",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000072",
+          "label": {
+            "en": "Text inquiries",
+            "hil": "Mga pamangkot paagi sa text"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "text"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/hospital-7",
+      "approved": true,
+      "active": true,
+      "priority": false
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000008",
+      "agency": "Jaro Community Hospital (Demo)",
+      "branch": "Admissions information",
+      "category": "hospital",
+      "area": "iloilo",
+      "description": {
+        "en": "Information desk for admissions, visiting schedules and department referrals.",
+        "hil": "Desko para sa impormasyon sa pag-admit, oras sang pagbisita kag pagpatuhoy sa departamento."
+      },
+      "aliases": ["admissions", "hospital", "visiting hours"],
+      "hours": "Demo schedule: Monday–Sunday, 6 AM–10 PM",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000081",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000082",
+          "label": {
+            "en": "Office information",
+            "hil": "Impormasyon sang opisina"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "108",
+          "channel": "voice"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/hospital-8",
+      "approved": true,
+      "active": true,
+      "priority": false
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000009",
+      "agency": "Iloilo Disaster Coordination Desk (Demo)",
+      "branch": "City coordination",
+      "category": "disaster",
+      "area": "iloilo",
+      "description": {
+        "en": "Contact desk for incident reports and disaster-service information.",
+        "hil": "Desko para sa mga report sang insidente kag impormasyon sa serbisyo sa kalamidad."
+      },
+      "aliases": ["disaster", "kalamidad", "flood", "baha"],
+      "hours": "Demo schedule: 24 hours",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000091",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000092",
+          "label": {
+            "en": "Text inquiries",
+            "hil": "Mga pamangkot paagi sa text"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "text"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/disaster-9",
+      "approved": true,
+      "active": true,
+      "priority": false
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000010",
+      "agency": "National Disaster Information Desk (Demo)",
+      "branch": "Public information",
+      "category": "disaster",
+      "area": "national",
+      "description": {
+        "en": "Information desk for disaster-agency referrals and public advisories.",
+        "hil": "Desko para sa pagpatuhoy sa ahensya sang kalamidad kag mga pahibalo sa publiko."
+      },
+      "aliases": ["advisory", "disaster information"],
+      "hours": "Demo schedule: Monday–Friday, 8 AM–5 PM",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000101",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000102",
+          "label": {
+            "en": "Office information",
+            "hil": "Impormasyon sang opisina"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "110",
+          "channel": "voice"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/disaster-10",
+      "approved": true,
+      "active": true,
+      "priority": false
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000011",
+      "agency": "Campus Security Office (Demo)",
+      "branch": "Main gate assistance",
+      "category": "school",
+      "area": "cpu",
+      "description": {
+        "en": "Campus contact desk for security concerns and incident reporting.",
+        "hil": "Desko sa kampus para sa mga kabalak-an sa seguridad kag pagreport sang insidente."
+      },
+      "aliases": ["security", "guard", "guwardiya", "campus"],
+      "hours": "Demo schedule: 24 hours",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000111",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000112",
+          "label": {
+            "en": "Text inquiries",
+            "hil": "Mga pamangkot paagi sa text"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "text"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/school-11",
+      "approved": true,
+      "active": true,
+      "priority": true
+    },
+    {
+      "id": "10000000-0000-4000-8000-000000000012",
+      "agency": "Student Support Office (Demo)",
+      "branch": "Student services",
+      "category": "school",
+      "area": "cpu",
+      "description": {
+        "en": "Office for student-service questions and referrals to campus departments.",
+        "hil": "Opisina para sa pamangkot parte sa serbisyo sa estudyante kag pagpatuhoy sa mga departamento sang kampus."
+      },
+      "aliases": ["student affairs", "support", "bulig"],
+      "hours": "Demo schedule: Monday–Friday, 8 AM–5 PM",
+      "numbers": [
+        {
+          "id": "20000000-0000-4000-8000-000000000121",
+          "label": {
+            "en": "Main assistance line",
+            "hil": "Panguna nga linya para sa pagbulig"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "",
+          "channel": "voice"
+        },
+        {
+          "id": "20000000-0000-4000-8000-000000000122",
+          "label": {
+            "en": "Office information",
+            "hil": "Impormasyon sang opisina"
+          },
+          "display": "0912 345 6789",
+          "dial": "09123456789",
+          "extension": "112",
+          "channel": "voice"
+        }
+      ],
+      "verifiedAt": "2026-11-18",
+      "source": "https://example.com/contacts/school-12",
+      "approved": true,
+      "active": true,
+      "priority": true
+    }
+  ],
+  "quickCalls": [
+    {
+      "category": "police",
+      "contactId": "10000000-0000-4000-8000-000000000001",
+      "numberId": "20000000-0000-4000-8000-000000000011"
+    },
+    {
+      "category": "fire",
+      "contactId": "10000000-0000-4000-8000-000000000003",
+      "numberId": "20000000-0000-4000-8000-000000000031"
+    },
+    {
+      "category": "medical",
+      "contactId": "10000000-0000-4000-8000-000000000005",
+      "numberId": "20000000-0000-4000-8000-000000000051"
+    },
+    {
+      "category": "hospital",
+      "contactId": "10000000-0000-4000-8000-000000000007",
+      "numberId": "20000000-0000-4000-8000-000000000071"
+    },
+    {
+      "category": "disaster",
+      "contactId": "10000000-0000-4000-8000-000000000009",
+      "numberId": "20000000-0000-4000-8000-000000000091"
+    },
+    {
+      "category": "school",
+      "contactId": "10000000-0000-4000-8000-000000000011",
+      "numberId": "20000000-0000-4000-8000-000000000111"
+    }
+  ],
+  "guidance": [
+    {
+      "id": "40000000-0000-4000-8000-000000000001",
+      "category": "police",
+      "title": {
+        "en": "Contacting a police assistance desk",
+        "hil": "Pagkontak sa desko sang pulis"
+      },
+      "steps": [
+        {
+          "en": "Open the contact card and check the agency and service area.",
+          "hil": "Abrihi ang kard sang kontak kag tan-awa ang ahensya kag lugar nga ginserbisyuhan."
+        },
+        {
+          "en": "Have the location and a short description of your concern ready.",
+          "hil": "Ihanda ang lokasyon kag malip-ot nga paglaragway sang imo kabalak-an."
+        },
+        {
+          "en": "Use the voice line for a call or the text line for a text message.",
+          "hil": "Gamita ang linya para sa tawag ukon ang linya para sa text suno sa imo kinahanglanon."
+        }
+      ],
+      "source": "https://example.com/guidance/police",
+      "reviewedAt": "2026-11-18",
+      "reviewer": "Demo content review",
+      "approved": true
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000002",
+      "category": "fire",
+      "title": {
+        "en": "Finding fire-service contacts",
+        "hil": "Pagpangita sang kontak sang serbisyo sa sunog"
+      },
+      "steps": [
+        {
+          "en": "Choose Fire in the contact directory.",
+          "hil": "Pilia ang Sunog sa listahan sang mga kontak."
+        },
+        {
+          "en": "Check the contact description and service area before calling.",
+          "hil": "Tan-awa ang paglaragway sang kontak kag lugar nga ginserbisyuhan antes magtawag."
+        },
+        {
+          "en": "State the location clearly when speaking with the operator.",
+          "hil": "Isugid sing maathag ang lokasyon kon makighambal sa operator."
+        }
+      ],
+      "source": "https://example.com/guidance/fire",
+      "reviewedAt": "2026-11-18",
+      "reviewer": "Demo content review",
+      "approved": true
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000003",
+      "category": "medical",
+      "title": {
+        "en": "Asking about medical transport",
+        "hil": "Pagpamangkot parte sa transportasyon medikal"
+      },
+      "steps": [
+        {
+          "en": "Choose Medical / Ambulance and open the relevant contact.",
+          "hil": "Pilia ang Medikal / Ambulansya kag abrihi ang nagakaigo nga kontak."
+        },
+        {
+          "en": "Prepare the pickup location and a callback number.",
+          "hil": "Ihanda ang lugar sang pagsundo kag numero nga matawgan liwat."
+        },
+        {
+          "en": "Ask the operator about available services; the website does not dispatch a vehicle.",
+          "hil": "Pamangkuta ang operator parte sa magamit nga serbisyo; ang website wala nagapadala sang salakyan."
+        }
+      ],
+      "source": "https://example.com/guidance/medical",
+      "reviewedAt": "2026-11-18",
+      "reviewer": "Demo content review",
+      "approved": true
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000004",
+      "category": "hospital",
+      "title": {
+        "en": "Finding hospital information",
+        "hil": "Pagpangita sang impormasyon sang ospital"
+      },
+      "steps": [
+        {
+          "en": "Choose Hospitals and review the listed departments and contact labels.",
+          "hil": "Pilia ang Mga ospital kag tan-awa ang nakalista nga mga departamento kag ngalan sang linya."
+        },
+        {
+          "en": "Use the office information line for department or admissions questions.",
+          "hil": "Gamita ang linya sang impormasyon sang opisina para sa pamangkot parte sa departamento ukon pag-admit."
+        },
+        {
+          "en": "Confirm schedules and service availability directly with the hospital.",
+          "hil": "Kumpirmaha mismo sa ospital ang iskedyul kag kon may ara sang kinahanglan nga serbisyo."
+        }
+      ],
+      "source": "https://example.com/guidance/hospital",
+      "reviewedAt": "2026-11-18",
+      "reviewer": "Demo content review",
+      "approved": true
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000005",
+      "category": "disaster",
+      "title": {
+        "en": "Contacting a disaster information desk",
+        "hil": "Pagkontak sa desko sang impormasyon sa kalamidad"
+      },
+      "steps": [
+        {
+          "en": "Choose Disaster response and check whether the desk serves your area.",
+          "hil": "Pilia ang Bulig sa kalamidad kag tan-awa kon ang desko nagaserbisyo sa imo lugar."
+        },
+        {
+          "en": "Prepare the location and the time of the reported incident.",
+          "hil": "Ihanda ang lokasyon kag oras sang ginareport nga insidente."
+        },
+        {
+          "en": "Ask the desk for current official advisories and agency referrals.",
+          "hil": "Pangayo sa desko sang bag-o nga opisyal nga pahibalo kag pagpatuhoy sa nagakaigo nga ahensya."
+        }
+      ],
+      "source": "https://example.com/guidance/disaster",
+      "reviewedAt": "2026-11-18",
+      "reviewer": "Demo content review",
+      "approved": true
+    },
+    {
+      "id": "40000000-0000-4000-8000-000000000006",
+      "category": "school",
+      "title": {
+        "en": "Using campus contacts and the map",
+        "hil": "Paggamit sang mga kontak kag mapa sang kampus"
+      },
+      "steps": [
+        {
+          "en": "Choose School emergency and select Security or Student Support as appropriate.",
+          "hil": "Pilia ang Emerhensya sa eskwelahan kag pilia ang Seguridad ukon Bulig sa estudyante suno sa imo kinahanglanon."
+        },
+        {
+          "en": "Open Campus map to look up the labels of buildings and gates.",
+          "hil": "Abrihi ang Mapa sang kampus agod makita ang mga ngalan sang bilding kag puwertahan."
+        },
+        {
+          "en": "Give the office the building name or gate label shown on the map.",
+          "hil": "Ihatag sa opisina ang ngalan sang bilding ukon puwertahan nga makita sa mapa."
+        }
+      ],
+      "source": "https://example.com/guidance/school",
+      "reviewedAt": "2026-11-18",
+      "reviewer": "Demo content review",
+      "approved": true
+    }
+  ],
+  "map": {
+    "id": "30000000-0000-4000-8000-000000000018",
+    "assetPath": "30000000-0000-4000-8000-000000000018.jpg",
+    "description": {
+      "en": "Campus map showing labeled buildings, fields and gates.",
+      "hil": "Mapa sang kampus nga nagapakita sang mga bilding, patag kag puwertahan nga may ngalan."
+    },
+    "instructions": [
+      {
+        "en": "Use the printed building names and gate labels to identify campus landmarks.",
+        "hil": "Gamita ang nakasulat nga mga ngalan sang bilding kag puwertahan agod makilala ang mga lugar sa kampus."
+      },
+      {
+        "en": "The static map does not show your current location or provide live directions.",
+        "hil": "Ang permanente nga mapa wala nagapakita sang imo lokasyon subong ukon nagahatag sang direksyon sa gilayon."
+      },
+      {
+        "en": "Confirm current access arrangements with campus security.",
+        "hil": "Kumpirmaha sa seguridad sang kampus ang mga patakaran sa pagsulod subong."
+      }
+    ],
+    "source": "https://cpu.edu.ph/about-us/campus-map/",
+    "reviewedAt": "2026-11-18",
+    "reviewer": "Demo content review",
+    "approved": true
+  },
+  "testContact": null
+}
