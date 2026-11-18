@@ -3,7 +3,12 @@
 import { ArrowRight } from 'lucide-react';
 import { formatPhilippineDate } from '@/lib/directory/date';
 import { categories } from '@/lib/directory/labels';
-import { categoryIds, localized, type Category } from '@/lib/directory/schema';
+import {
+  categoryIds,
+  demoGuidanceAuthorization,
+  localized,
+  type Category,
+} from '@/lib/directory/schema';
 import { usePublic } from './context';
 
 export function GuidanceScreen({ category }: { category?: Category }) {
@@ -41,11 +46,15 @@ export function GuidanceScreen({ category }: { category?: Category }) {
                     <li key={index}>{localized(step, language)}</li>
                   ))}
                 </ol>
-                <p>
-                  <time dateTime={topic.reviewedAt}>{formatPhilippineDate(topic.reviewedAt)}</time>
-                  {' · '}
-                  {topic.reviewer}
-                </p>
+                {topic.reviewer !== demoGuidanceAuthorization && (
+                  <p>
+                    <time dateTime={topic.reviewedAt}>
+                      {formatPhilippineDate(topic.reviewedAt)}
+                    </time>
+                    {' · '}
+                    {topic.reviewer}
+                  </p>
+                )}
                 <a
                   className="guide-source"
                   href={topic.source}

@@ -70,6 +70,17 @@ Categories: `police`, `fire`, `medical`, `hospital`, `disaster`, `school`. Areas
 
 For a map, replace `"map": null` with the object from [campus-map.sample.json](../examples/campus-map.sample.json). Its visible name is **Campus map**, with no university name. The official source URL is retained for attribution. Upload the PNG/JPEG/WebP through Administration → Map first and copy its actual `assetPath` into JSON. Set the actual review date and reviewer, review the translations, and approve only after review. JSON does not upload images or accept remote image URLs in `assetPath`.
 
+## Replace public demo guidance
+
+Run a scoped dry run and then apply the same import.
+
+```sh
+pnpm db:populate -- --target hosted --demo-guidance-only --file ./directory.json --dry-run
+pnpm db:populate -- --target hosted --demo-guidance-only --file ./directory.json
+```
+
+The scoped import reads only the `guidance` array. It replaces the existing published demo topics in a single transaction and retains reviewed topics, unrelated drafts, contacts, assignments, map data, and earlier history. Every demo keeps its bilingual demo prefix in the title. Its authorization metadata records the owner's decision to publish the demo. Repeating the same import leaves the current publication unchanged.
+
 ## Verification
 
 Run `pnpm test` for unit and transaction-boundary checks. Run `pnpm test:db:content` against local Supabase (or a loopback `TEST_DATABASE_URL`) for real SQL save, publish, failure rollback, reset and account-preservation checks. All integration test changes are rolled back.

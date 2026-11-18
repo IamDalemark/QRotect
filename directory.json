@@ -544,159 +544,223 @@
   ],
   "guidance": [
     {
-      "id": "40000000-0000-4000-8000-000000000001",
-      "category": "police",
-      "title": {
-        "en": "Contacting a police assistance desk",
-        "hil": "Pagkontak sa desko sang pulis"
-      },
-      "steps": [
-        {
-          "en": "Open the contact card and check the agency and service area.",
-          "hil": "Abrihi ang kard sang kontak kag tan-awa ang ahensya kag lugar nga ginserbisyuhan."
-        },
-        {
-          "en": "Have the location and a short description of your concern ready.",
-          "hil": "Ihanda ang lokasyon kag malip-ot nga paglaragway sang imo kabalak-an."
-        },
-        {
-          "en": "Use the voice line for a call or the text line for a text message.",
-          "hil": "Gamita ang linya para sa tawag ukon ang linya para sa text suno sa imo kinahanglanon."
-        }
-      ],
-      "source": "https://example.com/guidance/police",
-      "reviewedAt": "2026-11-18",
-      "reviewer": "Demo content review",
-      "approved": true
-    },
-    {
-      "id": "40000000-0000-4000-8000-000000000002",
+      "id": "50000000-0000-4000-8000-000000000001",
       "category": "fire",
       "title": {
-        "en": "Finding fire-service contacts",
-        "hil": "Pagpangita sang kontak sang serbisyo sa sunog"
+        "en": "Demo record — Raise the alarm and evacuate",
+        "hil": "Halimbawa nga rekord — Pabatingga ang alarma kag magguwa"
       },
       "steps": [
         {
-          "en": "Choose Fire in the contact directory.",
-          "hil": "Pilia ang Sunog sa listahan sang mga kontak."
+          "en": "Alert people nearby and activate the fire alarm as you leave.",
+          "hil": "Paandami ang mga tawo sa palibot kag pabatingga ang alarma sang sunog samtang nagaguwa ka."
         },
         {
-          "en": "Check the contact description and service area before calling.",
-          "hil": "Tan-awa ang paglaragway sang kontak kag lugar nga ginserbisyuhan antes magtawag."
+          "en": "Use the nearest safe exit. Use the stairs and stay low if you encounter smoke on the way out.",
+          "hil": "Gamita ang pinakamalapit nga luwas nga alagyan pagguwa. Mag-agi sa hagdan kag magduko kon may aso sa alagyan."
         },
         {
-          "en": "State the location clearly when speaking with the operator.",
-          "hil": "Isugid sing maathag ang lokasyon kon makighambal sa operator."
+          "en": "Once outside, call for help. Stay out of the building until responders say it is safe to return.",
+          "hil": "Kon ara ka na sa guwa, magtawag para sa bulig. Magpabilin sa guwa tubtob magsiling ang mga responder nga luwas na magbalik."
         }
       ],
-      "source": "https://example.com/guidance/fire",
-      "reviewedAt": "2026-11-18",
-      "reviewer": "Demo content review",
+      "source": "https://bfp.gov.ph/wp-content/uploads/2024/08/Volume-5-Fire-Safety-for-Business-Establishments.pdf",
+      "reviewedAt": "2026-11-19",
+      "reviewer": "Owner-authorized demo",
       "approved": true
     },
     {
-      "id": "40000000-0000-4000-8000-000000000003",
-      "category": "medical",
+      "id": "50000000-0000-4000-8000-000000000002",
+      "category": "fire",
       "title": {
-        "en": "Asking about medical transport",
-        "hil": "Pagpamangkot parte sa transportasyon medikal"
+        "en": "Demo record — Use a fire extinguisher with T-PASS",
+        "hil": "Halimbawa nga rekord — Paggamit sang fire extinguisher paagi sa T-PASS"
       },
       "steps": [
         {
-          "en": "Choose Medical / Ambulance and open the relevant contact.",
-          "hil": "Pilia ang Medikal / Ambulansya kag abrihi ang nagakaigo nga kontak."
+          "en": "Raise the alarm first. Use an extinguisher only if you are trained, the fire is small and contained, you have the right extinguisher, and you can use it without breathing smoke and with a clear exit behind you. If any condition is missing, leave immediately.",
+          "hil": "Pabatingga anay ang alarma. Gamita lang ang fire extinguisher kon nabansay ka, gamay pa ang kalayo kag wala pa naglapta, nagakaigo ang extinguisher, wala ka sing masuyop nga aso, kag may luwas nga alagyan sa imo likod. Kon may kulang sa sini, magguwa gilayon."
         },
         {
-          "en": "Prepare the pickup location and a callback number.",
-          "hil": "Ihanda ang lugar sang pagsundo kag numero nga matawgan liwat."
+          "en": "Twist the safety pin to break its seal.",
+          "hil": "Twist — Tuyuka ang safety pin para mabuka ang selyo."
         },
         {
-          "en": "Ask the operator about available services; the website does not dispatch a vehicle.",
-          "hil": "Pamangkuta ang operator parte sa magamit nga serbisyo; ang website wala nagapadala sang salakyan."
+          "en": "Pull the safety pin out.",
+          "hil": "Pull — Butonga pagguwa ang safety pin."
+        },
+        {
+          "en": "Aim the nozzle at the base of the fire.",
+          "hil": "Aim — Itumod ang nozzle sa puno sang kalayo."
+        },
+        {
+          "en": "Squeeze the handle to release the extinguishing agent.",
+          "hil": "Squeeze — Pisla ang hawiran para magguwa ang pangpalong."
+        },
+        {
+          "en": "Sweep the nozzle from side to side at the base. Leave immediately if the fire grows or you cannot put it out safely.",
+          "hil": "Sweep — Igiho ang nozzle pakaliwa kag pakanan sa puno sang kalayo. Magguwa gilayon kon nagadaku ang kalayo ukon indi mo ini mapalong sing luwas."
         }
       ],
-      "source": "https://example.com/guidance/medical",
-      "reviewedAt": "2026-11-18",
-      "reviewer": "Demo content review",
+      "source": "https://bfp.gov.ph/wp-content/uploads/2024/05/Volume-2_-Fire-Safety-for-Teenagers.pdf",
+      "reviewedAt": "2026-11-19",
+      "reviewer": "Owner-authorized demo",
       "approved": true
     },
     {
-      "id": "40000000-0000-4000-8000-000000000004",
-      "category": "hospital",
-      "title": {
-        "en": "Finding hospital information",
-        "hil": "Pagpangita sang impormasyon sang ospital"
-      },
-      "steps": [
-        {
-          "en": "Choose Hospitals and review the listed departments and contact labels.",
-          "hil": "Pilia ang Mga ospital kag tan-awa ang nakalista nga mga departamento kag ngalan sang linya."
-        },
-        {
-          "en": "Use the office information line for department or admissions questions.",
-          "hil": "Gamita ang linya sang impormasyon sang opisina para sa pamangkot parte sa departamento ukon pag-admit."
-        },
-        {
-          "en": "Confirm schedules and service availability directly with the hospital.",
-          "hil": "Kumpirmaha mismo sa ospital ang iskedyul kag kon may ara sang kinahanglan nga serbisyo."
-        }
-      ],
-      "source": "https://example.com/guidance/hospital",
-      "reviewedAt": "2026-11-18",
-      "reviewer": "Demo content review",
-      "approved": true
-    },
-    {
-      "id": "40000000-0000-4000-8000-000000000005",
+      "id": "50000000-0000-4000-8000-000000000003",
       "category": "disaster",
       "title": {
-        "en": "Contacting a disaster information desk",
-        "hil": "Pagkontak sa desko sang impormasyon sa kalamidad"
+        "en": "Demo record — Earthquake — Duck, Cover, and Hold",
+        "hil": "Halimbawa nga rekord — Linog: Yuko, Tabon, kag Kapot"
       },
       "steps": [
         {
-          "en": "Choose Disaster response and check whether the desk serves your area.",
-          "hil": "Pilia ang Bulig sa kalamidad kag tan-awa kon ang desko nagaserbisyo sa imo lugar."
+          "en": "Duck. If you are inside, get low as soon as the shaking starts.",
+          "hil": "Yuko. Kon ara ka sa sulod, magduko gilayon kon magsugod ang pag-uyog."
         },
         {
-          "en": "Prepare the location and the time of the reported incident.",
-          "hil": "Ihanda ang lokasyon kag oras sang ginareport nga insidente."
+          "en": "Cover. Get under a sturdy desk or table if one is nearby. Protect your head and neck.",
+          "hil": "Tabon. Magpanalipod sa idalom sang malig-on nga lamesa kon may malapit. Protektahi ang imo ulo kag liog."
         },
         {
-          "en": "Ask the desk for current official advisories and agency referrals.",
-          "hil": "Pangayo sa desko sang bag-o nga opisyal nga pahibalo kag pagpatuhoy sa nagakaigo nga ahensya."
+          "en": "Hold. Hold on to your cover until the shaking stops. Then follow campus instructions to move to a safe area.",
+          "hil": "Kapot. Magkapot sa lamesa tubtob mag-untat ang pag-uyog. Dayon, sunda ang instruksyon sang kampus sa pagkadto sa luwas nga lugar."
         }
       ],
-      "source": "https://example.com/guidance/disaster",
-      "reviewedAt": "2026-11-18",
-      "reviewer": "Demo content review",
+      "source": "https://www.phivolcs.dost.gov.ph/earthquake-advisory/",
+      "reviewedAt": "2026-11-19",
+      "reviewer": "Owner-authorized demo",
       "approved": true
     },
     {
-      "id": "40000000-0000-4000-8000-000000000006",
-      "category": "school",
+      "id": "50000000-0000-4000-8000-000000000004",
+      "category": "disaster",
       "title": {
-        "en": "Using campus contacts and the map",
-        "hil": "Paggamit sang mga kontak kag mapa sang kampus"
+        "en": "Demo record — Flood — Move to safe higher ground early",
+        "hil": "Halimbawa nga rekord — Baha: Magkadto sing temprano sa luwas nga mataas nga lugar"
       },
       "steps": [
         {
-          "en": "Choose School emergency and select Security or Student Support as appropriate.",
-          "hil": "Pilia ang Emerhensya sa eskwelahan kag pilia ang Seguridad ukon Bulig sa estudyante suno sa imo kinahanglanon."
+          "en": "Watch for flood warnings and follow instructions from local officials and campus staff.",
+          "hil": "Magbantay sa mga paandam sa baha kag sunda ang instruksyon sang lokal nga mga opisyal kag kawani sang kampus."
         },
         {
-          "en": "Open Campus map to look up the labels of buildings and gates.",
-          "hil": "Abrihi ang Mapa sang kampus agod makita ang mga ngalan sang bilding kag puwertahan."
+          "en": "When directed to evacuate, move to safe higher ground before floodwater cuts off the route.",
+          "hil": "Kon ginpasugo nga magbakwit, magkadto sa luwas nga mataas nga lugar antes matabunan sang tubig ang alagyan."
         },
         {
-          "en": "Give the office the building name or gate label shown on the map.",
-          "hil": "Ihatag sa opisina ang ngalan sang bilding ukon puwertahan nga makita sa mapa."
+          "en": "Avoid walking or driving through floodwater. Use a safe route identified by local officials.",
+          "hil": "Likawi ang paglakat ukon pagmaneho sa tubig-baha. Gamita ang luwas nga ruta nga gintudlo sang lokal nga mga opisyal."
         }
       ],
-      "source": "https://example.com/guidance/school",
-      "reviewedAt": "2026-11-18",
-      "reviewer": "Demo content review",
+      "source": "https://bagong.pagasa.dost.gov.ph/learning-tools/floods",
+      "reviewedAt": "2026-11-19",
+      "reviewer": "Owner-authorized demo",
+      "approved": true
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000005",
+      "category": "medical",
+      "title": {
+        "en": "Demo record — Check, Call, Care",
+        "hil": "Halimbawa nga rekord — Usisaa, Tawag, Bulig"
+      },
+      "steps": [
+        {
+          "en": "Check. Make sure it is safe to approach. Check whether the person responds and is breathing normally.",
+          "hil": "Usisaa. Siguruha nga luwas ang lugar antes magpalapit. Tan-awa kon nagasabat ang tawo kag kon normal ang iya pagginhawa."
+        },
+        {
+          "en": "Call. Get emergency help right away if the person is unresponsive, has trouble breathing, or is bleeding heavily. Give your exact location, what happened, the person’s condition, and a callback number.",
+          "hil": "Tawag. Magtawag gilayon para sa bulig kon wala siya nagasabat, nabudlayan magginhawa, ukon madamo ang nagaguwa nga dugo. Ihatag ang eksakto nga lugar, kon ano ang natabo, ang kahimtangan sang tawo, kag ang numero nga matawgan liwat."
+        },
+        {
+          "en": "Care. Follow the dispatcher’s instructions and give care within your training while help is on the way.",
+          "hil": "Bulig. Sunda ang instruksyon sang nagbaton sang tawag. Maghatag sang bulig suno sa imo nabal-an kag nabansayan samtang nagahulat sa mga responder."
+        }
+      ],
+      "source": "https://production.redcross.org/take-a-class/articles-three-cs-of-first-aid-check-call-care.html",
+      "reviewedAt": "2026-11-19",
+      "reviewer": "Owner-authorized demo",
+      "approved": true
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000006",
+      "category": "hospital",
+      "title": {
+        "en": "Demo record — What to tell emergency department staff",
+        "hil": "Halimbawa nga rekord — Ano ang isugid sa kawani sang emergency department"
+      },
+      "steps": [
+        {
+          "en": "Tell the triage nurse what happened, what symptoms you have, and when they started.",
+          "hil": "Sugiri ang nars sa triage kon ano ang natabo, ano ang imo mga sintomas, kag san-o ini nagsugod."
+        },
+        {
+          "en": "Tell staff about any known allergies and medicines you take.",
+          "hil": "Isugid ang mga alerdyi nga nahibaluan mo kag ang mga bulong nga ginainom mo."
+        },
+        {
+          "en": "If symptoms get worse while waiting, tell staff right away.",
+          "hil": "Kon maglala ang mga sintomas samtang nagahulat, sugiri gilayon ang kawani."
+        }
+      ],
+      "source": "https://bmc.doh.gov.ph/patient-care/emergency-department/faqs",
+      "reviewedAt": "2026-11-19",
+      "reviewer": "Owner-authorized demo",
+      "approved": true
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000007",
+      "category": "police",
+      "title": {
+        "en": "Demo record — Get to safety and report what’s happening",
+        "hil": "Halimbawa nga rekord — Magkadto sa luwas nga lugar kag ireport ang nagakatabo"
+      },
+      "steps": [
+        {
+          "en": "Move to a safe place if you can.",
+          "hil": "Kon mahimo, magkadto sa luwas nga lugar."
+        },
+        {
+          "en": "Call for help and give the exact location, a nearby landmark, and a callback number.",
+          "hil": "Magtawag para sa bulig. Ihatag ang eksakto nga lugar, isa ka malapit nga palatandaan, kag ang numero nga matawgan liwat."
+        },
+        {
+          "en": "Describe what is happening and tell the dispatcher whether anyone is injured or in immediate danger. Follow the instructions you receive.",
+          "hil": "Isugid kon ano ang nagakatabo kag kon may nasamaran ukon ara sa peligro subong. Sunda ang mga instruksyon nga ihatag sa imo."
+        }
+      ],
+      "source": "https://www.911.gov/calling-911/frequently-asked-questions/",
+      "reviewedAt": "2026-11-19",
+      "reviewer": "Owner-authorized demo",
+      "approved": true
+    },
+    {
+      "id": "50000000-0000-4000-8000-000000000008",
+      "category": "school",
+      "title": {
+        "en": "Demo record — Report an incident and follow campus evacuation instructions",
+        "hil": "Halimbawa nga rekord — Ireport ang insidente kag sunda ang instruksyon sang kampus sa pagbakwit"
+      },
+      "steps": [
+        {
+          "en": "Tell campus responders what happened, the building, floor, and room, and whether anyone needs help.",
+          "hil": "Sugiri ang mga responder sang kampus kon ano ang natabo, ano nga bilding, andana, kag kuwarto, kag kon may nagakinahanglan sang bulig."
+        },
+        {
+          "en": "If instructed to evacuate, follow staff directions to the designated assembly area.",
+          "hil": "Kon ginpasugo nga magbakwit, sunda ang instruksyon sang kawani sa pagkadto sa gintalana nga tilipunan."
+        },
+        {
+          "en": "Check in with staff at the assembly area and tell them if someone from your group is missing.",
+          "hil": "Magpahibalo sa kawani kon nakaabot ka na sa tilipunan. Isugid kon may kaupod kamo nga wala pa makita."
+        }
+      ],
+      "source": "https://www.deped.gov.ph/2022/12/09/december-9-2022-do-053-s-2022-mandatory-unannounced-earthquake-and-fire-drills-in-schools/",
+      "reviewedAt": "2026-11-19",
+      "reviewer": "Owner-authorized demo",
       "approved": true
     }
   ],

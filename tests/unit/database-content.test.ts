@@ -8,6 +8,7 @@ import {
   validateDocument,
   validateTarget,
   changeContent,
+  planDemoGuidance,
 } from '../../scripts/database-content.mjs';
 
 describe('database content tools', () => {
@@ -18,6 +19,36 @@ describe('database content tools', () => {
     expect(
       parseCommand(['populate', '--', '--target', 'local', '--file', 'x', '--dry-run']).dryRun,
     ).toBe(true);
+  });
+  it('plans only demo replacements and treats the committed set as a no-op', () => {
+    const { guidance } = readDirectoryFile('./directory.json', true);
+    const oldDemo = {
+      ...guidance[0],
+      id: '40000000-0000-4000-8000-000000000002',
+      reviewer: 'Demo content review',
+    };
+    const reviewed = {
+      ...guidance[1],
+      id: '40000000-0000-4000-8000-000000000009',
+      reviewer: 'Reviewer',
+    };
+    expect(guidance).toHaveLength(8);
+    expect(new Set(guidance.map((guide) => guide.category)).size).toBe(6);
+    expect(planDemoGuidance([reviewed, oldDemo], [reviewed, oldDemo], guidance)).toEqual({
+      remove: [oldDemo],
+      add: guidance,
+    });
+    expect(planDemoGuidance([reviewed, ...guidance], [reviewed, ...guidance], guidance)).toEqual({
+      remove: [],
+      add: [],
+    });
+    expect(() => planDemoGuidance([oldDemo], [oldDemo, guidance[0]], guidance)).toThrow(
+      'private guidance',
+    );
+    expect(() =>
+      planDemoGuidance([oldDemo], [{ ...oldDemo, source: 'https://example.com/new' }], guidance),
+    ).toThrow('unpublished guidance edits');
+    expect(() => parseCommand(['reset', '--target', 'local', '--demo-guidance-only'])).toThrow();
   });
   it('blocks samples, malformed data, unapproved records and broken references', () => {
     expect(() => validateDocument(fixtureSnapshot)).toThrow('Sample records');

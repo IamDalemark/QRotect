@@ -1,4 +1,4 @@
-import { parseArgs } from 'node:util';
+import { isDeepStrictEqual, parseArgs } from 'node:util';
 import { randomUUID } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -7,6 +7,8 @@ import { z } from 'zod';
 import { emptySnapshot } from '../src/lib/directory/fixtures';
 import {
   snapshotSchema,
+  demoGuidanceAuthorization,
+  type Snapshot,
   workingDirectoryIssues,
   publicationIssues,
 } from '../src/lib/directory/schema';
@@ -22,6 +24,7 @@ export function parseCommand(
       target: { type: 'string' },
       file: { type: 'string' },
       'confirm-project': { type: 'string' },
+      'demo-guidance-only': { type: 'boolean' },
       'dry-run': { type: 'boolean', default: false },
     },
   });
@@ -30,8 +33,11 @@ export function parseCommand(
   const target = z.enum(['local', 'hosted']).parse(values.target || env.QROTECT_DB_TARGET);
   const file = values.file || env.QROTECT_POPULATE_FILE || './directory.json';
   if (action === 'reset' && values.file) throw new Error('Reset does not accept --file.');
+  if (action === 'reset' && values['demo-guidance-only'])
+    throw new Error('--demo-guidance-only requires populate.');
   return {
     action,
+    ...(values['demo-guidance-only'] && { demoGuidanceOnly: true }),
     target,
     file: action === 'populate' ? file : undefined,
     confirmation: values['confirm-project'],
@@ -62,7 +68,7 @@ export function databaseConnection(
   return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${encodeURIComponent(name)}`;
 }
 
-export function readDirectoryFile(file: string) {
+export function readDirectoryFile(file: string, demoGuidanceOnly = false) {
   let content: string;
   try {
     content = readFileSync(file, 'utf8');
@@ -79,6 +85,21 @@ export function readDirectoryFile(file: string) {
     input = JSON.parse(content);
   } catch {
     throw new Error(`Invalid JSON in ${file}. Check its JSON syntax before importing.`);
+  }
+  if (demoGuidanceOnly) {
+    const { guidance } = snapshotSchema.pick({ guidance: true }).strip().parse(input);
+    const document = validateDocument({ ...emptySnapshot, guidance });
+    if (
+      !guidance.length ||
+      guidance.some(
+        (guide) =>
+          guide.reviewer !== demoGuidanceAuthorization ||
+          !guide.title.en.startsWith('Demo record — ') ||
+          !guide.title.hil.startsWith('Halimbawa nga rekord — '),
+      )
+    )
+      throw new Error('Supply owner-authorized, explicitly labeled bilingual demo guidance.');
+    return document;
   }
   return validateDocument(input);
 }
@@ -185,13 +206,66 @@ export async function changeContent(
   return result.rows[0].id as string;
 }
 
+type Guide = Snapshot['guidance'][number];
+
+export function planDemoGuidance(current: Guide[], draft: Guide[], incoming: Guide[]) {
+  const publishedDemo = current.filter(
+    (guide) =>
+      guide.reviewer === 'Demo content review' || guide.reviewer === demoGuidanceAuthorization,
+  );
+  const publishedIds = new Set(publishedDemo.map((guide) => guide.id));
+  const incomingIds = new Set(incoming.map((guide) => guide.id));
+  if (current.some((guide) => incomingIds.has(guide.id) && !publishedIds.has(guide.id)))
+    throw new Error('An incoming demo ID belongs to a published non-demo topic.');
+  if (draft.some((guide) => incomingIds.has(guide.id) && !publishedIds.has(guide.id)))
+    throw new Error('An incoming demo ID belongs to a private guidance topic.');
+  if (
+    draft.some(
+      (guide) =>
+        publishedIds.has(guide.id) &&
+        !isDeepStrictEqual(
+          guide,
+          publishedDemo.find((published) => published.id === guide.id),
+        ),
+    )
+  )
+    throw new Error(
+      'A published demo has unpublished guidance edits. Resolve the edits before replacement.',
+    );
+  if (
+    isDeepStrictEqual(publishedDemo, incoming) &&
+    draft.filter((guide) => publishedIds.has(guide.id)).length === incoming.length
+  )
+    return { remove: [], add: [] };
+  return { remove: publishedDemo, add: incoming };
+}
+
+export async function publishDemoGuidance(
+  db: pg.Client,
+  plan: ReturnType<typeof planDemoGuidance>,
+  revision: number,
+) {
+  for (const [id, topic] of [
+    ...plan.remove.map((guide) => [guide.id, null] as const),
+    ...plan.add.map((guide) => [guide.id, guide] as const),
+  ]) {
+    const { rows } = await db.query(
+      "select public.publish_directory_item('guidance',$1,$2::jsonb,$3::bigint) revision",
+      [id, topic && JSON.stringify(topic), revision],
+    );
+    revision = Number(rows[0].revision);
+  }
+  const { rows } = await db.query('select id from public.publications where current');
+  return rows[0].id as string;
+}
+
 export async function main(args = process.argv.slice(2)) {
   const require = createRequire(import.meta.resolve('next/package.json'));
   require('@next/env').loadEnvConfig(process.cwd());
   const options = parseCommand(args);
   const document =
     options.action === 'populate'
-      ? readDirectoryFile(options.file!)
+      ? readDirectoryFile(options.file!, options.demoGuidanceOnly)
       : structuredClone(emptySnapshot);
   const connection = databaseConnection(options.target);
   if (options.action === 'reset') {
@@ -228,7 +302,7 @@ export async function main(args = process.argv.slice(2)) {
       'lock table public.publications, public.audit_events in share row exclusive mode',
     );
     const current = await db.query('select public._directory_document() payload');
-    if (document.map) {
+    if (!options.demoGuidanceOnly && document.map) {
       const asset = await db.query(
         "select 1 from storage.objects where bucket_id='campus-maps' and name=$1",
         [document.map.assetPath],
@@ -238,12 +312,34 @@ export async function main(args = process.argv.slice(2)) {
     }
     const publications = await db.query('select * from public.publications order by created_at');
     const audit = await db.query('select * from public.audit_events order by id');
-    console.log(
-      `${options.action} target: ${identity}. Existing: ${current.rows[0].payload.contacts.length} contacts, ${publications.rowCount} publications. Incoming: ${document.contacts.length} contacts, ${document.guidance.length} guides, ${document.map ? 1 : 0} map.`,
-    );
+    const plan = options.demoGuidanceOnly
+      ? planDemoGuidance(
+          publications.rows.find((row) => row.current)?.snapshot.guidance ?? [],
+          current.rows[0].payload.guidance,
+          document.guidance,
+        )
+      : null;
+    if (plan) {
+      console.log(`Demo guidance target: ${identity}`);
+      console.log(
+        `Remove (${plan.remove.length}): ${plan.remove.map((guide) => guide.title.en).join(' | ')}`,
+      );
+      console.log(
+        `Add (${plan.add.length}): ${plan.add.map((guide) => guide.title.en).join(' | ')}`,
+      );
+    } else {
+      console.log(
+        `${options.action} target: ${identity}. Existing: ${current.rows[0].payload.contacts.length} contacts, ${publications.rowCount} publications. Incoming: ${document.contacts.length} contacts, ${document.guidance.length} guides, ${document.map ? 1 : 0} map.`,
+      );
+    }
     if (options.dryRun) {
       await db.query('rollback');
       console.log('Dry run complete. No content or backup files changed.');
+      return;
+    }
+    if (plan && !plan.remove.length && !plan.add.length) {
+      await db.query('rollback');
+      console.log('Demo guidance already matches. No content or backup files changed.');
       return;
     }
     mkdirSync('.local/backups', { recursive: true, mode: 0o700 });
@@ -266,7 +362,9 @@ export async function main(args = process.argv.slice(2)) {
       { flag: 'wx', mode: 0o600 },
     );
     console.log(`Backup: ${backup}`);
-    const publication = await changeContent(db, options.action, document, draft.rows[0].revision);
+    const publication = plan
+      ? await publishDemoGuidance(db, plan, Number(draft.rows[0].revision))
+      : await changeContent(db, options.action, document, draft.rows[0].revision);
     await db.query('commit');
     committed = true;
     console.log(

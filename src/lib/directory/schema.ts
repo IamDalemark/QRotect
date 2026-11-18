@@ -37,6 +37,7 @@ export const contactSchema = z
     priority: z.boolean(),
   })
   .strict();
+export const demoGuidanceAuthorization = 'Owner-authorized demo';
 export const guideSchema = z
   .object({
     id: z.uuid(),
