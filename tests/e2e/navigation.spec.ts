@@ -325,7 +325,7 @@ test('Home keeps the two category links reachable at phone and desktop sizes', a
   const fire = page.locator('.home-category').filter({ has: page.locator('#home-category-fire') });
   const links = fire.locator('.home-category-links a');
 
-  for (const width of [320, 390, 1440]) {
+  for (const width of [320, 390, 500, 800, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     for (const language of ['en', 'hil']) {
       await page.locator('.language-label select').selectOption(language);
