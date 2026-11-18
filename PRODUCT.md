@@ -10,11 +10,11 @@ A campus emergency contact website with English and Hiligaynon public interfaces
 
 ## Primary experience
 
-The homepage prioritizes the national emergency call action and six category groups: Police, Fire, Medical/Ambulance, Hospital, Disaster Response, and Campus Emergency. Each group shows its assigned agency, branch, and phone number with a visible “Copy” button, plus separate Call and View other contacts actions. The national emergency number also has the same visible “Copy” button as All contacts. Call opens the exact confirmation in one activation, followed by deliberate swipe or the accessible alternative to open Phone. View other contacts opens the directory filtered to that category. Missing assignments retain browsing without a call action. Home ends with search and has no School & local contacts / priority list.
+The homepage prioritizes the national emergency call action and six category groups: Police, Fire, Medical/Ambulance, Hospital, Disaster Response, and Campus Emergency. Each group shows its assigned agency, branch, and phone number with a visible “Copy” button, plus a primary Call action and adjacent View other contacts and What to do links. What to do opens the matching Guide category. The national emergency number also has the same visible “Copy” button as All contacts. Call opens the exact confirmation in one activation, followed by deliberate swipe or the accessible alternative to open Phone. View other contacts opens the directory filtered to that category. Missing assignments retain browsing without a call action. Home ends with search and has no School & local contacts / priority list.
 
 Public navigation has exactly three page links: Get help (`/`), All contacts (`/directory`), and Guide (`/guidance`). On phones up to 760px they form a fixed bottom bar with icons, visible labels, safe-area padding and a measured content reservation; it hides during call confirmation. Desktop centers the three links in its top navigation. Active state follows the current URL. About and administrator access are in the footer.
 
-Guide is always useful: it explains contact selection, confirmation/Phone handoff and internet access. Approved safety guidance and a link to the approved campus map appear when available; no emergency advice or map is invented. Pages and approved maps require internet access.
+Guide groups approved emergency tips by category. Home deep links open the selected category with a link back to all topics and to that category’s contacts. Categories without approved topics show an availability message. The approved campus map is linked in the full Guide and Campus Emergency view. About explains contact selection, confirmation and Phone handoff, and internet access.
 
 Directory search stays visible beside one Filters button. Category and service-area controls expand inline below it, update loaded contacts immediately, and retain URL/back-navigation state. The button counts active filter groups, excluding search text; clearing filters preserves search, while the empty-results reset clears all restrictions.
 
@@ -28,7 +28,7 @@ Quick calls must name an already published contact and exact callable voice line
 
 Publication history is retained. Restoring a version explicitly replaces the whole directory; the confirmation explains that scope. Existing private working records and low-level save/publish functions remain for compatibility and restore, without exposing that workflow in normal editing. Contact source URLs and verification dates are optional. New contacts default to today’s Philippine date, which can be cleared; editing never replaces an existing date. Approval and reviewed translations remain required. The research group supplies or approves translations, emergency guidance and the map.
 
-Safety guidance and map links inside Guide remain hidden until approved content exists. A static supplied map includes accompanying textual information. Do not invent routes, medical instructions, translations, or agency availability.
+Guide displays safety topics and map links only after the corresponding content is approved and published. A static supplied map includes accompanying textual information. Do not invent routes, medical instructions, translations, or agency availability.
 
 ## Online access and freshness
 

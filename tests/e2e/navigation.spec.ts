@@ -1,11 +1,10 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { categories } from '../../src/lib/directory/labels';
 import { fixtureSnapshot } from '../../src/lib/directory/fixtures';
 import { categoryIds } from '../../src/lib/directory/schema';
 
-test('Home offers browsing and calling for all six categories without priority rows', async ({
-  page,
-}) => {
+test('Home offers contacts, calling, and Guide links for all six categories', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.home-category')).toHaveCount(6);
   await expect(page.getByRole('heading', { name: 'School & local contacts' })).toHaveCount(0);
@@ -29,6 +28,30 @@ test('Home offers browsing and calling for all six categories without priority r
     );
     await page.goBack();
     await expect(page.locator('.home-category')).toHaveCount(6);
+
+    const tips = article.getByRole('link', { name: /^What to do/ });
+    const guideUrl = `/guidance?category=${category}`;
+    await expect(tips).toHaveAttribute('href', guideUrl);
+    await tips.focus();
+    await expect(tips).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(guideUrl);
+    const title = category === 'school' ? 'Campus emergency' : categories[category].en;
+    const selected = page.getByRole('region', { name: title, exact: true });
+    await expect(selected).toBeVisible();
+    await expect(
+      selected.getByText('Approved emergency guidance is not available yet.'),
+    ).toBeVisible();
+    await expect(selected.getByRole('link', { name: /^View other contacts/ })).toHaveAttribute(
+      'href',
+      `/directory?category=${category}`,
+    );
+    await expect(page.getByRole('link', { name: 'All topics', exact: true })).toHaveAttribute(
+      'href',
+      '/guidance',
+    );
+    await page.goBack();
+    await expect(article).toBeVisible();
   }
 });
 
@@ -44,7 +67,7 @@ test('three page destinations retain direct links, active state and browser Back
   );
   await nav.getByRole('link', { name: 'Guide', exact: true }).click();
   await expect(page).toHaveURL('/guidance');
-  await expect(page.getByRole('heading', { name: 'How to call a contact' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Guide', exact: true })).toBeVisible();
   await expect(page.locator('.public-nav a[aria-current="page"]')).toHaveText('Guide');
   await page.goBack();
   await expect(page).toHaveURL('/directory?category=fire&q=station');
@@ -68,9 +91,16 @@ test('three page destinations retain direct links, active state and browser Back
 test('all three destinations work online in Hiligaynon', async ({ page }) => {
   await page.goto('/');
   await page.locator('.language-label select').selectOption('hil');
-  await page.locator('.public-nav').getByRole('link', { name: 'Giya', exact: true }).click();
+  const fire = page.locator('.home-category').filter({ has: page.locator('#home-category-fire') });
+  await fire.getByRole('link', { name: 'Ano ang himuon: Sunog' }).click();
+  await expect(page).toHaveURL('/guidance?category=fire');
+  await expect(page.getByRole('heading', { name: 'Sunog', exact: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Sunog', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Tanan nga topiko', exact: true }).click();
+  await expect(page).toHaveURL('/guidance');
   await expect(page.getByRole('heading', { name: 'Giya', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Paano magtawag sa kontak' })).toBeVisible();
+  await expect(page.getByText('Wala pa sang gin-aprobahan nga giya sa emerhensya.')).toBeVisible();
   await expect(page.locator('.public-nav a[aria-current="page"]')).toHaveText('Giya');
   await page
     .locator('.public-nav')
@@ -116,7 +146,7 @@ test('mobile navigation stays above safe-area space, clears the footer and hides
 
 test('Guide shows approved safety content and map without changing the three navigation items', async ({
   page,
-}) => {
+}, info) => {
   const snapshot = structuredClone(fixtureSnapshot);
   snapshot.publishedAt = new Date().toISOString();
   snapshot.guidance = [
@@ -139,6 +169,24 @@ test('Guide shows approved safety content and map without changing the three nav
     title: { en: 'Unapproved test guidance', hil: '' },
     approved: false,
   });
+  snapshot.guidance.push(
+    {
+      ...snapshot.guidance[0],
+      id: '30000000-0000-4000-8000-000000000003',
+      title: { en: 'Reviewed fire evacuation', hil: 'Ginpamatud-an nga pagbakwit sa sunog' },
+      category: 'fire',
+      steps: [
+        { en: 'First reviewed step.', hil: 'Una nga paagi.' },
+        { en: 'Second reviewed step.', hil: 'Ikaduha nga paagi.' },
+      ],
+    },
+    {
+      ...snapshot.guidance[0],
+      id: '30000000-0000-4000-8000-000000000004',
+      title: { en: 'Reviewed extinguisher procedure', hil: 'Ginpamatud-an nga paggamit' },
+      category: 'fire',
+    },
+  );
   snapshot.map = {
     id: '40000000-0000-4000-8000-000000000001',
     assetPath: '40000000-0000-4000-8000-000000000001.png',
@@ -158,6 +206,55 @@ test('Guide shows approved safety content and map without changing the three nav
     '/campus-map',
   );
   await expect(page.locator('.public-nav').getByRole('link')).toHaveCount(3);
+
+  await page.goto('/guidance?category=fire');
+  const fire = page.getByRole('region', { name: 'Fire', exact: true });
+  await expect(fire.getByRole('heading', { level: 3 })).toHaveText([
+    'Reviewed fire evacuation',
+    'Reviewed extinguisher procedure',
+  ]);
+  const firstTopic = fire.locator('.guide').first();
+  await expect(firstTopic.getByRole('listitem')).toHaveText([
+    'First reviewed step.',
+    'Second reviewed step.',
+  ]);
+  await expect(firstTopic.getByRole('link', { name: 'View source' })).toHaveAttribute(
+    'href',
+    'https://example.test/source',
+  );
+  await expect(firstTopic.locator('time')).toHaveAttribute('datetime', '2026-10-28');
+  await expect(firstTopic).toContainText('Test reviewer');
+  await expect(page.getByRole('heading', { name: 'Reviewed campus procedure' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'View campus map' })).toHaveCount(0);
+  if (info.project.name === 'desktop-chromium') {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.screenshot({ path: '.impeccable/review/guidance-fire-desktop.png', fullPage: true });
+  }
+  await page.locator('.language-label select').selectOption('hil');
+  const translatedTopic = page.getByRole('region', { name: 'Sunog' }).locator('.guide').first();
+  await expect(translatedTopic.getByRole('heading', { level: 3 })).toHaveText(
+    'Ginpamatud-an nga pagbakwit sa sunog',
+  );
+  await expect(translatedTopic.getByRole('listitem')).toHaveText([
+    'Una nga paagi.',
+    'Ikaduha nga paagi.',
+  ]);
+  await expect(translatedTopic.getByRole('list')).toHaveCSS('list-style-type', 'decimal');
+  if (info.project.name === 'desktop-chromium') {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.screenshot({ path: '.impeccable/review/guidance-fire-mobile.png', fullPage: true });
+  }
+  await page.locator('.language-label select').selectOption('en');
+
+  await page.goto('/guidance?category=school');
+  await expect(page.getByRole('heading', { name: 'Reviewed campus procedure' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'View campus map' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Reviewed fire evacuation' })).toHaveCount(0);
+
+  await page.goto('/guidance?category=unknown');
+  await expect(page.getByRole('heading', { name: 'Reviewed campus procedure' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Reviewed fire evacuation' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'All topics', exact: true })).toHaveCount(0);
 });
 
 test('Guide and navigation reflow at narrow widths, enlarged text and in both languages', async ({
@@ -218,4 +315,34 @@ test('Guide and navigation reflow at narrow widths, enlarged text and in both la
     path: '.impeccable/review/navigation-guide-320-hil-enlarged.png',
     fullPage: true,
   });
+});
+
+test('Home keeps the two category links reachable at phone and desktop sizes', async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== 'desktop-chromium', 'Shared responsive matrix.');
+  await page.goto('/');
+  const fire = page.locator('.home-category').filter({ has: page.locator('#home-category-fire') });
+  const links = fire.locator('.home-category-links a');
+
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const language of ['en', 'hil']) {
+      await page.locator('.language-label select').selectOption(language);
+      const contacts = (await links.nth(0).boundingBox())!;
+      const tips = (await links.nth(1).boundingBox())!;
+      expect(contacts.y).toBe(tips.y);
+      expect(tips.x).toBeGreaterThanOrEqual(contacts.x + contacts.width);
+      for (const box of [contacts, tips]) {
+        expect(box.width).toBeGreaterThanOrEqual(48);
+        expect(box.height).toBeGreaterThanOrEqual(48);
+      }
+    }
+  }
+
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await links.nth(1).click();
+  await expect(page).toHaveURL('/guidance?category=fire');
 });

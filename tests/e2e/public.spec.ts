@@ -44,9 +44,7 @@ test('copy failure gives selectable-number recovery', async ({ page }) => {
     'Select the visible number',
   );
 });
-test('Guide has practical help while unapproved safety content and map stay hidden', async ({
-  page,
-}) => {
+test('Guide has an empty state and About explains the website', async ({ page }) => {
   await page.goto('/');
   await expect(
     page
@@ -54,10 +52,12 @@ test('Guide has practical help while unapproved safety content and map stay hidd
       .getByRole('link', { name: 'Campus map' }),
   ).toHaveCount(0);
   await page.goto('/guidance');
+  await expect(page.getByText('Approved emergency guidance is not available yet.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'How to call a contact' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'View campus map' })).toHaveCount(0);
+  await page.goto('/about');
   await expect(page.getByRole('heading', { name: 'How to call a contact' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Emergency guidance', exact: true })).toHaveCount(
-    0,
-  );
+  await expect(page.getByRole('heading', { name: 'Internet access and privacy' })).toBeVisible();
   await page.goto('/campus-map');
   await expect(
     page.getByText('An approved campus evacuation map is not available yet.'),
@@ -145,12 +145,9 @@ test('responsive screens have no overflow or automated accessibility violations'
   await page.screenshot({ path: '.impeccable/review/hiligaynon-mobile.png', fullPage: true });
 });
 
-test('Guide and About explain internet access without promising saved access', async ({ page }) => {
-  await page.goto('/guidance');
-  await expect(page.getByRole('heading', { name: 'Accessing the website' })).toBeVisible();
-  await expect(page.getByText(/Keep an internet connection/)).toBeVisible();
-  await expect(page.getByText(/Available offline|Using the directory offline/)).toHaveCount(0);
+test('About explains internet access in both languages', async ({ page }) => {
   await page.goto('/about');
+  await expect(page.getByText(/Available offline|Using the directory offline/)).toHaveCount(0);
   await expect(page.getByText(/An internet connection is needed/)).toBeVisible();
   await page.locator('.language-label select').selectOption('hil');
   await expect(page.getByText(/Kinahanglan internet para mabuksan/)).toBeVisible();

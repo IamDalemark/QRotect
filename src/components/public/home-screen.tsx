@@ -1,6 +1,5 @@
 'use client';
 import {
-  ArrowRight,
   Shield,
   Flame,
   HeartPulse,
@@ -102,13 +101,17 @@ export function HomeScreen() {
                       }
                     />
                   )}
-                  <a
-                    href={`/directory?category=${id}`}
-                    aria-label={`${t.viewContacts}: ${category}`}
-                  >
-                    {t.viewContacts}
-                    <ArrowRight size={15} aria-hidden="true" />
-                  </a>
+                  <div className="home-category-links">
+                    <a
+                      href={`/directory?category=${id}`}
+                      aria-label={`${t.viewContacts}: ${category}`}
+                    >
+                      {t.viewContacts}
+                    </a>
+                    <a href={`/guidance?category=${id}`} aria-label={`${t.whatToDo}: ${category}`}>
+                      {t.whatToDo}
+                    </a>
+                  </div>
                 </div>
               </article>
             );

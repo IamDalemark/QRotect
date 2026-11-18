@@ -39,7 +39,8 @@ export const copy = {
     campusEmergency: 'Campus emergency',
     viewContacts: 'View other contacts',
     guide: 'Guide',
-    guideIntro: 'Help with calling, finding contacts, and accessing the website.',
+    whatToDo: 'What to do',
+    allTopics: 'All topics',
     guideCalling: 'How to call a contact',
     guideChoose:
       'On Get help, choose Call for the help you need. Choose View other contacts to browse other agencies, or use All contacts to search and filter.',
@@ -47,9 +48,6 @@ export const copy = {
       'Check the agency, branch, and number in the confirmation card. Swipe to call, or choose Open Phone instead. Cancel to return without opening Phone.',
     guidePhone:
       'Continue in your phone app and follow any device confirmation. QROTECT opens the selected number; it cannot tell whether the call connects.',
-    guideAccess: 'Accessing the website',
-    guideConnection:
-      'Keep an internet connection when opening pages or refreshing contacts. Check each contact’s verification date. Your phone app handles the call after you confirm the selected number.',
     viewMap: 'View campus map',
     directory: 'All contacts',
     guidance: 'Emergency guidance',
@@ -120,7 +118,8 @@ export const copy = {
     campusEmergency: 'Emerhensya sa kampus',
     viewContacts: 'Tan-awa ang mga kontak',
     guide: 'Giya',
-    guideIntro: 'Bulig sa pagtawag, pagpangita sang kontak, kag paggamit sang website.',
+    whatToDo: 'Ano ang himuon',
+    allTopics: 'Tanan nga topiko',
     guideCalling: 'Paano magtawag sa kontak',
     guideChoose:
       'Sa pahina nga Pangayo bulig, pilia ang Tawag para sa kinahanglan nga bulig. Pilia ang Tan-awa ang mga kontak para sa iban nga ahensya, ukon gamita ang Tanan nga kontak sa pagpangita kag pag-filter.',
@@ -128,9 +127,6 @@ export const copy = {
       'Tan-awa ang ahensya, sangay, kag numero sa kumpirmasyon. I-swipe para magtawag ukon pilia ang Buksan ang Telepono. Pilia ang Kanselahon para magbalik nga wala ginabuksan ang Telepono.',
     guidePhone:
       'Magpadayon sa app sang telepono kag sundon ang kumpirmasyon sang device. Ginabuksan sang QROTECT ang napilian nga numero; indi sini mahibaluan kon nakakonekta ang tawag.',
-    guideAccess: 'Pagbukas sang website',
-    guideConnection:
-      'Kinahanglan internet sa pagbukas sang mga pahina ukon pag-update sang mga kontak. Tan-awa ang petsa sang pagkumpirma sang kontak. Ang app sang telepono ang nagahimo sang tawag pagkatapos mo makumpirma ang numero.',
     viewMap: 'Tan-awa ang mapa sang kampus',
     directory: 'Tanan nga kontak',
     guidance: 'Giya sa emerhensya',

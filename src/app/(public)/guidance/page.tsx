@@ -1,4 +1,11 @@
 import { GuidanceScreen } from '@/components/public/guidance-screen';
-export default function Page() {
-  return <GuidanceScreen />;
+import { categoryIds } from '@/lib/directory/schema';
+
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string | string[] }>;
+}) {
+  const { category } = await searchParams;
+  return <GuidanceScreen category={categoryIds.find((id) => id === category)} />;
 }

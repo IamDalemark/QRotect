@@ -12,9 +12,15 @@ export function AboutScreen() {
       </h2>
       <p>
         {language === 'en'
-          ? 'QROTECT helps learners, teachers, and staff find campus and public emergency contacts. Confirm a contact and swipe to open the selected number in your phone app. Your device handles the call.'
-          : 'Ang QROTECT nagabulig sa mga estudyante, manunudlo, kag kawani sa pagpangita sang mga kontak sa emerhensya sa kampus kag publiko. Kumpirmaha ang kontak kag i-swipe para buksan ang napilian nga numero sa telepono.'}
+          ? 'QROTECT helps learners, teachers, and staff find campus and public emergency contacts.'
+          : 'Ang QROTECT nagabulig sa mga estudyante, manunudlo, kag kawani sa pagpangita sang mga kontak sa emerhensya sa kampus kag publiko.'}
       </p>
+      <h2>{t.guideCalling}</h2>
+      <ol className="guide-steps">
+        <li>{t.guideChoose}</li>
+        <li>{t.guideConfirm}</li>
+        <li>{t.guidePhone}</li>
+      </ol>
       <h2>{language === 'en' ? 'Internet access and privacy' : 'Internet kag pribasiya'}</h2>
       <p>
         {language === 'en'
