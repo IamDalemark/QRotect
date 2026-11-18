@@ -1,0 +1,18 @@
+{
+  "id": "30000000-0000-4000-8000-000000000001",
+  "assetPath": "30000000-0000-4000-8000-000000000001.png",
+  "description": {
+    "en": "Campus map.",
+    "hil": "Mapa sang kampus."
+  },
+  "instructions": [
+    {
+      "en": "Use the map to locate campus buildings and gates.",
+      "hil": "Gamita ang mapa agod makita ang mga bilding kag mga puwertahan sang kampus."
+    }
+  ],
+  "source": "https://cpu.edu.ph/about-us/campus-map/",
+  "reviewedAt": "2026-11-18",
+  "reviewer": "REPLACE WITH ACTUAL REVIEWER",
+  "approved": false
+}

@@ -84,3 +84,7 @@ See [performance measurements and commands](docs/PERFORMANCE.md) for the mobile 
 ## Administrator item publishing
 
 Administrators publish one contact, Home assignment, guidance topic or map directly. Forms provide concrete examples and inline errors; maps accept drag-and-drop or a file picker. No draft-save or publish-all step is required. Complete versions remain available in History. See [operating instructions](docs/OPERATIONS.md). The additive `202610290003_publish_directory_item.sql` is applied hosted; the frontend can now be released against it. Earlier hosted migrations were completed during the 29 October administrator repair.
+
+## Database content scripts
+
+Use `pnpm db:reset` to clear website content or `pnpm db:populate` to replace and publish a directory JSON. Set `QROTECT_DB_TARGET` and `QROTECT_POPULATE_FILE` in `.env.local` to run either command without inline configuration. See [commands, configuration and samples](docs/DATABASE_CONTENT.md).
