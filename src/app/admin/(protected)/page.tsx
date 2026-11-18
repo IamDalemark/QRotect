@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { AdminLink } from '@/components/admin/admin-shell';
 import { loadAdminOverview } from '@/lib/admin/data';
 import { formatPhilippineDate } from '@/lib/directory/date';
 
@@ -19,9 +19,9 @@ export default async function Page() {
         <dt>Last publication</dt>
         <dd>{publishedAt ? formatPhilippineDate(publishedAt) : 'Not published'}</dd>
       </dl>
-      <Link href="/admin/contacts" className="button primary">
+      <AdminLink href="/admin/contacts" className="button primary">
         Manage contacts
-      </Link>
+      </AdminLink>
     </>
   );
 }

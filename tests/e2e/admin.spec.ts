@@ -29,13 +29,15 @@ test('administrator publishes individual items with inline validation, reviewed 
   await expect(page.getByRole('heading', { name: 'Directory overview' })).toBeVisible();
   await page.getByRole('link', { name: 'Contacts', exact: true }).click();
   await navigationRequested;
-  // An RSC request may be prefetched or committed atomically; a delayed
-  // response does not guarantee the route's loading boundary will render.
   await expect(page.getByRole('navigation', { name: 'Administrator navigation' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Expand navigation', exact: true })).toBeEnabled();
-  await expect(page.getByRole('heading', { name: 'Manage contacts', exact: true })).toHaveCount(0);
+  const pending = page.getByRole('status').filter({ hasText: 'Loading administrator content…' });
+  await expect(pending).toBeVisible();
+  await expect(page.locator('main[inert] h1')).toHaveText('Directory overview');
   releaseNavigation();
   await expect(page.getByRole('heading', { name: 'Manage contacts', exact: true })).toBeVisible();
+  await expect(pending).toHaveCount(0);
+  await expect(page.locator('main[inert]')).toHaveCount(0);
   await page.unroute('**/admin/contacts?*');
   await page.getByRole('button', { name: 'Add contact', exact: true }).click();
   await expect(page.getByLabel('Last verified date (optional)', { exact: true })).toHaveValue(

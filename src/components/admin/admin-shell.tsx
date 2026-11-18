@@ -1,8 +1,16 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, type ReactNode } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useTransition,
+  type ComponentProps,
+  type ReactNode,
+} from 'react';
 import {
   BookOpen,
   ContactRound,
@@ -35,33 +43,72 @@ const sections = [
   ['/admin/password', 'Password', KeyRound],
 ] as const;
 
+const AdminNavigation = createContext<((href: string) => void) | null>(null);
+
+export function AdminLink({
+  href,
+  ...props
+}: Omit<ComponentProps<typeof Link>, 'href' | 'onNavigate' | 'prefetch'> & { href: string }) {
+  const navigate = useContext(AdminNavigation);
+  return (
+    <Link
+      {...props}
+      href={href}
+      prefetch={false}
+      onNavigate={(event) => {
+        if (!navigate) return;
+        event.preventDefault();
+        navigate(href);
+      }}
+    />
+  );
+}
+
 function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { setOpenMobile } = useSidebar();
+  const router = useRouter();
+  const { openMobile, setOpenMobile } = useSidebar();
+  const [navigating, startNavigation] = useTransition();
+  const [showStatus, setShowStatus] = useState(false);
+  const navigationStatus = navigating && showStatus ? 'Loading administrator content…' : null;
+
+  useEffect(() => {
+    if (!navigating) return;
+    const timer = window.setTimeout(() => setShowStatus(true), 120);
+    return () => {
+      window.clearTimeout(timer);
+      setShowStatus(false);
+    };
+  }, [navigating]);
+
   useEffect(() => {
     // Synchronize the modal with a committed route, never a possibly cancelled click.
     setOpenMobile(false);
   }, [pathname, setOpenMobile]);
   const confirmSignOut = useConfirmSignOut();
   return (
-    <>
+    <AdminNavigation.Provider value={(href) => startNavigation(() => router.push(href))}>
       <Sidebar>
         <div className="admin-sidebar-header">
           <SidebarTooltip label="QROTECT Administration">
-            <Link href="/admin" className="admin-sidebar-brand" aria-label="QROTECT Administration">
+            <AdminLink
+              href="/admin"
+              className="admin-sidebar-brand"
+              aria-label="QROTECT Administration"
+            >
               <ShieldCheck aria-hidden="true" size={24} />
               <span className="admin-sidebar-label">
                 <strong>QROTECT</strong>
                 <span>Administration</span>
               </span>
-            </Link>
+            </AdminLink>
           </SidebarTooltip>
           <SidebarTrigger />
         </div>
         <nav className="admin-sidebar-content" aria-label="Administrator navigation">
           {sections.map(([href, label, Icon]) => (
             <SidebarTooltip key={href} label={label}>
-              <Link
+              <AdminLink
                 href={href}
                 className="admin-sidebar-link"
                 aria-current={pathname === href ? 'page' : undefined}
@@ -69,10 +116,13 @@ function Shell({ children }: { children: ReactNode }) {
               >
                 <Icon aria-hidden="true" size={20} />
                 <span className="admin-sidebar-label">{label}</span>
-              </Link>
+              </AdminLink>
             </SidebarTooltip>
           ))}
         </nav>
+        <div role="status" className="admin-sidebar-navigation-status">
+          {openMobile && navigationStatus}
+        </div>
         <div className="admin-sidebar-footer">
           <SidebarTooltip label="Public directory">
             <Link href="/" className="admin-sidebar-link" aria-label="Public directory">
@@ -99,10 +149,15 @@ function Shell({ children }: { children: ReactNode }) {
         <header className="admin-shell-header">
           <SidebarTrigger mobile />
           <span>QROTECT / Administration</span>
+          <span role="status" className="admin-navigation-status">
+            {!openMobile && navigationStatus}
+          </span>
         </header>
-        <main className="admin-main">{children}</main>
+        <main className="admin-main" aria-busy={navigating} inert={navigating}>
+          {children}
+        </main>
       </div>
-    </>
+    </AdminNavigation.Provider>
   );
 }
 

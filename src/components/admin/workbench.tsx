@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- authenticated original map preview */
 'use client';
-import Link from 'next/link';
+import { AdminLink } from './admin-shell';
 import { useUnpublishedEdits } from './unpublished-edits';
 import type { AdminEditorSection } from '@/lib/admin/data';
 import { useRouter } from 'next/navigation';
@@ -547,7 +547,7 @@ export function Workbench({ initial, initialRevision, section, publishedContacts
                   {errors._form}
                   {errors._form.includes('Home quick call') && (
                     <p>
-                      <Link href="/admin/quick-calls">Open Home quick calls</Link>
+                      <AdminLink href="/admin/quick-calls">Open Home quick calls</AdminLink>
                     </p>
                   )}
                 </div>
