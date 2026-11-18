@@ -7,12 +7,10 @@ export function CopyNumber({
   value,
   name,
   compact = false,
-  label,
 }: {
   value: string;
   name: string;
   compact?: boolean;
-  label?: string;
 }) {
   const { t } = usePublic();
   const [feedback, setFeedback] = useState<'copied' | 'manual' | ''>('');
@@ -55,7 +53,7 @@ export function CopyNumber({
         ) : (
           <Copy size={18} aria-hidden="true" />
         )}
-        {!compact && (feedback === 'copied' ? t.copied : (label ?? t.copy))}
+        {!compact && (feedback === 'copied' ? t.copied : t.copy)}
       </button>
       <span
         className={`copy-feedback${feedback === 'manual' ? ' copy-error' : ' sr-only'}`}

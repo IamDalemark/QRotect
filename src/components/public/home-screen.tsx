@@ -36,11 +36,7 @@ export function HomeScreen() {
       <section className="emergency-line" aria-label={t.nationalEmergency}>
         <div className="number-with-copy emergency-number-group">
           <div className="emergency-number">911</div>
-          <CopyNumber
-            value="911"
-            name={t.nationalEmergency}
-            label={language === 'hil' ? 'Kopyaha' : undefined}
-          />
+          <CopyNumber value="911" name={t.nationalEmergency} />
         </div>
         <div className="emergency-copy">
           <h2>
@@ -87,11 +83,7 @@ export function HomeScreen() {
                 {target && (
                   <div className="number-with-copy home-category-number">
                     <p className="phone-number">{target.number.display}</p>
-                    <CopyNumber
-                      value={target.number.display}
-                      name={target.agency}
-                      label={language === 'hil' ? 'Kopyaha' : undefined}
-                    />
+                    <CopyNumber value={target.number.display} name={target.agency} />
                   </div>
                 )}
                 <div className="home-category-actions">

@@ -39,7 +39,7 @@ test('copy failure gives selectable-number recovery', async ({ page }) => {
     });
   });
   await page.goto('/directory?category=fire');
-  await page.getByRole('button', { name: 'Copy number: Sample fire station' }).click();
+  await page.getByRole('button', { name: 'Copy: Sample fire station' }).click();
   await expect(page.getByRole('article').getByRole('status')).toContainText(
     'Select the visible number',
   );

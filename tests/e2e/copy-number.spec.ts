@@ -31,22 +31,22 @@ test.beforeEach(async ({ page }) => {
 test('Home and confirmation copy exact visible numbers without opening Phone', async ({ page }) => {
   await page.goto('/');
   const national = page.getByRole('region', { name: 'National emergency line', exact: true });
-  await expect(
-    national.getByRole('button', { name: 'Copy number: National emergency line' }),
-  ).toHaveText('Copy number');
-  await national.getByRole('button', { name: 'Copy number: National emergency line' }).click();
+  await expect(national.getByRole('button', { name: 'Copy: National emergency line' })).toHaveText(
+    'Copy',
+  );
+  await national.getByRole('button', { name: 'Copy: National emergency line' }).click();
   await expect(national.getByRole('status')).toHaveText('Copied');
   const fire = page.locator('.home-category').filter({ hasText: 'Sample fire station' });
   await expect(fire.locator('.phone-number')).toHaveText('0912 345 6789');
-  const copy = fire.getByRole('button', { name: 'Copy number: Sample fire station' });
-  await expect(copy).toHaveText('Copy number');
+  const copy = fire.getByRole('button', { name: 'Copy: Sample fire station' });
+  await expect(copy).toHaveText('Copy');
   await copy.focus();
   await page.keyboard.press('Enter');
   await expect(fire.getByRole('status')).toHaveText('Copied');
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await fire.getByRole('button', { name: /Call Fire/ }).click();
   const dialog = page.getByRole('dialog');
-  await dialog.getByRole('button', { name: 'Copy number: Sample fire station' }).click();
+  await dialog.getByRole('button', { name: 'Copy: Sample fire station' }).click();
   await expect(dialog.getByRole('status')).toHaveText('Copied');
   await expect(dialog.getByRole('link', { name: 'Open Phone instead' })).toHaveAttribute(
     'href',
@@ -73,13 +73,10 @@ test('clipboard failure offers manual recovery on Home and in confirmation', asy
   });
   await page.goto('/');
   const fire = page.locator('.home-category').filter({ hasText: 'Sample fire station' });
-  await fire.getByRole('button', { name: 'Copy number: Sample fire station' }).click();
+  await fire.getByRole('button', { name: 'Copy: Sample fire station' }).click();
   await expect(fire.getByRole('status')).toContainText('Select the visible number');
   await fire.getByRole('button', { name: /Call Fire/ }).click();
-  await page
-    .getByRole('dialog')
-    .getByRole('button', { name: 'Copy number: Sample fire station' })
-    .click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Copy: Sample fire station' }).click();
   await expect(page.getByRole('dialog').getByRole('status')).toContainText(
     'Select the visible number',
   );
@@ -92,9 +89,9 @@ test('copy feedback uses the selected interface language', async ({ page }) => {
   await page.goto('/');
   await page.locator('.language-label select').selectOption('hil');
   const fire = page.locator('.home-category').filter({ hasText: 'Sample fire station' });
-  const copy = fire.getByRole('button', { name: 'Kopyaha ang numero: Sample fire station' });
+  const copy = fire.getByRole('button', { name: 'Kopyaha: Sample fire station' });
   await expect(copy).toHaveText('Kopyaha');
-  await expect(copy).toHaveAttribute('title', 'Kopyaha ang numero');
+  await expect(copy).toHaveAttribute('title', 'Kopyaha');
   await expect(page.locator('.emergency-number-group button')).toHaveText('Kopyaha');
   await copy.click();
   await expect(fire.getByRole('status')).toHaveText('Nakopya');
@@ -110,7 +107,7 @@ for (const route of ['/', '/directory']) {
     await page.clock.pauseAt(new Date());
     const control = page.locator('.copy-control').first();
     const button = control.getByRole('button');
-    await expect(button).toHaveText('Copy number');
+    await expect(button).toHaveText('Copy');
     await button.click();
     await expect(button).toHaveText('Copied');
     await expect(button.locator('.lucide-check')).toHaveCount(1);
@@ -120,7 +117,7 @@ for (const route of ['/', '/directory']) {
     await page.clock.runFor(2000);
     await expect(button).toHaveText('Copied');
     await page.clock.runFor(1000);
-    await expect(button).toHaveText('Copy number');
+    await expect(button).toHaveText('Copy');
     await expect(button.locator('.lucide-copy')).toHaveCount(1);
     await expect(control.getByRole('status')).toBeEmpty();
   });

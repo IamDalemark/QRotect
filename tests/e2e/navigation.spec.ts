@@ -15,7 +15,7 @@ test('Home offers browsing and calling for all six categories without priority r
       .locator('.home-category')
       .filter({ has: page.locator(`#home-category-${category}`) });
     await expect(article.getByRole('button')).toHaveCount(2);
-    await expect(article.getByRole('button', { name: /^Copy number:/ })).toHaveText('Copy number');
+    await expect(article.getByRole('button', { name: /^Copy:/ })).toHaveText('Copy');
     await expect(article.getByRole('link', { name: /View other contacts/ })).toHaveAttribute(
       'href',
       `/directory?category=${category}`,
