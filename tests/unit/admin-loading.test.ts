@@ -1,99 +1,123 @@
 import { beforeEach, expect, it, vi } from 'vitest';
-import { emptySnapshot } from '../../src/lib/directory/fixtures';
+import { fixtureSnapshot, emptySnapshot } from '@/lib/directory/fixtures';
 
-const mocks = vi.hoisted(() => ({ auth: vi.fn(), from: vi.fn(), draft: vi.fn() }));
+const mocks = vi.hoisted(() => ({ auth: vi.fn(), from: vi.fn(), rpc: vi.fn(), draft: vi.fn() }));
 vi.mock('server-only', () => ({}));
-vi.mock('../../src/lib/admin/auth', () => ({ requireAdmin: mocks.auth }));
-import { dashboard } from '../../src/lib/admin/data';
+vi.mock('@/lib/admin/auth', () => ({ requireAdminForRender: mocks.auth }));
+import { loadAdminEditor, loadAdminHistory, loadAdminOverview } from '@/lib/admin/data';
 
 beforeEach(() => {
   vi.resetAllMocks();
   mocks.draft.mockResolvedValue({ data: { payload: emptySnapshot, revision: 4 }, error: null });
-  mocks.auth.mockResolvedValue({
-    client: { rpc: () => ({ single: mocks.draft }), from: mocks.from },
-  });
+  mocks.rpc.mockReturnValue({ single: mocks.draft });
+  mocks.auth.mockResolvedValue({ client: { rpc: mocks.rpc, from: mocks.from } });
 });
 
-it.each(['contacts', 'guidance', 'map', 'preview'])(
-  '%s remains usable without querying publication history or audit events',
+it.each(['contacts', 'guidance', 'map', 'preview'] as const)(
+  '%s fetches only the working draft',
   async (section) => {
-    mocks.from.mockImplementation(() => {
-      throw new Error('History service unavailable');
+    expect(await loadAdminEditor(section)).toEqual({
+      initial: emptySnapshot,
+      initialRevision: 4,
+      publishedContacts: [],
     });
-    const data = await dashboard(section);
-    expect(data.initialRevision).toBe(4);
-    expect(data.initial).toEqual(emptySnapshot);
-    expect(data.history).toEqual([]);
-    expect(data.events).toEqual([]);
+    expect(mocks.rpc).toHaveBeenCalledWith('get_directory_draft');
     expect(mocks.from).not.toHaveBeenCalled();
   },
 );
 
-it('overview finds the current publication even when newer noncurrent rows exist', async () => {
-  const publications = Array.from({ length: 25 }, (_, index) => ({
-    id: String(index),
-    created_at: String(100 - index),
-    current: index === 24,
-  }));
-  mocks.from.mockImplementation((table: string) => {
-    expect(table).toBe('publications');
-    return {
-      select: () => ({
-        eq: (column: string, value: boolean) => ({
-          limit: async (count: number) => ({
-            data: publications.filter((row) => row[column as 'current'] === value).slice(0, count),
-            error: null,
-          }),
-        }),
-      }),
-    };
-  });
-  const data = await dashboard();
-  expect(data.history).toEqual([publications[24]]);
-  expect(data.events).toEqual([]);
-});
-
-it('history still returns publications and audit events and rejects incomplete loads', async () => {
-  const publication = { id: 'p1', created_at: '2026-10-29', current: true };
-  const event = { id: 1, action: 'publish', revision: 4, created_at: '2026-10-29' };
+it('filters for the current publication and counts all stored contacts without fetching the draft', async () => {
+  const countDraft = vi.fn().mockResolvedValue({ count: 12, error: null });
+  const selectContacts = vi.fn().mockReturnValue({ eq: countDraft });
+  const publication = {
+    eq: vi.fn().mockReturnThis(),
+    maybeSingle: vi.fn().mockResolvedValue({ data: { created_at: '2026-11-18' }, error: null }),
+  };
+  const selectPublication = vi.fn().mockReturnValue(publication);
   mocks.from.mockImplementation((table: string) => ({
-    select: () => ({
-      order: () => ({
-        limit: async () => ({
-          data: table === 'publications' ? [publication] : [event],
-          error: null,
-        }),
-      }),
-    }),
+    select: table === 'contacts' ? selectContacts : selectPublication,
   }));
-  const data = await dashboard('history');
-  expect(data.history).toEqual([publication]);
-  expect(data.events).toEqual([event]);
+
+  expect(await loadAdminOverview()).toEqual({ contactCount: 12, publishedAt: '2026-11-18' });
+  publication.maybeSingle.mockResolvedValue({ data: null, error: null });
+  countDraft.mockResolvedValue({ count: 0, error: null });
+  expect(await loadAdminOverview()).toEqual({ contactCount: 0, publishedAt: null });
+
+  expect(mocks.from.mock.calls.slice(0, 2)).toEqual([['contacts'], ['publications']]);
+  expect(selectContacts).toHaveBeenCalledWith('id', { count: 'exact', head: true });
+  expect(countDraft).toHaveBeenCalledWith('draft_id', true);
+  expect(selectPublication).toHaveBeenCalledWith('created_at');
+  expect(publication.eq).toHaveBeenCalledWith('current', true);
+  expect(mocks.rpc).not.toHaveBeenCalled();
+});
+
+it('loads the revision needed to restore along with bounded publication and audit lists', async () => {
+  const publication = { id: 'p1', created_at: '2026-10-29', current: true };
+  const event = { id: 1, action: 'publish', created_at: '2026-10-29' };
+  const revision = {
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn().mockResolvedValue({ data: { revision: 8 }, error: null }),
+  };
+  const publications = {
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockResolvedValue({ data: [publication], error: null }),
+  };
+  const events = {
+    order: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockResolvedValue({ data: [event], error: null }),
+  };
+  const select = vi
+    .fn()
+    .mockReturnValueOnce(revision)
+    .mockReturnValueOnce(publications)
+    .mockReturnValueOnce(events);
+  mocks.from.mockReturnValue({ select });
+
+  expect(await loadAdminHistory()).toEqual({
+    revision: 8,
+    publications: [publication],
+    events: [event],
+  });
+  expect(mocks.from.mock.calls).toEqual([['directory_drafts'], ['publications'], ['audit_events']]);
+  expect(select.mock.calls).toEqual([
+    ['revision'],
+    ['id,created_at,current'],
+    ['id,action,created_at'],
+  ]);
+  expect(revision.eq).toHaveBeenCalledWith('id', true);
+  expect(publications.order).toHaveBeenCalledWith('created_at', { ascending: false });
+  expect(publications.limit).toHaveBeenCalledWith(20);
+  expect(events.order).toHaveBeenCalledWith('created_at', { ascending: false });
+  expect(events.limit).toHaveBeenCalledWith(30);
+  expect(mocks.rpc).not.toHaveBeenCalled();
+
+  select
+    .mockReturnValueOnce(revision)
+    .mockReturnValueOnce(publications)
+    .mockReturnValueOnce(events);
+  events.limit.mockResolvedValue({ data: null, error: { message: 'Unavailable' } });
+  await expect(loadAdminHistory()).rejects.toThrow('Administrator data could not be loaded');
+});
+
+it.each([loadAdminOverview, loadAdminHistory, () => loadAdminEditor('contacts')])(
+  'fails closed before reading data when administrator authorization fails',
+  async (load) => {
+    mocks.auth.mockRejectedValue(new Error('Access denied'));
+    await expect(load()).rejects.toThrow('Access denied');
+    expect(mocks.from).not.toHaveBeenCalled();
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  },
+);
+
+it('quick-call choices come from the published snapshot rather than the working draft', async () => {
   mocks.from.mockReturnValue({
     select: () => ({
-      order: () => ({
-        limit: async () => ({ data: null, error: { message: 'Unavailable' } }),
+      eq: () => ({
+        maybeSingle: async () => ({ data: { snapshot: fixtureSnapshot }, error: null }),
       }),
     }),
   });
-  await expect(dashboard('history')).rejects.toThrow('Administrator data could not be loaded');
-});
-
-it('fails closed before reading data when administrator authorization fails', async () => {
-  mocks.auth.mockRejectedValue(new Error('Access denied'));
-  await expect(dashboard('contacts')).rejects.toThrow('Access denied');
-  expect(mocks.from).not.toHaveBeenCalled();
-  expect(mocks.draft).not.toHaveBeenCalled();
-});
-
-it('quick-call choices come from the current publication, not unfinished contacts', async () => {
-  mocks.from.mockReturnValue({
-    select: () => ({
-      eq: () => ({ maybeSingle: async () => ({ data: { snapshot: emptySnapshot }, error: null }) }),
-    }),
-  });
-  const data = await dashboard('quick-calls');
-  expect(data.publishedContacts).toEqual([]);
-  expect(data.history).toEqual([]);
-  expect(data.events).toEqual([]);
+  const { initial, publishedContacts } = await loadAdminEditor('quick-calls');
+  expect(initial.contacts).toHaveLength(0);
+  expect(publishedContacts).toEqual(fixtureSnapshot.contacts);
 });

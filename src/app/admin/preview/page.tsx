@@ -1,12 +1,12 @@
 export const dynamic = 'force-dynamic';
-import { dashboard } from '@/lib/admin/data';
+import { loadAdminEditor } from '@/lib/admin/data';
 import { PublicProvider } from '@/components/public/context';
 import { PublicShell } from '@/components/public/shell';
 import { HomeScreen } from '@/components/public/home-screen';
 import { DirectoryScreen } from '@/components/public/directory-screen';
 import { GuidanceScreen } from '@/components/public/guidance-screen';
 export default async function Page() {
-  const { initial } = await dashboard('preview');
+  const { initial } = await loadAdminEditor('preview');
   return (
     <PublicProvider initial={initial} preview>
       <PublicShell>

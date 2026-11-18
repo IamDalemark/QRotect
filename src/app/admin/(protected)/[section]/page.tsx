@@ -1,12 +1,16 @@
-import { redirect } from 'next/navigation';
-import { notFound } from 'next/navigation';
-import { dashboard } from '@/lib/admin/data';
+import { notFound, redirect } from 'next/navigation';
+import { loadAdminEditor } from '@/lib/admin/data';
 import { Workbench } from '@/components/admin/workbench';
 export default async function Page({ params }: { params: Promise<{ section: string }> }) {
   const { section } = await params;
   if (section === 'publish') redirect('/admin');
-  if (!['contacts', 'quick-calls', 'guidance', 'map', 'publish', 'history'].includes(section))
+  if (
+    section !== 'contacts' &&
+    section !== 'quick-calls' &&
+    section !== 'guidance' &&
+    section !== 'map'
+  )
     notFound();
-  const data = await dashboard(section);
+  const data = await loadAdminEditor(section);
   return <Workbench key={section} {...data} section={section} />;
 }

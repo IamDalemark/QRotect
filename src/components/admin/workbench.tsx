@@ -2,6 +2,7 @@
 'use client';
 import Link from 'next/link';
 import { useUnpublishedEdits } from './unpublished-edits';
+import type { AdminEditorSection } from '@/lib/admin/data';
 import { useRouter } from 'next/navigation';
 import {
   createContext,
@@ -13,20 +14,18 @@ import {
   useTransition,
   type FormEvent,
 } from 'react';
-import { publishItem, restorePublication, uploadMap } from '@/app/admin/content-actions';
+import { publishItem, uploadMap } from '@/app/admin/content-actions';
 import { categoryIds, type Snapshot, type Contact } from '@/lib/directory/schema';
 import { itemErrors, type ItemKind, type FieldErrors } from '@/lib/admin/item-validation';
 import { categories, areas } from '@/lib/directory/labels';
 import { telephoneHref } from '@/lib/directory/calling';
-import { formatPhilippineDate, philippineDate } from '@/lib/directory/date';
+import { philippineDate } from '@/lib/directory/date';
 
 type Props = {
   initial: Snapshot;
   initialRevision: number;
-  section: string;
+  section: AdminEditorSection;
   publishedContacts: Contact[];
-  history: { id: string; created_at: string; current: boolean }[];
-  events: { id: number; action: string; revision: number | null; created_at: string }[];
 };
 const Fields = createContext<{ errors: FieldErrors; touch: (name: string) => void }>({
   errors: {},
@@ -182,23 +181,14 @@ function Bilingual({
     </fieldset>
   );
 }
-const titles: Record<string, string> = {
-  overview: 'Directory overview',
+const titles: Record<AdminEditorSection, string> = {
   contacts: 'Manage contacts',
   'quick-calls': 'Home quick calls',
   guidance: 'Guidance',
   map: 'Campus evacuation map',
-  history: 'Publication history',
 };
 const blank = { en: '', hil: '' };
-export function Workbench({
-  initial,
-  initialRevision,
-  section,
-  history,
-  events,
-  publishedContacts = [],
-}: Props) {
+export function Workbench({ initial, initialRevision, section, publishedContacts = [] }: Props) {
   const router = useRouter();
   const [working, setWorking] = useState(initial);
   const [baseline, setBaseline] = useState(initial);
@@ -301,7 +291,6 @@ export function Workbench({
         : kind === 'quick-call'
           ? assignment
           : working.map;
-  const currentPublication = history.find((p) => p.current);
   const validation = itemErrors(kind, item);
   const errors = {
     ...Object.fromEntries(
@@ -470,782 +459,701 @@ export function Workbench({
     <>
       <div className="admin-title">
         <div>
-          <h1>{titles[section] || 'Administration'}</h1>
-          {section === 'history' && message && (
-            <section className="admin-status admin-feedback" role="status" aria-live="polite">
-              <h2>{successful ? 'Version restored' : 'Check this update'}</h2>
-              <p>{message}</p>
-            </section>
-          )}
-          {!['overview', 'history'].includes(section) && (
-            <p>Publish one item at a time. Other items stay unchanged.</p>
-          )}
+          <h1>{titles[section]}</h1>
+          <p>Publish one item at a time. Other items stay unchanged.</p>
         </div>
       </div>
-      {section === 'overview' && (
-        <>
-          <p>
-            View your contact totals and latest publication, and access tools for managing contacts,
-            Home quick calls, guidance, and the campus map.
-          </p>
-          <dl className="overview-list">
-            <dt>Stored contacts</dt>
-            <dd>{initial.contacts.length}</dd>
-            <dt>Last publication</dt>
-            <dd>
-              {currentPublication
-                ? formatPhilippineDate(currentPublication.created_at)
-                : 'Not published'}
-            </dd>
-          </dl>
-          <Link href="/admin/contacts" className="button primary">
-            Manage contacts
-          </Link>
-        </>
-      )}
-      {section === 'history' && (
-        <>
-          <p>
-            Each item update creates a complete version. Restoring a version replaces the whole
-            public directory.
-          </p>
-          {history.map((p) => (
-            <article key={p.id} className="history-row">
-              <h2>{p.current ? 'Current publication' : 'Previous publication'}</h2>
-              <p>{formatPhilippineDate(p.created_at)}</p>
-              <p>{p.id}</p>
+      <Fields.Provider
+        value={{
+          errors,
+          touch: (name) =>
+            setTouched((previous) => (previous.includes(name) ? previous : [...previous, name])),
+        }}
+      >
+        <div
+          className={
+            ['contacts', 'guidance', 'quick-calls'].includes(section) ? 'contact-editor-layout' : ''
+          }
+        >
+          {section === 'contacts' && (
+            <aside className="draft-list">
+              <label>
+                Search contacts
+                <input value={search} onChange={(e) => setSearch(e.target.value)} />
+              </label>
               <button
                 className="button secondary"
-                disabled={pending || p.current}
-                onClick={() => {
-                  if (
-                    !window.confirm(
-                      'Restore this entire directory version, including contacts, assignments, guidance and map?',
-                    )
-                  )
-                    return;
-                  start(async () => {
-                    try {
-                      const r = await restorePublication(p.id, revision);
-                      setSuccessful(r.ok);
-                      setMessage(r.message);
-                    } catch {
-                      setMessage(
-                        'Restore could not be confirmed. Reload and check the public directory.',
-                      );
-                    }
-                  });
-                }}
+                disabled={pending}
+                onClick={() => add('contact')}
               >
-                Restore as new publication
+                Add contact
               </button>
-            </article>
-          ))}
-          <h2>Activity</h2>
-          {events.map((e) => (
-            <p key={e.id}>
-              {formatPhilippineDate(e.created_at)} · {e.action}
-            </p>
-          ))}
-        </>
-      )}
-      {!['overview', 'history'].includes(section) && (
-        <Fields.Provider
-          value={{
-            errors,
-            touch: (name) =>
-              setTouched((previous) => (previous.includes(name) ? previous : [...previous, name])),
-          }}
-        >
-          <div
-            className={
-              ['contacts', 'guidance', 'quick-calls'].includes(section)
-                ? 'contact-editor-layout'
-                : ''
-            }
-          >
-            {section === 'contacts' && (
-              <aside className="draft-list">
-                <label>
-                  Search contacts
-                  <input value={search} onChange={(e) => setSearch(e.target.value)} />
-                </label>
-                <button
-                  className="button secondary"
-                  disabled={pending}
-                  onClick={() => add('contact')}
-                >
-                  Add contact
-                </button>
-                {working.contacts
-                  .filter((c) => c.agency.toLowerCase().includes(search.toLowerCase()))
-                  .map((c) => (
-                    <button
-                      key={c.id}
-                      className="draft-select"
-                      disabled={pending}
-                      aria-pressed={selected === c.id}
-                      onClick={() => select(c.id)}
-                    >
-                      {c.agency || 'New contact'}
-                    </button>
-                  ))}
-              </aside>
-            )}
-            {section === 'guidance' && (
-              <aside className="draft-list">
-                <button
-                  className="button secondary"
-                  disabled={pending}
-                  onClick={() => add('guidance')}
-                >
-                  Add guidance topic
-                </button>
-                {working.guidance.map((g) => (
+              {working.contacts
+                .filter((c) => c.agency.toLowerCase().includes(search.toLowerCase()))
+                .map((c) => (
                   <button
-                    key={g.id}
+                    key={c.id}
                     className="draft-select"
                     disabled={pending}
-                    aria-pressed={selected === g.id}
-                    onClick={() => select(g.id)}
+                    aria-pressed={selected === c.id}
+                    onClick={() => select(c.id)}
                   >
-                    {g.title.en || 'New topic'}
+                    {c.agency || 'New contact'}
                   </button>
                 ))}
-              </aside>
-            )}
-            {section === 'quick-calls' && (
-              <aside className="draft-list">
-                {categoryIds.map((id) => (
-                  <button
-                    key={id}
-                    className="draft-select"
-                    disabled={pending}
-                    aria-pressed={selected === id}
-                    onClick={() => select(id)}
-                  >
-                    {categories[id].en}
-                  </button>
-                ))}
-              </aside>
-            )}
-            <form ref={form} noValidate onSubmit={(e) => publish(e)}>
-              <fieldset className="admin-editor-body" disabled={pending}>
-                {errors._form && (
-                  <div className="field-error" role="alert">
-                    {errors._form}
-                    {errors._form.includes('Home quick call') && (
-                      <p>
-                        <Link href="/admin/quick-calls">Open Home quick calls</Link>
-                      </p>
-                    )}
-                  </div>
-                )}
-                {section === 'contacts' && contact && (
-                  <div className="editor-fields">
-                    <Field
-                      name="agency"
-                      label="Agency"
-                      value={contact.agency}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.contacts[ci].agency = v;
-                        })
-                      }
-                      hint="Official name of the office or service."
-                      placeholder="Example: Campus Security Office"
-                    />
-                    <Field
-                      name="branch"
-                      label="Branch"
-                      value={contact.branch}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.contacts[ci].branch = v;
-                        })
-                      }
-                      hint="Location or branch name. Leave blank if there is only one."
-                      placeholder="Example: Main campus"
-                    />
-                    <Field
-                      name="category"
-                      label="Category"
-                      value={contact.category}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.contacts[ci].category = v as Contact['category'];
-                        })
-                      }
-                      options={categoryOptions}
-                    />
-                    <Field
-                      name="area"
-                      label="Area"
-                      value={contact.area}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.contacts[ci].area = v as Contact['area'];
-                        })
-                      }
-                      options={Object.entries(areas).map(([value, a]) => ({ value, label: a.en }))}
-                    />
-                    <Bilingual
-                      name="description"
-                      label="Description"
-                      value={contact.description}
-                      onChange={(language, text) =>
-                        edit((d) => {
-                          d.contacts[ci].description[language] = text;
-                        })
-                      }
-                      hint="Describe what this service handles. Add the same meaning in both languages."
-                    />
-                    <Field
-                      name="aliases"
-                      label="Search aliases"
-                      value={aliasText[contact.id] ?? contact.aliases.join(', ')}
-                      onChange={(v) => {
-                        setAliasText((previous) => ({ ...previous, [contact.id]: v }));
-                        return;
-                        edit((d) => {
-                          d.contacts[ci].aliases = v
-                            .split(',')
-                            .map((a) => a.trim())
-                            .filter(Boolean);
-                        });
-                      }}
-                      hint="Optional alternative names, separated by commas."
-                      placeholder="Example: security, guard, campus help"
-                    />
-                    <Field
-                      name="hours"
-                      label="Service hours"
-                      value={contact.hours}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.contacts[ci].hours = v;
-                        })
-                      }
-                      hint="Enter only verified hours. Leave blank if unknown."
-                      placeholder="Example: Monday–Friday, 8 AM–5 PM"
-                    />
-                    {contact.numbers.map((n, i) => (
-                      <fieldset key={n.id} className="number-editor">
-                        <legend>Number {i + 1}</legend>
-                        <Bilingual
-                          name={`numbers.${i}.label`}
-                          label="Line label"
-                          value={n.label}
-                          onChange={(language, text) =>
-                            edit((d) => {
-                              d.contacts[ci].numbers[i].label[language] = text;
-                            })
-                          }
-                          hint="Name this line, for example Main line or After-hours line, in both languages."
-                        />
-                        <Field
-                          name={`numbers.${i}.display`}
-                          label="Display number"
-                          value={n.display}
-                          onChange={(v) =>
-                            edit((d) => {
-                              d.contacts[ci].numbers[i].display = v;
-                            })
-                          }
-                          hint="Readable version shown to visitors. Spaces and parentheses are allowed."
-                          placeholder="Example: 0912 345 6789 or (033) 320 1234"
-                          type="tel"
-                        />
-                        <Field
-                          name={`numbers.${i}.dial`}
-                          label="Phone number to dial"
-                          value={n.dial}
-                          onChange={(v) =>
-                            edit((d) => {
-                              d.contacts[ci].numbers[i].dial = v;
-                            })
-                          }
-                          hint="Examples: 09123456789 or +63333201234. Use one number with no spaces, hyphens or extension. Use Add alternate number for another line."
-                          placeholder="09123456789 or +63333201234"
-                          type="tel"
-                        />
-                        <Field
-                          name={`numbers.${i}.extension`}
-                          label="Extension"
-                          value={n.extension}
-                          onChange={(v) =>
-                            edit((d) => {
-                              d.contacts[ci].numbers[i].extension = v;
-                            })
-                          }
-                          hint="Optional, up to 8 digits. Leave blank if this line has no extension."
-                          placeholder="Example: 123"
-                        />
-                        <Field
-                          name={`numbers.${i}.channel`}
-                          label="Channel"
-                          value={n.channel}
-                          onChange={(v) =>
-                            edit((d) => {
-                              d.contacts[ci].numbers[i].channel = v as 'voice' | 'text';
-                            })
-                          }
-                          hint="Text-only numbers do not show a voice-call button."
-                          options={[
-                            { value: 'voice', label: 'Voice' },
-                            { value: 'text', label: 'Text only' },
-                          ]}
-                        />
-                        <button
-                          type="button"
-                          className="button secondary"
-                          disabled={contact.numbers.length === 1}
-                          onClick={() =>
-                            edit((d) => {
-                              d.contacts[ci].numbers.splice(i, 1);
-                            })
-                          }
-                        >
-                          Remove number {i + 1}
-                        </button>
-                      </fieldset>
-                    ))}
-                    <button
-                      type="button"
-                      className="button secondary"
-                      disabled={contact.numbers.length >= 10}
-                      onClick={() =>
-                        edit((d) => {
-                          d.contacts[ci].numbers.push({
-                            id: crypto.randomUUID(),
-                            label: { en: 'Alternate line', hil: '' },
-                            display: '',
-                            dial: '',
-                            extension: '',
-                            channel: 'voice',
-                          });
-                        })
-                      }
-                    >
-                      Add alternate number
-                    </button>
-                    <Field
-                      name="source"
-                      label="Official verification source URL (optional)"
-                      value={contact.source}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.contacts[ci].source = v;
-                        })
-                      }
-                      type="url"
-                      hint="Link to the official page where you checked this phone number."
-                      placeholder="https://example.edu/contact"
-                    />
-                    <Field
-                      name="verifiedAt"
-                      label="Last verified date (optional)"
-                      value={contact.verifiedAt}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.contacts[ci].verifiedAt = v;
-                        })
-                      }
-                      type="date"
-                      hint="Defaults to today in Philippine time. Change or clear it as needed."
-                    />
-                    <Check
-                      name="approved"
-                      label="I checked this contact and both language versions"
-                      checked={contact.approved}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.contacts[ci].approved = v;
-                        })
-                      }
-                    />
-                  </div>
-                )}
-                {section === 'contacts' && !contact && <p>Add a contact to begin.</p>}
-                {section === 'guidance' && guide && (
-                  <div className="editor-fields">
+            </aside>
+          )}
+          {section === 'guidance' && (
+            <aside className="draft-list">
+              <button
+                className="button secondary"
+                disabled={pending}
+                onClick={() => add('guidance')}
+              >
+                Add guidance topic
+              </button>
+              {working.guidance.map((g) => (
+                <button
+                  key={g.id}
+                  className="draft-select"
+                  disabled={pending}
+                  aria-pressed={selected === g.id}
+                  onClick={() => select(g.id)}
+                >
+                  {g.title.en || 'New topic'}
+                </button>
+              ))}
+            </aside>
+          )}
+          {section === 'quick-calls' && (
+            <aside className="draft-list">
+              {categoryIds.map((id) => (
+                <button
+                  key={id}
+                  className="draft-select"
+                  disabled={pending}
+                  aria-pressed={selected === id}
+                  onClick={() => select(id)}
+                >
+                  {categories[id].en}
+                </button>
+              ))}
+            </aside>
+          )}
+          <form ref={form} noValidate onSubmit={(e) => publish(e)}>
+            <fieldset className="admin-editor-body" disabled={pending}>
+              {errors._form && (
+                <div className="field-error" role="alert">
+                  {errors._form}
+                  {errors._form.includes('Home quick call') && (
                     <p>
-                      Enter one guidance topic in English and Hiligaynon. Include its source and the
-                      person who checked it. Publishing updates this topic only.
+                      <Link href="/admin/quick-calls">Open Home quick calls</Link>
                     </p>
-                    <Bilingual
-                      name="title"
-                      label="Topic title"
-                      value={guide.title}
-                      onChange={(language, text) =>
-                        edit((d) => {
-                          d.guidance[gi].title[language] = text;
-                        })
-                      }
-                      hint="A short title that describes the supplied guidance."
-                    />
-                    <Field
-                      name="category"
-                      label="Category"
-                      value={guide.category}
-                      options={categoryOptions}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.guidance[gi].category = v as Contact['category'];
-                        })
-                      }
-                    />
-                    {guide.steps.map((s, i) => (
-                      <div key={i}>
-                        <Bilingual
-                          name={`steps.${i}`}
-                          label={`Step ${i + 1}`}
-                          value={s}
-                          onChange={(language, text) =>
-                            edit((d) => {
-                              d.guidance[gi].steps[i][language] = text;
-                            })
-                          }
-                          hint="Use the reviewed instructions supplied by the school or official source."
-                        />
-                        <button
-                          type="button"
-                          className="button secondary"
-                          disabled={guide.steps.length === 1}
-                          onClick={() =>
-                            edit((d) => {
-                              d.guidance[gi].steps.splice(i, 1);
-                            })
-                          }
-                        >
-                          Remove step {i + 1}
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      type="button"
-                      className="button secondary"
-                      disabled={guide.steps.length >= 12}
-                      onClick={() =>
-                        edit((d) => {
-                          d.guidance[gi].steps.push({ ...blank });
-                        })
-                      }
-                    >
-                      Add step
-                    </button>
-                    <Field
-                      name="source"
-                      label="Source URL"
-                      value={guide.source}
-                      type="url"
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.guidance[gi].source = v;
-                        })
-                      }
-                      hint="Official webpage or school document link supporting these instructions."
-                      placeholder="https://example.edu/safety"
-                    />
-                    <Field
-                      name="reviewer"
-                      label="Reviewer"
-                      value={guide.reviewer}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.guidance[gi].reviewer = v;
-                        })
-                      }
-                      hint="Name of the person who checked the instructions and both translations."
-                      placeholder="Reviewer’s full name"
-                    />
-                    <Field
-                      name="reviewedAt"
-                      label="Review date"
-                      value={guide.reviewedAt}
-                      type="date"
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.guidance[gi].reviewedAt = v;
-                        })
-                      }
-                      hint="Date the reviewer approved this topic."
-                    />
-                    <Check
-                      name="approved"
-                      label="The reviewer approved this topic and both language versions"
-                      checked={guide.approved}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.guidance[gi].approved = v;
-                        })
-                      }
-                    />
-                    <button
-                      type="button"
-                      className="button secondary"
-                      onClick={() => publish(undefined, true)}
-                    >
-                      Remove guidance
-                    </button>
-                  </div>
-                )}
-                {section === 'guidance' && !guide && <p>Add a guidance topic to begin.</p>}
-                {section === 'quick-calls' && (
-                  <div className="editor-fields">
-                    <h2>{categories[selected as Contact['category']]?.en}</h2>
-                    <p>
-                      Choose a published contact and its exact voice line. Publishing changes this
-                      category’s Home call button only. Clear the selection to offer contact
-                      browsing instead.
-                    </p>
-                    <Field
-                      name="assignment"
-                      label="Call destination"
-                      value={assignment ? `${assignment.contactId}:${assignment.numberId}` : ''}
-                      onChange={(v) =>
-                        edit((d) => {
-                          d.quickCalls = (d.quickCalls ?? []).filter(
-                            (q) => q.category !== selected,
-                          );
-                          if (v) {
-                            const [contactId, numberId] = v.split(':');
-                            d.quickCalls.push({
-                              category: selected as Contact['category'],
-                              contactId,
-                              numberId,
-                            });
-                          }
-                        })
-                      }
-                      options={[
-                        { value: '', label: 'No quick call — browse contacts' },
-                        ...publishedContacts
-                          .filter((c) => c.category === selected)
-                          .flatMap((c) =>
-                            c.numbers
-                              .filter((n) => telephoneHref(n))
-                              .map((n) => ({
-                                value: `${c.id}:${n.id}`,
-                                label: `${c.agency}${c.branch ? ' / ' + c.branch : ''} — ${n.label.en} — ${n.display}${n.extension ? ' ext. ' + n.extension : ''}`,
-                              })),
-                          ),
-                      ]}
-                    />
-                  </div>
-                )}
-                {section === 'map' && (
-                  <div className="editor-fields">
-                    <p>
-                      Upload one campus map, then describe it and provide its text instructions in
-                      both languages. Uploading alone does not replace the public map.
-                    </p>
-                    <div
-                      className={`map-dropzone${dragging ? ' is-dragging' : ''}`}
-                      onDragOver={(e) => {
-                        e.preventDefault();
-                        if (!pending) setDragging(true);
-                      }}
-                      onDragLeave={(e) => {
-                        if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false);
-                      }}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        chooseFiles(e.dataTransfer.files);
-                      }}
-                    >
-                      <input
-                        ref={input}
-                        hidden
-                        type="file"
-                        aria-label="Choose map image"
-                        accept="image/png,image/jpeg,image/webp"
-                        onChange={(e) => chooseFiles(e.target.files)}
+                  )}
+                </div>
+              )}
+              {section === 'contacts' && contact && (
+                <div className="editor-fields">
+                  <Field
+                    name="agency"
+                    label="Agency"
+                    value={contact.agency}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.contacts[ci].agency = v;
+                      })
+                    }
+                    hint="Official name of the office or service."
+                    placeholder="Example: Campus Security Office"
+                  />
+                  <Field
+                    name="branch"
+                    label="Branch"
+                    value={contact.branch}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.contacts[ci].branch = v;
+                      })
+                    }
+                    hint="Location or branch name. Leave blank if there is only one."
+                    placeholder="Example: Main campus"
+                  />
+                  <Field
+                    name="category"
+                    label="Category"
+                    value={contact.category}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.contacts[ci].category = v as Contact['category'];
+                      })
+                    }
+                    options={categoryOptions}
+                  />
+                  <Field
+                    name="area"
+                    label="Area"
+                    value={contact.area}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.contacts[ci].area = v as Contact['area'];
+                      })
+                    }
+                    options={Object.entries(areas).map(([value, a]) => ({ value, label: a.en }))}
+                  />
+                  <Bilingual
+                    name="description"
+                    label="Description"
+                    value={contact.description}
+                    onChange={(language, text) =>
+                      edit((d) => {
+                        d.contacts[ci].description[language] = text;
+                      })
+                    }
+                    hint="Describe what this service handles. Add the same meaning in both languages."
+                  />
+                  <Field
+                    name="aliases"
+                    label="Search aliases"
+                    value={aliasText[contact.id] ?? contact.aliases.join(', ')}
+                    onChange={(v) => {
+                      setAliasText((previous) => ({ ...previous, [contact.id]: v }));
+                      return;
+                      edit((d) => {
+                        d.contacts[ci].aliases = v
+                          .split(',')
+                          .map((a) => a.trim())
+                          .filter(Boolean);
+                      });
+                    }}
+                    hint="Optional alternative names, separated by commas."
+                    placeholder="Example: security, guard, campus help"
+                  />
+                  <Field
+                    name="hours"
+                    label="Service hours"
+                    value={contact.hours}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.contacts[ci].hours = v;
+                      })
+                    }
+                    hint="Enter only verified hours. Leave blank if unknown."
+                    placeholder="Example: Monday–Friday, 8 AM–5 PM"
+                  />
+                  {contact.numbers.map((n, i) => (
+                    <fieldset key={n.id} className="number-editor">
+                      <legend>Number {i + 1}</legend>
+                      <Bilingual
+                        name={`numbers.${i}.label`}
+                        label="Line label"
+                        value={n.label}
+                        onChange={(language, text) =>
+                          edit((d) => {
+                            d.contacts[ci].numbers[i].label[language] = text;
+                          })
+                        }
+                        hint="Name this line, for example Main line or After-hours line, in both languages."
                       />
-                      <p>Drag and drop a map image here</p>
-                      <p className="field-hint">PNG, JPEG or WebP · one image · maximum 5 MB</p>
+                      <Field
+                        name={`numbers.${i}.display`}
+                        label="Display number"
+                        value={n.display}
+                        onChange={(v) =>
+                          edit((d) => {
+                            d.contacts[ci].numbers[i].display = v;
+                          })
+                        }
+                        hint="Readable version shown to visitors. Spaces and parentheses are allowed."
+                        placeholder="Example: 0912 345 6789 or (033) 320 1234"
+                        type="tel"
+                      />
+                      <Field
+                        name={`numbers.${i}.dial`}
+                        label="Phone number to dial"
+                        value={n.dial}
+                        onChange={(v) =>
+                          edit((d) => {
+                            d.contacts[ci].numbers[i].dial = v;
+                          })
+                        }
+                        hint="Examples: 09123456789 or +63333201234. Use one number with no spaces, hyphens or extension. Use Add alternate number for another line."
+                        placeholder="09123456789 or +63333201234"
+                        type="tel"
+                      />
+                      <Field
+                        name={`numbers.${i}.extension`}
+                        label="Extension"
+                        value={n.extension}
+                        onChange={(v) =>
+                          edit((d) => {
+                            d.contacts[ci].numbers[i].extension = v;
+                          })
+                        }
+                        hint="Optional, up to 8 digits. Leave blank if this line has no extension."
+                        placeholder="Example: 123"
+                      />
+                      <Field
+                        name={`numbers.${i}.channel`}
+                        label="Channel"
+                        value={n.channel}
+                        onChange={(v) =>
+                          edit((d) => {
+                            d.contacts[ci].numbers[i].channel = v as 'voice' | 'text';
+                          })
+                        }
+                        hint="Text-only numbers do not show a voice-call button."
+                        options={[
+                          { value: 'voice', label: 'Voice' },
+                          { value: 'text', label: 'Text only' },
+                        ]}
+                      />
                       <button
                         type="button"
                         className="button secondary"
-                        onClick={() => input.current?.click()}
+                        disabled={contact.numbers.length === 1}
+                        onClick={() =>
+                          edit((d) => {
+                            d.contacts[ci].numbers.splice(i, 1);
+                          })
+                        }
                       >
-                        Choose image
+                        Remove number {i + 1}
                       </button>
-                    </div>
-                    {uploadMessage && <p>{uploadMessage}</p>}
-                    {uploadError && (
-                      <p className="field-error" role="alert">
-                        {uploadError}
-                      </p>
-                    )}
-                    {working.map && (
-                      <>
-                        <img
-                          className="admin-map-preview"
-                          alt="Private uploaded campus map preview"
-                          src={`/api/admin/map?path=${encodeURIComponent(working.map.assetPath)}`}
-                        />
-                        <Bilingual
-                          name="description"
-                          label="Map description / alternative text"
-                          value={working.map.description}
-                          onChange={(language, text) =>
-                            edit((d) => {
-                              d.map!.description[language] = text;
-                            })
-                          }
-                          hint="Describe the map so someone who cannot see it understands what it shows."
-                        />
-                        {working.map.instructions.map((s, i) => (
-                          <div key={i}>
-                            <Bilingual
-                              name={`instructions.${i}`}
-                              label={`Text instruction ${i + 1}`}
-                              value={s}
-                              onChange={(language, text) =>
-                                edit((d) => {
-                                  d.map!.instructions[i][language] = text;
-                                })
-                              }
-                              hint="Provide the school-supplied map directions in both languages."
-                            />
-                            <button
-                              type="button"
-                              className="button secondary"
-                              disabled={working.map!.instructions.length === 1}
-                              onClick={() =>
-                                edit((d) => {
-                                  d.map!.instructions.splice(i, 1);
-                                })
-                              }
-                            >
-                              Remove instruction {i + 1}
-                            </button>
-                          </div>
-                        ))}
-                        <button
-                          type="button"
-                          className="button secondary"
-                          disabled={working.map.instructions.length >= 20}
-                          onClick={() =>
-                            edit((d) => {
-                              d.map!.instructions.push({ ...blank });
-                            })
-                          }
-                        >
-                          Add text instruction
-                        </button>
-                        <Field
-                          name="source"
-                          label="Source URL"
-                          value={working.map.source}
-                          type="url"
-                          onChange={(v) =>
-                            edit((d) => {
-                              d.map!.source = v;
-                            })
-                          }
-                          hint="School webpage or document link that supplies this map."
-                          placeholder="https://example.edu/campus-map"
-                        />
-                        <Field
-                          name="reviewer"
-                          label="Reviewer"
-                          value={working.map.reviewer}
-                          onChange={(v) =>
-                            edit((d) => {
-                              d.map!.reviewer = v;
-                            })
-                          }
-                          hint="Name of the person who checked this map and its text in both languages."
-                          placeholder="Reviewer’s full name"
-                        />
-                        <Field
-                          name="reviewedAt"
-                          label="Review date"
-                          value={working.map.reviewedAt}
-                          type="date"
-                          onChange={(v) =>
-                            edit((d) => {
-                              d.map!.reviewedAt = v;
-                            })
-                          }
-                          hint="Date this map and its text were approved."
-                        />
-                        <Check
-                          name="approved"
-                          label="The reviewer approved this map and both text versions"
-                          checked={working.map.approved}
-                          onChange={(v) =>
-                            edit((d) => {
-                              d.map!.approved = v;
-                            })
-                          }
-                        />
-                        <button
-                          type="button"
-                          className="button secondary"
-                          onClick={() => publish(undefined, true)}
-                        >
-                          Remove map
-                        </button>
-                      </>
-                    )}
-                  </div>
-                )}
-                {(item !== null || section === 'quick-calls') && (
-                  <div className="editor-actions">
-                    {dirty && (
-                      <button
-                        type="button"
-                        className="button secondary"
-                        onClick={() => select(selected)}
-                      >
-                        Discard changes
-                      </button>
-                    )}
-                    <button className="button primary" type="submit">
-                      {pending
-                        ? 'Working…'
-                        : {
-                            contact: 'Publish contact',
-                            guidance: 'Publish guidance',
-                            map: 'Publish map',
-                            'quick-call': 'Publish assignment',
-                          }[kind]}
-                    </button>
-                    <p className="field-hint">
-                      Only this {kind === 'quick-call' ? 'assignment' : kind} will change publicly.
-                    </p>
-                  </div>
-                )}
-              </fieldset>
-              {message && (
-                <section
-                  ref={feedback}
-                  tabIndex={-1}
-                  className={`admin-status admin-feedback ${successful ? 'success' : ''}`}
-                  role="status"
-                  aria-live="polite"
-                >
-                  <h2>{successful ? 'Update published' : 'Check this item'}</h2>
-                  <p>{message}</p>
+                    </fieldset>
+                  ))}
                   <button
                     type="button"
                     className="button secondary"
-                    onClick={() => {
-                      setMessage('');
-                      setSuccessful(false);
+                    disabled={contact.numbers.length >= 10}
+                    onClick={() =>
+                      edit((d) => {
+                        d.contacts[ci].numbers.push({
+                          id: crypto.randomUUID(),
+                          label: { en: 'Alternate line', hil: '' },
+                          display: '',
+                          dial: '',
+                          extension: '',
+                          channel: 'voice',
+                        });
+                      })
+                    }
+                  >
+                    Add alternate number
+                  </button>
+                  <Field
+                    name="source"
+                    label="Official verification source URL (optional)"
+                    value={contact.source}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.contacts[ci].source = v;
+                      })
+                    }
+                    type="url"
+                    hint="Link to the official page where you checked this phone number."
+                    placeholder="https://example.edu/contact"
+                  />
+                  <Field
+                    name="verifiedAt"
+                    label="Last verified date (optional)"
+                    value={contact.verifiedAt}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.contacts[ci].verifiedAt = v;
+                      })
+                    }
+                    type="date"
+                    hint="Defaults to today in Philippine time. Change or clear it as needed."
+                  />
+                  <Check
+                    name="approved"
+                    label="I checked this contact and both language versions"
+                    checked={contact.approved}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.contacts[ci].approved = v;
+                      })
+                    }
+                  />
+                </div>
+              )}
+              {section === 'contacts' && !contact && <p>Add a contact to begin.</p>}
+              {section === 'guidance' && guide && (
+                <div className="editor-fields">
+                  <p>
+                    Enter one guidance topic in English and Hiligaynon. Include its source and the
+                    person who checked it. Publishing updates this topic only.
+                  </p>
+                  <Bilingual
+                    name="title"
+                    label="Topic title"
+                    value={guide.title}
+                    onChange={(language, text) =>
+                      edit((d) => {
+                        d.guidance[gi].title[language] = text;
+                      })
+                    }
+                    hint="A short title that describes the supplied guidance."
+                  />
+                  <Field
+                    name="category"
+                    label="Category"
+                    value={guide.category}
+                    options={categoryOptions}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.guidance[gi].category = v as Contact['category'];
+                      })
+                    }
+                  />
+                  {guide.steps.map((s, i) => (
+                    <div key={i}>
+                      <Bilingual
+                        name={`steps.${i}`}
+                        label={`Step ${i + 1}`}
+                        value={s}
+                        onChange={(language, text) =>
+                          edit((d) => {
+                            d.guidance[gi].steps[i][language] = text;
+                          })
+                        }
+                        hint="Use the reviewed instructions supplied by the school or official source."
+                      />
+                      <button
+                        type="button"
+                        className="button secondary"
+                        disabled={guide.steps.length === 1}
+                        onClick={() =>
+                          edit((d) => {
+                            d.guidance[gi].steps.splice(i, 1);
+                          })
+                        }
+                      >
+                        Remove step {i + 1}
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="button secondary"
+                    disabled={guide.steps.length >= 12}
+                    onClick={() =>
+                      edit((d) => {
+                        d.guidance[gi].steps.push({ ...blank });
+                      })
+                    }
+                  >
+                    Add step
+                  </button>
+                  <Field
+                    name="source"
+                    label="Source URL"
+                    value={guide.source}
+                    type="url"
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.guidance[gi].source = v;
+                      })
+                    }
+                    hint="Official webpage or school document link supporting these instructions."
+                    placeholder="https://example.edu/safety"
+                  />
+                  <Field
+                    name="reviewer"
+                    label="Reviewer"
+                    value={guide.reviewer}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.guidance[gi].reviewer = v;
+                      })
+                    }
+                    hint="Name of the person who checked the instructions and both translations."
+                    placeholder="Reviewer’s full name"
+                  />
+                  <Field
+                    name="reviewedAt"
+                    label="Review date"
+                    value={guide.reviewedAt}
+                    type="date"
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.guidance[gi].reviewedAt = v;
+                      })
+                    }
+                    hint="Date the reviewer approved this topic."
+                  />
+                  <Check
+                    name="approved"
+                    label="The reviewer approved this topic and both language versions"
+                    checked={guide.approved}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.guidance[gi].approved = v;
+                      })
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="button secondary"
+                    onClick={() => publish(undefined, true)}
+                  >
+                    Remove guidance
+                  </button>
+                </div>
+              )}
+              {section === 'guidance' && !guide && <p>Add a guidance topic to begin.</p>}
+              {section === 'quick-calls' && (
+                <div className="editor-fields">
+                  <h2>{categories[selected as Contact['category']]?.en}</h2>
+                  <p>
+                    Choose a published contact and its exact voice line. Publishing changes this
+                    category’s Home call button only. Clear the selection to offer contact browsing
+                    instead.
+                  </p>
+                  <Field
+                    name="assignment"
+                    label="Call destination"
+                    value={assignment ? `${assignment.contactId}:${assignment.numberId}` : ''}
+                    onChange={(v) =>
+                      edit((d) => {
+                        d.quickCalls = (d.quickCalls ?? []).filter((q) => q.category !== selected);
+                        if (v) {
+                          const [contactId, numberId] = v.split(':');
+                          d.quickCalls.push({
+                            category: selected as Contact['category'],
+                            contactId,
+                            numberId,
+                          });
+                        }
+                      })
+                    }
+                    options={[
+                      { value: '', label: 'No quick call — browse contacts' },
+                      ...publishedContacts
+                        .filter((c) => c.category === selected)
+                        .flatMap((c) =>
+                          c.numbers
+                            .filter((n) => telephoneHref(n))
+                            .map((n) => ({
+                              value: `${c.id}:${n.id}`,
+                              label: `${c.agency}${c.branch ? ' / ' + c.branch : ''} — ${n.label.en} — ${n.display}${n.extension ? ' ext. ' + n.extension : ''}`,
+                            })),
+                        ),
+                    ]}
+                  />
+                </div>
+              )}
+              {section === 'map' && (
+                <div className="editor-fields">
+                  <p>
+                    Upload one campus map, then describe it and provide its text instructions in
+                    both languages. Uploading alone does not replace the public map.
+                  </p>
+                  <div
+                    className={`map-dropzone${dragging ? ' is-dragging' : ''}`}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      if (!pending) setDragging(true);
+                    }}
+                    onDragLeave={(e) => {
+                      if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragging(false);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      chooseFiles(e.dataTransfer.files);
                     }}
                   >
-                    Dismiss
-                  </button>
-                </section>
+                    <input
+                      ref={input}
+                      hidden
+                      type="file"
+                      aria-label="Choose map image"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={(e) => chooseFiles(e.target.files)}
+                    />
+                    <p>Drag and drop a map image here</p>
+                    <p className="field-hint">PNG, JPEG or WebP · one image · maximum 5 MB</p>
+                    <button
+                      type="button"
+                      className="button secondary"
+                      onClick={() => input.current?.click()}
+                    >
+                      Choose image
+                    </button>
+                  </div>
+                  {uploadMessage && <p>{uploadMessage}</p>}
+                  {uploadError && (
+                    <p className="field-error" role="alert">
+                      {uploadError}
+                    </p>
+                  )}
+                  {working.map && (
+                    <>
+                      <img
+                        className="admin-map-preview"
+                        alt="Private uploaded campus map preview"
+                        src={`/api/admin/map?path=${encodeURIComponent(working.map.assetPath)}`}
+                      />
+                      <Bilingual
+                        name="description"
+                        label="Map description / alternative text"
+                        value={working.map.description}
+                        onChange={(language, text) =>
+                          edit((d) => {
+                            d.map!.description[language] = text;
+                          })
+                        }
+                        hint="Describe the map so someone who cannot see it understands what it shows."
+                      />
+                      {working.map.instructions.map((s, i) => (
+                        <div key={i}>
+                          <Bilingual
+                            name={`instructions.${i}`}
+                            label={`Text instruction ${i + 1}`}
+                            value={s}
+                            onChange={(language, text) =>
+                              edit((d) => {
+                                d.map!.instructions[i][language] = text;
+                              })
+                            }
+                            hint="Provide the school-supplied map directions in both languages."
+                          />
+                          <button
+                            type="button"
+                            className="button secondary"
+                            disabled={working.map!.instructions.length === 1}
+                            onClick={() =>
+                              edit((d) => {
+                                d.map!.instructions.splice(i, 1);
+                              })
+                            }
+                          >
+                            Remove instruction {i + 1}
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        className="button secondary"
+                        disabled={working.map.instructions.length >= 20}
+                        onClick={() =>
+                          edit((d) => {
+                            d.map!.instructions.push({ ...blank });
+                          })
+                        }
+                      >
+                        Add text instruction
+                      </button>
+                      <Field
+                        name="source"
+                        label="Source URL"
+                        value={working.map.source}
+                        type="url"
+                        onChange={(v) =>
+                          edit((d) => {
+                            d.map!.source = v;
+                          })
+                        }
+                        hint="School webpage or document link that supplies this map."
+                        placeholder="https://example.edu/campus-map"
+                      />
+                      <Field
+                        name="reviewer"
+                        label="Reviewer"
+                        value={working.map.reviewer}
+                        onChange={(v) =>
+                          edit((d) => {
+                            d.map!.reviewer = v;
+                          })
+                        }
+                        hint="Name of the person who checked this map and its text in both languages."
+                        placeholder="Reviewer’s full name"
+                      />
+                      <Field
+                        name="reviewedAt"
+                        label="Review date"
+                        value={working.map.reviewedAt}
+                        type="date"
+                        onChange={(v) =>
+                          edit((d) => {
+                            d.map!.reviewedAt = v;
+                          })
+                        }
+                        hint="Date this map and its text were approved."
+                      />
+                      <Check
+                        name="approved"
+                        label="The reviewer approved this map and both text versions"
+                        checked={working.map.approved}
+                        onChange={(v) =>
+                          edit((d) => {
+                            d.map!.approved = v;
+                          })
+                        }
+                      />
+                      <button
+                        type="button"
+                        className="button secondary"
+                        onClick={() => publish(undefined, true)}
+                      >
+                        Remove map
+                      </button>
+                    </>
+                  )}
+                </div>
               )}
-            </form>
-          </div>
-        </Fields.Provider>
-      )}
+              {(item !== null || section === 'quick-calls') && (
+                <div className="editor-actions">
+                  {dirty && (
+                    <button
+                      type="button"
+                      className="button secondary"
+                      onClick={() => select(selected)}
+                    >
+                      Discard changes
+                    </button>
+                  )}
+                  <button className="button primary" type="submit">
+                    {pending
+                      ? 'Working…'
+                      : {
+                          contact: 'Publish contact',
+                          guidance: 'Publish guidance',
+                          map: 'Publish map',
+                          'quick-call': 'Publish assignment',
+                        }[kind]}
+                  </button>
+                  <p className="field-hint">
+                    Only this {kind === 'quick-call' ? 'assignment' : kind} will change publicly.
+                  </p>
+                </div>
+              )}
+            </fieldset>
+            {message && (
+              <section
+                ref={feedback}
+                tabIndex={-1}
+                className={`admin-status admin-feedback ${successful ? 'success' : ''}`}
+                role="status"
+                aria-live="polite"
+              >
+                <h2>{successful ? 'Update published' : 'Check this item'}</h2>
+                <p>{message}</p>
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={() => {
+                    setMessage('');
+                    setSuccessful(false);
+                  }}
+                >
+                  Dismiss
+                </button>
+              </section>
+            )}
+          </form>
+        </div>
+      </Fields.Provider>
     </>
   );
 }
