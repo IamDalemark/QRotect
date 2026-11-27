@@ -69,6 +69,36 @@ test('Home shortcuts work in Hiligaynon with the tap alternative', async ({ page
   ).toEqual(['tel:09123456789']);
 });
 
+test('mobile category links jump to the matching heading in both languages', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto('/');
+  const shortcuts = page.locator('.home-category-shortcuts');
+  const links = shortcuts.getByRole('link');
+  for (const language of ['en', 'hil']) {
+    await page.locator('.language-label select').selectOption(language);
+    await expect(links).toHaveCount(categoryIds.length);
+    for (const [index, id] of categoryIds.entries()) {
+      const link = links.nth(index);
+      const headingId = `home-category-${id}`;
+      const heading = page.locator(`#${headingId}`);
+      await expect(link).toHaveText(await heading.innerText());
+      await expect(link).toHaveAttribute('href', `#${headingId}`);
+      expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+      await link.focus();
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL(new RegExp(`#${headingId}$`));
+      await expect(heading).toBeFocused();
+      await expect(heading).toBeInViewport({ ratio: 1 });
+    }
+  }
+  await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.setViewportSize({ width: 760, height: 800 });
+  await expect(shortcuts).toBeVisible();
+  await page.setViewportSize({ width: 761, height: 800 });
+  await expect(shortcuts).toBeHidden();
+});
+
 test('withdrawn assignments offer category browsing without selecting another contact', async ({
   page,
 }) => {

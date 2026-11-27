@@ -26,6 +26,12 @@ const icons = {
 export function HomeScreen() {
   const { data, t, language } = usePublic();
   if (!data) return null;
+  const homeCategories = categoryIds.map((id) => ({
+    id,
+    Icon: icons[id],
+    headingId: `home-category-${id}`,
+    label: id === 'school' ? t.campusEmergency : localized(categories[id], language),
+  }));
   return (
     <>
       <div className="page-heading">
@@ -55,19 +61,26 @@ export function HomeScreen() {
           }}
         />
       </section>
+      <nav className="home-category-shortcuts" aria-label={t.emergencyContacts}>
+        {homeCategories.map(({ Icon, headingId, label }) => (
+          <a href={`#${headingId}`} key={headingId}>
+            <Icon size={20} aria-hidden="true" />
+            <span>{label}</span>
+          </a>
+        ))}
+      </nav>
       <section className="quick-call-section" aria-labelledby="quick-call-heading">
         <h2 id="quick-call-heading">{t.emergencyContacts}</h2>
         <div className="quick-call-grid">
-          {categoryIds.map((id) => {
-            const Icon = icons[id];
+          {homeCategories.map(({ id, Icon, headingId, label: category }) => {
             const target = quickCallTarget(data, id);
-            const category =
-              id === 'school' ? t.campusEmergency : localized(categories[id], language);
             return (
-              <article className="home-category" key={id} aria-labelledby={`home-category-${id}`}>
+              <article className="home-category" key={id} aria-labelledby={headingId}>
                 <div className="home-category-title">
                   <Icon size={23} aria-hidden="true" />
-                  <h3 id={`home-category-${id}`}>{category}</h3>
+                  <h3 id={headingId} tabIndex={-1}>
+                    {category}
+                  </h3>
                 </div>
                 <div className="home-category-recipient">
                   {target ? (
